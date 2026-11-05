@@ -1,0 +1,34 @@
+# Copiar a config/settings.yaml y ajustar. Los secretos van en variables de entorno, no aquí.
+# database_url: "postgresql+psycopg://sapsec@dbhost/sapsec"   # producción (contraseña vía PGPASSWORD / .pgpass)
+database_url: "sqlite:///data/sapsec.db"
+log_level: INFO
+languages: ["S", "E"]          # SPRAS para textos de roles, transacciones y actividades
+data_retention_days: 730
+include_user_fullname: true    # false = minimización de datos personales
+
+analysis:
+  inactivity_days: 90
+  expiring_role_days: 30
+  sap_all_equivalence_threshold: 0.8
+  stale_snapshot_days: 7
+  validation_sample_size: 20
+
+security:
+  # session_secret: definir en SAPSEC_SESSION_SECRET
+  session_max_age_minutes: 480
+  max_failed_logins: 5
+  lockout_minutes: 15           # bloqueo temporal tras los intentos fallidos (0 = hasta que un admin desbloquee)
+  secure_cookies: true          # en modo red con HTTPS se activa solo
+  credential_store: keyring     # keyring (Windows Credential Manager) | encrypted_file (SAPSEC_MASTER_KEY)
+  ai_external_allowed: false
+
+# Acceso desde otras PC (scripts\run.ps1 -Red). Desde fuera de la oficina: por la VPN de la empresa.
+network:
+  port: 8443
+  # Desde dónde se puede entrar (esta PC siempre). Por defecto, las redes privadas (oficina y VPN).
+  # Para restringir más, ponga solo las redes de su empresa, por ejemplo: ["10.20.0.0/16", "10.200.0.0/16"]
+  allowed_networks: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7", "fe80::/10"]
+  # extra_names: ["sapsec.empresa.local"]   # alias DNS del servidor (se agregan al certificado)
+  # Certificado emitido por la CA de la empresa (PEM). Vacío = se usa una CA local propia (data\tls).
+  # tls_cert_file: "C:/certs/sapsec.crt"
+  # tls_key_file: "C:/certs/sapsec.key"

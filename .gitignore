@@ -1,0 +1,43 @@
+# --- Datos locales de cada instalación (NUNCA se suben) ---------------------------------------
+# Base de datos, snapshots, logs, cachés, clave de sesión, certificados y claves TLS (data/tls),
+# credenciales cifradas: todo vive en data/.
+data/
+*.db
+*.db-shm
+*.db-wal
+*.enc
+*.key
+*.pem
+*.crt
+*.log
+
+# Configuración propia de cada instalación (se copia de config/settings.example.yaml)
+config/settings.yaml
+.env
+.env.*
+
+# --- Python --------------------------------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- Entregas y archivos temporales --------------------------------------------------------------
+*.zip
+*.tmp
+~$*
+
+# --- Editores y sistema operativo ----------------------------------------------------------------
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

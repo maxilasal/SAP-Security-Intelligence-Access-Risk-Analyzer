@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Snapshot {{ s.id }}{% endblock %}
+{% block content %}
+<h1>Snapshot #{{ s.id }} — {{ s.sid }}/{{ s.client }}</h1>
+<p class="subtitle">Estado <b>{{ s.status }}</b> · {{ s.started_at.strftime('%Y-%m-%d %H:%M:%S') }} → {{ s.finished_at.strftime('%H:%M:%S') if s.finished_at else '' }}
+ · backend {{ s.backend }}{% if s.is_test_data %} · <span class="badge test">DATOS DE PRUEBA</span>{% endif %}</p>
+{% for i in s.issues %}<div class="warnbox"><b>{{ i.code }}</b>: {{ i.message }}</div>{% endfor %}
+<div class="grid g2">
+<div class="card"><h3>Sistema</h3><table class="tbl compact">{% for k,v in s.system_info.items() if k != 'PRODUCTO' %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}
+{% set prod = s.system_info.get('PRODUCTO') %}{% if prod %}<tr><td>Producto</td><td><b>{{ prod.label }}</b>{% if prod.fiori_label %}<br><span class="small">{{ prod.fiori_label }}</span>{% endif %}</td></tr>
+<tr><td>Componentes</td><td class="small">{% for c, r in prod.components.items() %}{{ c }} {{ r }}{{ ' · ' if not loop.last }}{% endfor %}</td></tr>{% endif %}</table></div>
+<div class="card"><h3>Llamadas RFC</h3><p>{{ s.stats.get('_rfc_calls', {}).get('calls') }} llamadas · eventos de truncamiento: {{ s.stats.get('_rfc_calls', {}).get('truncation_events') }}</p></div>
+</div>
+<h2>Datasets extraídos (completitud)</h2>
+<div class="tbl-wrap"><table class="tbl">
+<tr><th>Dataset</th><th>Estado</th><th>Filas</th><th>Llamadas</th><th>Método</th><th>Mensaje</th></tr>
+{% for k, v in s.stats.items() if k != '_rfc_calls' %}
+<tr><td><code>{{ k }}</code></td><td>{{ v.status }}</td><td class="right">{{ v.rows }}</td><td class="right">{{ v.calls }}</td><td>{{ v.method }}</td>
+<td>{{ v.message }}{% if v.extra %}<details><summary>Detalle</summary><pre class="mono">{{ v.extra|tojson(indent=1) }}</pre></details>{% endif %}</td></tr>
+{% endfor %}
+</table></div>
+<p class="note">Validación cruzada: una muestra de usuarios se compara contra <code>BAPI_USER_GET_DETAIL</code> (roles y perfiles). Las diferencias marcan el snapshot como incompleto.</p>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, filter %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p class="subtitle">{{ intro }} Para saber <b>qué hacer</b>, vaya a <a href="/">Qué corregir primero</a> o use «Qué hacer ›» en cada fila.</p>
+{{ filter("tg") }} <span class="muted">{{ rows|length }} reglas con hallazgos</span>
+<div class="tbl-wrap"><table class="tbl sortable" id="tg">
+<tr><th>Gravedad</th><th>Riesgo</th><th>Usuarios</th><th>Roles que lo originan</th><th>Abiertos</th><th></th></tr>
+{% for g in rows %}
+<tr><td>{{ sev(g.severity) }}</td><td><b>{{ g.title }}</b><br><span class="muted small">{{ g.rule_id }}</span></td>
+<td class="right"><b>{{ g.users|length }}</b></td>
+<td><span class="chips">{% for r, n in g.top_roles %}<a class="chip" href="/roles/{{ r }}">{{ r }}{% if n > 1 %} · {{ n }}{% endif %}</a>{% endfor %}{% if g.more_roles %}<span class="chip">+{{ g.more_roles }}</span>{% endif %}</span></td>
+<td class="right">{{ g.open }}</td>
+<td class="nowrap"><a href="/acciones?q={{ g.title|urlencode }}">Qué hacer ›</a> · <a href="/hallazgos?regla={{ g.rule_id }}">Casos</a></td></tr>
+{% else %}<tr><td colspan="6" class="muted">Sin hallazgos.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

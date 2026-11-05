@@ -1,0 +1,100 @@
+{% macro sev(s) -%}
+{%- set v = s.value if s.value is defined else s -%}
+<span class="sev sev-{{ v }}">{{ SEV_LABEL.get(v, v) }}</span>
+{%- endmacro %}
+
+{% macro cert(c) -%}
+{%- set v = c.value if c.value is defined else c -%}
+<span class="cert cert-{{ v }}" title="Grado de certeza">{{ {'definido_en_rol':'Definido en rol','en_perfil':'En perfil','asignado':'Asignado','capacidad_potencial':'Capacidad potencial','confirmado_en_sap':'Confirmado en SAP'}.get(v, v) }}</span>
+{%- endmacro %}
+
+{% macro rstatus(s) -%}
+<span class="rstatus rstatus-{{ s }}" title="Estado de gobierno de la regla">{{ s }}</span>
+{%- endmacro %}
+
+{% macro filter(target) -%}
+<input class="table-filter" data-target="{{ target }}" placeholder="Filtrar tabla…" type="search">
+{%- endmacro %}
+
+{% macro evidence_table(items) -%}
+<table class="tbl compact">
+<tr><th>Requisito</th><th>Objeto</th><th>Autorización</th><th>Valores</th><th>Procedencia</th><th>Certeza</th></tr>
+{% for e in items %}
+<tr><td>{{ e.requirement }}</td><td><code>{{ e.object }}</code></td><td><code>{{ e.auth }}</code></td>
+<td class="mono">{{ e["values"] if e is mapping else e.values }}</td><td>{{ e.provenance }}</td><td>{{ cert(e.certainty) }}</td></tr>
+{% endfor %}
+</table>
+{%- endmacro %}
+
+{% macro csrf_input(csrf) -%}<input type="hidden" name="csrf" value="{{ csrf }}">{%- endmacro %}
+
+{% macro task_card(t) -%}
+<a class="task sev-{{ t.severity }}{% if not t.pending %} done{% endif %}" href="/acciones/{{ t.key }}">
+  <div class="t-main">
+    <div class="t-title"><span class="kind">{{ KIND_LABEL[t.kind] }}</span>{{ t.title }}{% if not t.pending %} <span class="chip good">resuelta</span>{% endif %}</div>
+    {% if t.subtitle %}<div class="t-sub">{{ t.subtitle }}</div>{% endif %}
+    {% set vp = t.visible_problems %}
+    <div class="t-meta">{{ sev(t.severity) }} {{ vp|length }} punto{{ '' if vp|length == 1 else 's' }} a corregir{% if t.n_critical %} · {{ t.n_critical }} crítico{{ '' if t.n_critical == 1 else 's' }}{% endif %}{% if t.fixed_users %} · <span class="chip good">{{ t.fixed_users|length }} ya corregido{{ '' if t.fixed_users|length == 1 else 's' }}</span>{% endif %} · <span class="muted">{{ t.main_problem.title }}</span></div>
+  </div>
+  <div class="t-side"><b>{{ t.n_users }}</b>usuario{{ '' if t.n_users == 1 else 's' }}</div>
+  <div class="t-go">›</div>
+</a>
+{%- endmacro %}
+
+{% macro fix_item(it, open=False) -%}
+<li><details {% if open %}open{% endif %}><summary>{{ sev(it.severity) }}
+  <span class="grow"><b>{{ it.title }}</b><br><span class="muted">{{ it.origin }}{% if it.change %} — {{ it.change }}{% endif %}</span></span>
+  {% if it.users is defined and it.users %}<span class="muted nowrap">{{ it.users }} usuario{{ '' if it.users == 1 else 's' }}</span>{% endif %}
+  <span class="more">ver detalle ▸</span></summary>
+  {% if it.why %}<p><b>Por qué no debe seguir así:</b> {{ it.why }}</p>{% endif %}
+  {% if it.evidence %}{{ evidence_table(it.evidence) }}{% endif %}
+  {% if it.task %}<p><a class="btn small" href="/acciones/{{ it.task }}">Ver cómo corregirlo ›</a></p>{% endif %}
+</details></li>
+{%- endmacro %}
+
+{% macro sev_counts(items) -%}
+{%- set parts = [] -%}
+{%- for k, lbl in [("critico","crítico"),("alto","alto"),("medio","medio"),("bajo","bajo")] -%}
+  {%- set n = items|selectattr('severity','equalto',k)|list|length -%}
+  {%- if n %}{% set _ = parts.append(n ~ ' ' ~ lbl ~ ('s' if n > 1 else '')) %}{% endif -%}
+{%- endfor -%}
+{{ parts|join(' · ') }}
+{%- endmacro %}
+
+{% macro fix_list(items, first=6) -%}
+<ul class="fixlist">{% for it in items[:first] %}{{ fix_item(it) }}{% endfor %}</ul>
+{% if items|length > first %}
+<details class="more-items"><summary>Ver los otros {{ items|length - first }} puntos ({{ sev_counts(items[first:]) }})</summary>
+<ul class="fixlist">{% for it in items[first:] %}{{ fix_item(it) }}{% endfor %}</ul>
+</details>
+{% endif %}
+{%- endmacro %}
+
+{% macro reco_box(adv, label="Recomendación", extra="") -%}
+<section class="reco reco-{{ adv.level }}">
+  <div class="reco-top"><span class="reco-label">{{ label }}</span>{% if adv.verdict %}<span class="reco-verdict">{{ adv.verdict }}</span>{% endif %}{% if extra %}<span class="reco-extra">{{ extra }}</span>{% endif %}{% if adv.impact %}<span class="reco-impact">{{ adv.impact }}</span>{% endif %}</div>
+  <p class="reco-head">{{ adv.headline }}</p>
+  {% if adv.why %}<p class="reco-why"><b>Por qué:</b> {{ adv.why }}</p>{% endif %}
+  {% if adv.steps %}
+  <div class="reco-steps"><h4>Qué hacer</h4>
+    <ol>{% for s in adv.steps %}<li>{{ s.text }}{% if s.link %} <a href="{{ s.link }}">{{ s.link_text or 'ver' }} ›</a>{% endif %}</li>{% endfor %}</ol>
+  </div>
+  {% endif %}
+  {% if adv.where or adv.note or adv.action %}
+  <div class="reco-foot">
+    {% if adv.where %}<span class="reco-where"><b>Dónde, en SAP:</b> {{ adv.where }}</span>{% endif %}
+    {% if adv.action %}<a class="btn" href="{{ adv.action[1] }}">{{ adv.action[0] }}</a>{% endif %}
+  </div>
+  {% if adv.note %}<p class="reco-note">{{ adv.note }}</p>{% endif %}
+  {% endif %}
+</section>
+{%- endmacro %}
+
+
+{% macro fiori_table(items) -%}
+<p class="small muted">Servicios OData que puede iniciar (S_SERVICE). Iniciar un servicio no alcanza: además hacen falta los
+objetos de negocio del backend. El nombre sale de la tabla USOBHASH del propio sistema.</p>
+<table class="tbl compact"><tr><th>Servicio</th><th>Hash (SRV_NAME)</th><th>Aportado por</th></tr>
+{% for x in items %}<tr><td>{{ x.name or '— sin nombre en USOBHASH —' }}</td><td class="mono small">{{ x.hash }}</td><td>{{ x.roles|join(', ') or 'perfil' }}</td></tr>{% endfor %}
+</table>
+{%- endmacro %}

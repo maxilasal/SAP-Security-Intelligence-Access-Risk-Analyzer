@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<h1>Reportes</h1>
+<p class="subtitle">Snapshot #{{ current_snap.id }} · {{ current_snap.sid }}/{{ current_snap.client }}. Cada informe incluye fecha de datos, sistema, mandante, alcance, hash de reglas y limitaciones.</p>
+{% set reps = [("ejecutivo","Informe ejecutivo de seguridad"),("auditor","Informe técnico detallado para auditores"),
+  ("criticos","Usuarios con autorizaciones críticas"),("sap_all","Usuarios con SAP_ALL o equivalentes"),
+  ("admin","Usuarios con privilegios administrativos"),("sod_usuario","Conflictos SoD por usuario"),("sod_rol","Conflictos SoD por rol")] %}
+<div class="tbl-wrap"><table class="tbl">
+<tr><th>Reporte</th><th>Descargar</th></tr>
+{% for k, label in reps %}<tr><td>{{ label }}</td><td>{% for f in ["xlsx","pdf","csv","html"] %}<a class="btn ghost small" href="/reportes/descargar?tipo={{ k }}&formato={{ f }}">{{ f|upper }}</a> {% endfor %}</td></tr>{% endfor %}
+</table></div>
+<h2>Otros reportes</h2>
+<ul>
+  <li>Auditoría de un usuario: desde la ficha del usuario (PDF/Excel).</li>
+  <li>Simulación de nuevas asignaciones (técnico y ejecutivo): desde el resultado del simulador.</li>
+  <li>Comparación de roles y de sistemas: pantallas de comparadores (exportación prevista en fase 3).</li>
+  <li>Roles con permisos genéricos y redundantes: pantalla de recomendaciones.</li>
+</ul>
+{% endblock %}

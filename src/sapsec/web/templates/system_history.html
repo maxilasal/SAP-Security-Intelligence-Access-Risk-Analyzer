@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Historial {{ conn.label }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/sistemas">Todos los sistemas</a> › {{ conn.system.label }}</div>
+<h1>{{ conn.system.label }} <span class="env env-{{ (conn.system.environment or 'OTRO')|upper }}">{{ (conn.system.environment or 'OTRO')|upper }}</span></h1>
+<p class="subtitle">{{ conn.system.sid }} / mandante {{ conn.client }} · conexión «{{ conn.name }}» · huella {{ conn.fingerprint or 'se registra en la próxima extracción' }}</p>
+<p class="muted small">Se conservan los últimos {{ keep or 'todos los' }} snapshots de este sistema. Para ver uno anterior, use «Ver»: toda la aplicación pasa a mostrar ese snapshot hasta que vuelva al último.</p>
+<div class="tbl-wrap"><table class="tbl">
+<tr><th>#</th><th>Fecha</th><th>Estado</th><th>Por</th><th class="right">Hallazgos abiertos</th><th></th></tr>
+{% for s in snaps_all %}
+<tr><td>{{ s.id }}{% if latest and s.id == latest.id %} <span class="chip good">último</span>{% endif %}</td>
+<td>{{ s.started_at.strftime('%d/%m/%Y %H:%M') }}</td>
+<td>{{ s.status }}{% if s.is_test_data %} (prueba){% endif %}{% if not s.analyzed_at and s.status != 'error' %} · sin analizar{% endif %}</td>
+<td>{{ s.started_by }}</td><td class="right">{{ counts.get(s.id, 0) }}</td>
+<td class="nowrap">
+  {% if s.status in ('completo', 'incompleto') %}<a class="btn ghost small" href="/?snap={{ s.id }}">Ver</a>{% endif %}
+  {% if latest and s.id != latest.id and s.status in ('completo', 'incompleto') %}<a class="btn ghost small" href="/comparador-sistemas?snap_a={{ s.id }}&snap_b={{ latest.id }}">Qué cambió hasta el último</a>{% endif %}
+  <a class="btn ghost small" href="/snapshots/{{ s.id }}">Detalle técnico</a>
+  {% if user.can('conexiones') %}<form class="inline" method="post" action="/snapshots/{{ s.id }}/eliminar" data-confirm="¿Eliminar el snapshot #{{ s.id }} de {{ conn.label }}?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Eliminar</button></form>{% endif %}
+</td></tr>
+{% else %}<tr><td colspan="6" class="muted">Sin snapshots.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

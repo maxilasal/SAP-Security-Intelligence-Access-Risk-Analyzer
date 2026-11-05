@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Extracción{% endblock %}
+{% block content %}
+{% if job.estado in ("en_curso", "en_cola") %}<meta http-equiv="refresh" content="3">{% endif %}
+<div class="crumbs"><a href="/sistemas">Todos los sistemas</a> › extracción</div>
+<h1>Extracción — {{ job.conexion }}</h1>
+<div class="card">
+  <p><b>Estado:</b> {{ {"en_curso": "En curso", "en_cola": "En cola", "terminado": "Terminada", "error": "Error"}[job.estado] }} · {{ elapsed }}</p>
+  {% if job.estado == "en_cola" %}
+  <p>Posición en la cola: <b>{{ position }}</b>{% if running %} · extrayendo ahora: {{ running }}{% endif %}. Las extracciones se hacen de a una para no cargar los sistemas.</p>
+  {% else %}<p><b>Fase actual:</b> {{ job.fase }}</p>{% endif %}
+  {% if job.estado in ("en_curso", "en_cola") %}<p class="muted">La página se actualiza sola. Puede seguir usando la aplicación mientras tanto.</p>{% endif %}
+  {% if job.error %}<div class="errbox">{{ job.error }}</div>{% endif %}
+  {% if job.snapshot %}<p><a class="btn" href="/?sistema={{ cid }}">Ver qué corregir en este sistema</a>
+  <a class="btn ghost" href="/snapshots/{{ job.snapshot }}">Detalle técnico del snapshot</a></p>{% endif %}
+</div>
+{% endblock %}

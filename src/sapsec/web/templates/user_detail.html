@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, cert, fix_item, fix_list, sev_counts, filter, reco_box, fiori_table %}
+{% block title %}Usuario {{ a.username }}{% endblock %}
+{% block content %}
+{% set u = a.eff.user %}
+<div class="crumbs"><a href="/usuarios">Usuarios</a> › {{ a.username }}</div>
+<h1>{{ a.username }} <span class="muted">{{ u.full_name }}</span></h1>
+<div class="facts">
+  <span><b>{{ u.type_label }}</b></span><span>grupo {{ u.user_group or '—' }}</span>
+  <span class="{{ 'chip bad' if u.is_locked else '' }}">{{ u.lock_label }}</span>
+  <span>último acceso <b>{{ u.last_logon or 'sin dato' }}</b></span>
+  <span><b>{{ a.eff.valid_roles()|length }}</b> roles vigentes</span>
+  {% if 'SAP_ALL' in a.eff.profiles %}<span class="chip bad">SAP_ALL</span>{% endif %}
+  {% if a.critical|selectattr('rule_id', 'equalto', 'INFO-DEV-001')|list %}<span class="chip">desarrollador ABAP</span>{% endif %}
+  {% if fiori_services %}<span class="chip">{{ fiori_services|length }} servicio{{ '' if fiori_services|length == 1 else 's' }} Fiori/OData</span>{% endif %}
+  {% if a.eff._direct %}<span class="chip warn">perfiles directos: {{ a.eff._direct|sort|join(', ') }}</span>{% endif %}
+</div>
+<p>
+  <a class="btn ghost small" href="/simulador?usuario={{ a.username }}">Simular un cambio de roles</a>
+  <a class="btn ghost small" href="/reportes/descargar?tipo=usuario&usuario={{ a.username }}&formato=pdf">PDF</a>
+  <a class="btn ghost small" href="/reportes/descargar?tipo=usuario&usuario={{ a.username }}&formato=xlsx">Excel</a>
+</p>
+
+{{ reco_box(reco, "Recomendación", "riesgo del usuario: " ~ a.risk.inherent_level.label|lower) }}
+{% if a.risk.notes %}<p class="small muted">{% for n in a.risk.notes %}{{ n }} {% endfor %}</p>{% endif %}
+
+{% if fixes %}
+<h2>Qué corregir ({{ fixes|length }})</h2>
+<p class="sevline">{{ sev_counts(fixes) }}</p>
+{{ fix_list(fixes, 6) }}
+{% endif %}
+
+<h2>Antes de asignarle un rol nuevo</h2>
+{% if forbidden is none %}<div class="warnbox small">Calculando qué roles no conviene asignarle… recargue en unos minutos.</div>
+{% elif forbidden %}
+<p class="muted small">Estos roles completarían un conflicto con lo que ya puede hacer. Para cualquier otro rol, use el simulador.</p>
+<ul class="fixlist">
+{% for x in forbidden %}
+<li><details><summary>{{ sev(x.severity) }}<span class="grow"><b>No asignar roles que den «{{ x.missing_title }}»</b><br>
+  <span class="muted">{{ x.risk_title }} · ya tiene «{{ x.has_function }}»</span></span>
+  <span class="muted nowrap">{{ x.total_roles }} rol{{ '' if x.total_roles == 1 else 'es' }}</span><span class="more">ver roles ▸</span></summary>
+  <div class="chips">{% for r in x.roles %}<a class="chip" href="/roles/{{ r }}">{{ r }}</a>{% endfor %}{% if x.total_roles > x.roles|length %}<span class="chip">+{{ x.total_roles - x.roles|length }}</span>{% endif %}</div>
+</details></li>
+{% endfor %}
+</ul>
+{% else %}<p class="muted">No se detectaron roles que completen un conflicto con sus permisos actuales.</p>{% endif %}
+
+{% set vencidos = a.eff.assignments|selectattr('valid_to')|list %}
+<div class="facts small">
+  {% for x in a.eff.assignments if x.state(as_of) == 'vencida' %}<span class="chip warn">vencido: {{ x.role }}</span>{% endfor %}
+  {% for x in expiring %}<span class="chip warn">vence {{ x.valid_to }}: {{ x.role }}</span>{% endfor %}
+  {% for r, by in redundant %}<span class="chip">redundante: {{ r }}</span>{% endfor %}
+</div>
+
+<section class="tech">
+<h2>Detalle técnico</h2>
+<div class="tabs" data-group="u">
+  <a href="#" class="on" data-tab="t-roles">Roles y perfiles</a>
+  <a href="#" data-tab="t-auth">Autorizaciones efectivas ({{ objects|length }})</a>
+  {% if fiori_services %}<a href="#" data-tab="t-fiori">Fiori / OData ({{ fiori_services|length }})</a>{% endif %}
+  <a href="#" data-tab="t-risk">Cálculo del riesgo</a>
+  <a href="#" data-tab="t-obs">Observaciones ({{ a.issues|length }})</a>
+</div>
+<div class="tab on" id="t-roles" data-group="u">
+  <table class="tbl compact"><tr><th>Rol</th><th>Descripción</th><th>Tipo</th><th>Desde</th><th>Hasta</th><th>Estado</th><th>Heredado</th></tr>
+  {% for x in a.eff.assignments %}<tr><td><a href="/roles/{{ x.role }}">{{ x.role }}</a></td><td class="clamp1">{{ data.role_text.get(x.role,'') }}</td><td>{{ data.role_type(x.role) }}</td><td>{{ x.valid_from or '' }}</td><td>{{ x.valid_to or '' }}</td><td>{{ x.state(as_of) }}</td><td>{{ 'sí' if x.via_composite else '' }}</td></tr>{% endfor %}
+  </table>
+  <p class="small"><b>Perfiles en el maestro (UST04):</b> {% for p in a.eff.profiles %}<span class="chip">{{ p }}{% if data.profile_role.get(p) %} ← {{ data.profile_role[p] }}{% else %} (directo){% endif %}</span> {% endfor %}</p>
+</div>
+<div class="tab" id="t-auth" data-group="u">
+  {{ filter("tauth") }}
+  <table class="tbl compact sortable" id="tauth"><tr><th>Objeto</th><th>Autorización</th><th>Valores por campo</th><th>Procedencia</th><th>Certeza</th></tr>
+  {% for e in objects %}<tr><td><code>{{ e.instance.object }}</code><br><span class="muted small">{{ data.object_text.get(e.instance.object,'') }}</span></td><td><code>{{ e.instance.auth }}</code></td>
+  <td class="mono">{% for f, vals in e.instance.fields.items()|sort %}{{ f }} = {% for v in vals %}{{ v }}{% if f == 'ACTVT' and data.activity_text.get(v.low) %} ({{ data.activity_text[v.low] }}){% elif f == 'SRV_NAME' and data.service_label(v.low) %} ({{ data.service_label(v.low) }}){% endif %}{{ ', ' if not loop.last }}{% endfor %}<br>{% endfor %}</td>
+  <td class="small">{{ e.provenance() }}</td><td>{{ cert(e.certainty) }}</td></tr>{% endfor %}
+  </table>
+  <p class="note small">Cada fila es una instancia de autorización: SAP exige que todos los campos se cumplan dentro de la misma instancia.</p>
+</div>
+{% if fiori_services %}<div class="tab" id="t-fiori" data-group="u">{{ fiori_table(fiori_services) }}</div>{% endif %}
+<div class="tab" id="t-risk" data-group="u">
+  <p class="small">Inherente {{ a.risk.inherent_score }} · actual {{ a.risk.current_score }} · residual {{ a.risk.residual_score }}</p>
+  <table class="tbl compact"><tr><th>Hallazgo</th><th>Gravedad</th><th>Puntos</th><th>Factores</th><th>Inherente</th><th>Control</th><th>Residual</th></tr>
+  {% for i in a.risk.items %}<tr><td>{{ i.title }}</td><td>{{ sev(i.severity) }}</td><td class="right">{{ i.base }}</td><td class="small">{% for k,v in i.factors.items() %}{{ k }}×{{ v }} {% endfor %}</td><td class="right">{{ i.inherent }}</td><td>{{ i.mitigation or '—' }}</td><td class="right">{{ i.residual }}</td></tr>{% endfor %}
+  </table>
+</div>
+<div class="tab" id="t-obs" data-group="u">
+  <table class="tbl compact"><tr><th>Código</th><th>Gravedad</th><th>Mensaje</th></tr>
+  {% for i in a.issues %}<tr><td><code>{{ i.code }}</code></td><td>{{ sev(i.severity) }}</td><td>{{ i.message }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Sin observaciones.</td></tr>{% endfor %}</table>
+</div>
+</section>
+{% endblock %}

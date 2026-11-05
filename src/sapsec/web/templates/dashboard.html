@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, task_card, reco_box %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+<h1>¿Qué corregir primero en {{ snap.connection.system.label }}?</h1>
+{% set prod = (snap.system_info or {}).get('PRODUCTO') or {} %}
+<p class="subtitle">{{ snap.sid }} / mandante {{ snap.client }}{% if prod.label %} · {{ prod.label }}{% if prod.fiori %} · con Fiori{% endif %}{% endif %} · datos del {{ snap.started_at.strftime('%d/%m/%Y %H:%M') }}
+  {% if meta.stale %}· <b>datos desactualizados: conviene extraer de nuevo</b>{% endif %}
+  {% if snap.status != 'completo' %}· <span class="badge warn">snapshot {{ snap.status }}</span>{% endif %}</p>
+
+{% set envx = (snap.connection.system.environment or '')|upper %}
+{% if envx == 'DEV' %}<p class="howto envnote"><b>Sistema de desarrollo:</b> se revisan los riesgos técnicos (SAP_ALL, administración de usuarios, RFC, sistema operativo, usuarios estándar). Desarrollar, depurar y liberar transportes es normal acá y no se marca; los conflictos de procesos de negocio no aplican. Lo más importante: que los desarrolladores no tengan permisos críticos en producción — <a href="/entre-sistemas">ver «Desarrollo vs. producción»</a> · <a href="/reglas">qué se controla en cada ambiente</a>.</p>
+{% elif envx == 'QA' %}<p class="howto envnote"><b>Sistema de calidad:</b> se revisan los riesgos técnicos y que nadie desarrolle ni modifique datos fuera de lo previsto; los conflictos de procesos de negocio no aplican (no hay operaciones reales) — <a href="/reglas">qué se controla en cada ambiente</a>.</p>{% endif %}
+{% if cross and cross.rows %}{% set cu = cross.rows|map(attribute='user')|unique|list %}
+<div class="warnbox"><b>{{ cu|length }} desarrollador{{ '' if cu|length == 1 else 'es' }} de DEV {{ 'tiene' if cu|length == 1 else 'tienen' }} permisos críticos en este sistema</b> ({{ cu[:5]|join(', ') }}{% if cu|length > 5 %}…{% endif %}). <a href="/entre-sistemas">Ver detalle y qué hacer ›</a></div>{% endif %}
+{{ reco_box(reco, "Recomendación de hoy") }}
+<p class="howto"><b>Cómo se usa:</b> se corrige en SAP lo que dice cada tarea y se vuelve a extraer; lo corregido pasa a «resuelto» solo.</p>
+
+<div class="kpis">
+  <a class="kpi-s" href="/acciones"><div class="v">{{ summ.tareas }}</div><div class="l">tareas pendientes</div></a>
+  <a class="kpi-s crit" href="/acciones?gravedad=critico"><div class="v">{{ summ.criticas }}</div><div class="l">tareas críticas</div></a>
+  <a class="kpi-s high" href="/acciones"><div class="v">{{ summ.usuarios }}</div><div class="l">usuarios afectados de {{ stats.usuarios }}</div></a>
+  <a class="kpi-s crit" href="/objetos?perfil=SAP_ALL"><div class="v">{{ stats.sap_all }}</div><div class="l">usuarios con SAP_ALL</div></a>
+  <a class="kpi-s ok" href="/acciones?estado=resueltas"><div class="v">{{ summ.resueltas }}</div><div class="l">tareas resueltas</div></a>
+</div>
+
+{% if nxt %}
+<div class="next-head"><h2>Después, seguir con estas</h2><a href="/acciones">Ver las {{ summ.tareas }} tareas ›</a></div>
+{% for t in nxt %}{{ task_card(t) }}{% endfor %}
+{% endif %}
+
+<details class="tech"><summary>Indicadores y evolución</summary>
+<div class="grid g2">
+<div class="card">
+  <h3>Hallazgos abiertos por gravedad</h3>
+  {% set mx = [stats.por_severidad.values()|max, 1]|max %}
+  <svg class="chart" viewBox="0 0 420 150" width="100%" role="img" aria-label="Hallazgos por gravedad">
+  {% for k, color in [("critico","#b3261e"),("alto","#d9622b"),("medio","#c79a00"),("bajo","#2f7d4f"),("informativo","#5d6b7a")] %}
+    {% set w = (stats.por_severidad[k] / mx * 290)|round(0, 'floor') %}
+    <text x="0" y="{{ 18 + loop.index0*27 }}">{{ SEV_LABEL[k] }}</text>
+    <rect x="90" y="{{ 6 + loop.index0*27 }}" width="{{ [w, 1]|max }}" height="17" fill="{{ color }}" rx="3"></rect>
+    <text x="{{ 96 + w }}" y="{{ 19 + loop.index0*27 }}">{{ stats.por_severidad[k] }}</text>
+  {% endfor %}
+  </svg>
+  <p class="small muted">{{ stats.usuarios }} usuarios y {{ stats.roles }} roles analizados · {{ stats.sod }} conflictos SoD en usuarios · {{ stats.privilegiados }} usuarios privilegiados.</p>
+</div>
+<div class="card">
+  <h3>Evolución (hallazgos abiertos por snapshot)</h3>
+  {% if stats.evolucion|length > 1 %}
+  {% set totals = [] %}{% for e in stats.evolucion %}{% set _ = totals.append((e.get('critico',0) + e.get('alto',0) + e.get('medio',0) + e.get('bajo',0))) %}{% endfor %}
+  {% set mt = [totals|max, 1]|max %}
+  <svg class="chart" viewBox="0 0 420 150" width="100%" role="img" aria-label="Evolución">
+    {% for e in stats.evolucion %}
+      {% set h = (totals[loop.index0] / mt * 95)|round(0,'floor') %}
+      <rect x="{{ 10 + loop.index0*34 }}" y="{{ 120 - h }}" width="24" height="{{ [h,1]|max }}" fill="#2d5b8f" rx="2"></rect>
+      <text x="{{ 10 + loop.index0*34 }}" y="{{ 115 - h }}">{{ totals[loop.index0] }}</text>
+      <text x="{{ 8 + loop.index0*34 }}" y="138">#{{ e.snapshot }}</text>
+    {% endfor %}
+  </svg>
+  {% else %}<p class="muted">Con más de un snapshot del mismo sistema se verá aquí la evolución.</p>{% endif %}
+</div>
+</div>
+</details>
+{% endblock %}

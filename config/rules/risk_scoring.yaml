@@ -1,0 +1,21 @@
+# Parámetros del motor de riesgos (ver src/sapsec/engine/risk.py).
+# Todas las puntuaciones son explicables: puntos × factores, con desglose visible.
+ruleset:
+  id: SCORING
+  version: "2026.11-0.1"
+
+severity_points: {critico: 100, alto: 40, medio: 15, bajo: 5, informativo: 0}
+
+# Factor por tipo de usuario (USTYP). Los usuarios técnicos no inician sesión de diálogo,
+# pero sus autorizaciones pueden explotarse vía RFC o si se cambia el tipo.
+user_type_factor: {A: 1.0, S: 1.0, C: 0.9, B: 0.8, L: 0.7}
+
+# Factor por certeza de la evidencia.
+certainty_factor: {definido_en_rol: 0.8, en_perfil: 0.9, asignado: 1.0, capacidad_potencial: 1.0, confirmado_en_sap: 1.0}
+
+# Riesgo ACTUAL de un usuario bloqueado o fuera de validez = inherente × factor.
+# El riesgo POTENCIAL (inherente) no cambia: los permisos siguen asignados.
+inactive_user_factor: 0.2
+
+# Umbrales de nivel sobre la puntuación.
+level_thresholds: {critico: 100, alto: 40, medio: 15, bajo: 1}

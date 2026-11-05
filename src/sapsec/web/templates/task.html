@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, evidence_table, sev_counts, reco_box %}
+{% block title %}{{ t.title }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="/">Qué corregir primero</a> › <a href="/acciones">Todas las tareas</a> › {{ KIND_LABEL[t.kind] }}</div>
+<h1>{{ t.title }} {{ sev(t.severity) }} {% if not t.pending %}<span class="chip good">resuelta / aceptada</span>{% endif %}</h1>
+{% if t.subtitle %}<p class="subtitle">{{ t.subtitle }}</p>{% endif %}
+
+{{ reco_box(reco) }}
+{% if t.roles %}<div class="facts"><span><b>Roles involucrados:</b></span><span class="chips">{% for r in t.roles %}<a class="chip" href="/roles/{{ r }}">{{ r }}</a>{% endfor %}</span></div>{% endif %}
+
+{% if t.fixed_users %}
+<div class="note"><b>✓ Ya corregido desde la extracción anterior:</b>
+  {% for u in t.fixed_users[:30] %}<a class="chip good" href="/usuarios/{{ u }}">{{ u }}</a> {% endfor %}{% if t.fixed_users|length > 30 %}<span class="chip">+{{ t.fixed_users|length - 30 }}</span>{% endif %}
+  <span class="small muted">— ya no tienen este problema en SAP; no figuran como afectados.</span></div>
+{% endif %}
+{% if t.resolved_problems and t.pending %}<p class="small muted">✓ {{ t.resolved_problems|length }} punto{{ '' if t.resolved_problems|length == 1 else 's' }} de esta tarea ya {{ 'está corregido' if t.resolved_problems|length == 1 else 'están corregidos' }}.</p>{% endif %}
+<h2>Puntos a corregir ({{ t.visible_problems|length }})</h2>
+<p class="sevline">{{ sev_counts(t.visible_problems) }}</p>
+{% macro problem_row(p) %}
+<li><details><summary>{{ sev(p.severity) }}<span class="grow"><b>{{ p.title }}</b><br><span class="muted">{{ p.change }}</span></span>
+  <span class="muted nowrap">{{ p.users|length }} usuario{{ '' if p.users|length == 1 else 's' }}</span><span class="more">por qué ▸</span></summary>
+  {% if p.why %}<p><b>Por qué no debe seguir así:</b> {{ p.why }}</p>{% endif %}
+  <p class="small">Regla <code>{{ p.rule_id }}</code>{% if p.finding_ids %} · <a href="/hallazgos/{{ p.finding_ids[0] }}">ver evidencia técnica de un caso</a>{% endif %}</p>
+</details></li>
+{% endmacro %}
+{% set vp = t.visible_problems %}
+{% set first = 1 if t.kind == 'perfil' else 8 %}
+<ul class="fixlist">{% for p in vp[:first] %}{{ problem_row(p) }}{% endfor %}</ul>
+{% if vp|length > first %}
+<details class="more-items"><summary>{% if t.kind == 'perfil' %}Ver los {{ vp|length - 1 }} riesgos que desaparecen al quitarlo{% else %}Ver los otros {{ vp|length - first }} puntos{% endif %} ({{ sev_counts(vp[first:]) }})</summary>
+<ul class="fixlist">{% for p in vp[first:] %}{{ problem_row(p) }}{% endfor %}</ul></details>
+{% endif %}
+
+{% if users %}
+<div class="section-head"><h2>Usuarios afectados ({{ t.n_users }})</h2>{% if t.n_users > users|length %}<span class="muted">se muestran {{ users|length }}</span>{% endif %}</div>
+<div class="tbl-wrap"><table class="tbl compact sortable">
+<tr><th>Usuario</th><th>Nombre</th><th>Tipo</th><th>Estado</th><th>Último acceso</th>{% if t.roles %}<th>Roles de esta tarea que tiene</th>{% endif %}<th></th></tr>
+{% for u in users %}
+<tr><td><a href="/usuarios/{{ u.username }}">{{ u.username }}</a></td><td>{{ u.full_name }}</td><td>{{ u.type }}</td><td>{{ u.lock }}</td><td>{{ u.last_logon or '—' }}</td>
+{% if t.roles %}<td>{% for r in u.roles %}<span class="chip">{{ r }}</span> {% endfor %}</td>{% endif %}
+<td class="nowrap">{% if t.kind == 'combinacion' and u.roles %}{% for r in u.roles[:3] %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ r }}">Simular quitar {{ r }}</a> {% endfor %}{% elif t.kind == 'rol' %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ t.roles[0] }}">Simular quitar el rol</a>{% else %}<a class="btn ghost small" href="/usuarios/{{ u.username }}">Ver usuario</a>{% endif %}</td></tr>
+{% endfor %}
+</table></div>
+{% endif %}
+
+{% if user.can('hallazgos_gestionar') and t.pending %}
+<details class="card"><summary>Registrar decisión para toda la tarea ({{ t.open_ids|length }} hallazgos abiertos)</summary>
+<form method="post" action="/acciones/{{ t.key }}/gestionar" class="form-grid">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Decisión<select name="status">
+    <option value="en_revision">En revisión (alguien la está corrigiendo)</option>
+    <option value="excepcion">Aceptar el riesgo (excepción con vencimiento)</option>
+    <option value="mitigado">Mitigado por un control</option>
+    <option value="falso_positivo">Falso positivo (la regla no aplica)</option>
+  </select></label>
+  <label>Responsable<input name="owner" placeholder="Nombre o área"></label>
+  <label>Vence (excepción)<input type="date" name="exception_expires"></label>
+  <label>Justificación<textarea name="exception_justification" rows="2" placeholder="Obligatoria para excepción o falso positivo"></textarea></label>
+  <button class="btn">Guardar decisión</button>
+</form>
+<p class="small muted">Si se corrige en SAP no hace falta registrar nada: la próxima extracción lo marca como resuelto.</p>
+</details>
+{% endif %}
+{% endblock %}

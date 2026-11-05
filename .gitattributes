@@ -1,0 +1,27 @@
+# Finales de línea normalizados en el repositorio (LF); cada sistema los adapta al hacer checkout.
+* text=auto
+
+# PowerShell en Windows: CRLF en la copia de trabajo (los scripts conservan su BOM UTF-8).
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Código y configuración: LF siempre (Python, plantillas, reglas YAML, datos de prueba).
+*.py text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.zip binary

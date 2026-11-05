@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, filter %}
+{% block title %}Usuarios{% endblock %}
+{% block content %}
+<h1>Usuarios</h1>
+<form class="form-grid card" method="get">
+  <label>Buscar<input name="q" value="{{ q }}" placeholder="Usuario o nombre"></label>
+  <label>Tipo<select name="tipo"><option value="">Todos</option>{% for k,v in [("A","Diálogo"),("B","Sistema"),("C","Comunicación"),("S","Servicio"),("L","Referencia")] %}<option value="{{ k }}" {% if tipo==k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+  <label>Estado<select name="estado"><option value="">Todos</option><option value="activo" {% if estado=='activo' %}selected{% endif %}>Desbloqueados</option><option value="bloqueado" {% if estado=='bloqueado' %}selected{% endif %}>Bloqueados</option></select></label>
+  <button class="btn">Filtrar</button>
+</form>
+<p></p>{{ filter("tusers") }} <span class="muted">{{ rows|length }} usuarios</span>
+<div class="tbl-wrap"><table class="tbl sortable" id="tusers">
+<tr><th>Usuario</th><th>Nombre</th><th>Tipo</th><th>Grupo</th><th>Estado</th><th>Último acceso</th><th>Roles vigentes</th><th>Vencidos</th><th>Perfiles</th><th>Nivel máx.</th></tr>
+{% for r in rows %}
+<tr><td><a href="/usuarios/{{ r.u.username }}">{{ r.u.username }}</a></td><td>{{ r.u.full_name }}</td><td>{{ r.u.type_label }}</td><td>{{ r.u.user_group }}</td>
+<td>{{ r.u.lock_label }}</td><td>{{ r.u.last_logon or '—' }}{% if r.inactivo %} <span class="pill">inactivo</span>{% endif %}</td>
+<td class="right">{{ r.roles }}</td><td class="right">{{ r.vencidos }}</td><td class="right">{{ r.perfiles }}</td><td>{{ sev(r.nivel) }}</td></tr>
+{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,704 @@
+# Matriz SoD inicial — REGLAS DE EJEMPLO.
+#
+# No es la matriz oficial de SAP GRC ni de ningún proveedor. Son ejemplos técnicos
+# para arrancar; cada función y riesgo debe ser validado (seguridad SAP) y aprobado
+# (dueño del proceso) cambiando "status" a validada / aprobada.
+#
+# Modelo:
+#   functions: capacidades de negocio. Cada una tiene "actions" alternativas.
+#     Una acción se cumple si (a) alguna de sus "tcodes" puede iniciarse (S_TCODE +
+#     chequeo de inicio TSTCA) — o no tiene tcodes — y (b) TODOS sus requisitos
+#     "all_of" se cumplen, cada uno en UNA instancia de autorización.
+#     Las acciones sin tcodes representan la vía Fiori/OData/API/otros programas.
+#     Vía Fiori automática: si la persona no puede iniciar ninguna de las tcodes, la acción también se
+#     cumple cuando tiene S_SERVICE para un servicio OData que, según la SU24 del propio sistema
+#     (USOBX_C/USOBT_C, TYPE HT), verifica el primer objeto de la acción con la actividad pedida.
+#   risks: combinaciones de funciones incompatibles.
+#     by_environment: gravedad según el ambiente. Los riesgos de negocio (FI, MM, SD…) no aplican en
+#     DEV ni QA (no hay operaciones reales); los técnicos (seguridad, cambios) sí, con otra gravedad.
+#     compare_org_fields: se informa si los valores organizativos se solapan.
+#     Un no-solapamiento NUNCA oculta el conflicto: se marca para verificación.
+ruleset:
+  id: SOD
+  version: "2026.11-0.3"
+  owner: "Seguridad SAP / Control interno (a definir)"
+  approved_by: null
+
+functions:
+  # ---------------------------------------------------------------- Finanzas
+  - id: FN_PROV_MANT
+    title: Mantener datos maestros de proveedores (incluye datos bancarios)
+    process: Finanzas / Compras
+    org_fields: [BUKRS]
+    actions:
+      - id: BP
+        tcodes: [BP]
+        all_of:
+          - object: B_BUPA_RLT
+            fields: {ACTVT: ["02"], RELTYP: ["FLVN00", "FLVN01"]}
+      - id: CLASICA
+        tcodes: [FK01, FK02, XK01, XK02, MK01, MK02]
+        all_of:
+          - object: F_LFA1_APP
+            fields: {ACTVT: ["02"]}
+      - id: OBJETOS
+        description: Vía Fiori/API u otros programas (sin transacción).
+        all_of:
+          - object: B_BUPA_RLT
+            fields: {ACTVT: ["02"], RELTYP: ["FLVN00", "FLVN01"]}
+          - object: F_LFA1_APP
+            fields: {ACTVT: ["02"]}
+
+  - id: FN_PAGOS
+    title: Ejecutar pagos a proveedores
+    process: Finanzas
+    org_fields: [BUKRS]
+    confidence: media
+    verify: "F110: confirmar qué valores de F_REGU_BUK-FBTCH corresponden a ejecutar el pago (hoy: cualquier valor)."
+    actions:
+      - id: F110
+        tcodes: [F110]
+        description: "Programa de pagos. Validar con SU24 qué valores de FBTCH corresponden a ejecutar el pago."
+        all_of:
+          - object: F_REGU_BUK
+            fields: {FBTCH: {mode: present}, BUKRS: {mode: present}}
+      - id: MANUAL
+        tcodes: [F-53, F-58]
+        all_of:
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+          - object: F_BKPF_KOA
+            fields: {ACTVT: ["01"], KOART: ["K"]}
+
+  - id: FN_FACT_PROV
+    title: Registrar facturas de proveedores
+    process: Finanzas / Compras
+    org_fields: [BUKRS, WERKS]
+    actions:
+      - id: MIRO
+        tcodes: [MIRO]
+        all_of:
+          - object: M_RECH_WRK
+            fields: {ACTVT: ["01"], WERKS: {mode: present}}
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+      - id: FB60
+        tcodes: [FB60]
+        all_of:
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+          - object: F_BKPF_KOA
+            fields: {ACTVT: ["01"], KOART: ["K"]}
+
+  # ---------------------------------------------------------------- Compras
+  - id: FN_PO_CREAR
+    title: Crear o modificar pedidos de compra
+    process: Compras
+    org_fields: [EKORG]
+    actions:
+      - id: ME21N
+        tcodes: [ME21N, ME22N, ME21, ME22, ME25, ME59N]
+        all_of:
+          - object: M_BEST_BSA
+            fields: {ACTVT: ["01", "02"]}
+          - object: M_BEST_EKO
+            fields: {ACTVT: ["01", "02"], EKORG: {mode: present}}
+
+  - id: FN_PO_LIBERAR
+    title: Liberar (aprobar) pedidos de compra
+    process: Compras
+    actions:
+      - id: ME29N
+        tcodes: [ME28, ME29N]
+        description: "M_EINK_FRG también protege la liberación de solicitudes; FRGGR/FRGCO distinguen estrategias."
+        all_of:
+          - object: M_EINK_FRG
+            fields: {FRGCO: {mode: present}}
+
+  - id: FN_SOLPED_CREAR
+    title: Crear solicitudes de pedido
+    process: Compras
+    actions:
+      - id: ME51N
+        tcodes: [ME51N, ME52N]
+        all_of:
+          - object: M_BANF_BSA
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_SOLPED_LIBERAR
+    title: Liberar solicitudes de pedido
+    process: Compras
+    actions:
+      - id: ME54N
+        tcodes: [ME54N, ME55]
+        all_of:
+          - object: M_EINK_FRG
+            fields: {FRGCO: {mode: present}}
+
+  # ---------------------------------------------------------------- Materiales
+  - id: FN_MOV_MERC
+    title: Contabilizar movimientos de mercancías
+    process: Logística
+    org_fields: [WERKS]
+    actions:
+      - id: MIGO
+        tcodes: [MIGO]
+        all_of:
+          - object: M_MSEG_BWA
+            fields: {ACTVT: ["01"], BWART: {mode: present}}
+
+  - id: FN_INV_DIF
+    title: Contabilizar diferencias de inventario
+    process: Logística
+    org_fields: [WERKS]
+    confidence: baja
+    verify: "Objeto supuesto M_ISEG_WDB; confirmar con SU24 de MI07."
+    actions:
+      - id: MI07
+        tcodes: [MI07]
+        description: "Objeto a validar con SU24 en su release (chequeos de MI07)."
+        all_of:
+          - object: M_ISEG_WDB
+            fields: {WERKS: {mode: present}}
+
+  # ---------------------------------------------------------------- Seguridad SAP
+  - id: FN_USR_CREAR
+    title: Crear usuarios
+    process: Seguridad SAP
+    actions:
+      - id: SU01
+        tcodes: [SU01, SU10]
+        all_of:
+          - object: S_USER_GRP
+            fields: {ACTVT: ["01"]}
+      - id: OBJETOS
+        all_of:
+          - object: S_USER_GRP
+            fields: {ACTVT: ["01"]}
+
+  - id: FN_ROL_MANT
+    title: Mantener roles y autorizaciones
+    process: Seguridad SAP
+    actions:
+      - id: PFCG
+        tcodes: [PFCG]
+        all_of:
+          - object: S_USER_AGR
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_ROL_ASIGNAR
+    title: Asignar roles a usuarios
+    process: Seguridad SAP
+    actions:
+      - id: SU01
+        tcodes: [SU01, SU10, PFCG]
+        all_of:
+          - object: S_USER_GRP
+            fields: {ACTVT: ["02"]}
+          - object: S_USER_AGR
+            fields: {ACTVT: ["22"]}
+      - id: OBJETOS
+        description: Vía BAPI/RFC (p. ej. herramientas IdM) sin transacción.
+        all_of:
+          - object: S_USER_GRP
+            fields: {ACTVT: ["02"]}
+          - object: S_USER_AGR
+            fields: {ACTVT: ["22"]}
+
+  - id: FN_AUDITLOG_ADMIN
+    title: Administrar el Security Audit Log
+    process: Seguridad SAP
+    actions:
+      - id: SM18
+        tcodes: [SM18, SM19, RSAU_CONFIG, RSAU_ADMIN]
+        all_of:
+          - object: S_ADMI_FCD
+            fields: {S_ADMI_FCD: ["AUDA"]}
+
+  # ---------------------------------------------------------------- Administración técnica
+  - id: FN_DESARROLLO
+    title: Crear o modificar programas ABAP
+    process: Gestión de cambios
+    actions:
+      - id: SE80
+        tcodes: [SE38, SE80, SE24, SE37]
+        all_of:
+          - object: S_DEVELOP
+            fields: {ACTVT: ["01", "02"], OBJTYPE: ["PROG", "CLAS", "FUGR"]}
+
+  - id: FN_TRANSP_IMPORT
+    title: Importar transportes
+    process: Gestión de cambios
+    actions:
+      - id: STMS
+        tcodes: [STMS]
+        all_of:
+          - object: S_CTS_ADMI
+            fields: {CTS_ADMFCT: ["IMPA", "IMPS"]}
+
+  # ================================================================ ECC: Compras a pagos (P2P)
+  - id: FN_GR
+    title: Registrar entradas de mercancías para pedidos
+    process: Compras / Logística
+    org_fields: [WERKS]
+    confidence: alta
+    actions:
+      - id: MIGO
+        tcodes: [MIGO, MIGO_GR, MB01]
+        all_of:
+          - object: M_MSEG_BWE
+            fields: {ACTVT: ["01"]}
+
+  - id: FN_FACT_LIBERAR
+    title: Liberar facturas bloqueadas para pago
+    process: Finanzas / Compras
+    confidence: media
+    verify: "Confirmar con SU24 que MRBR verifica M_RECH_SPG en su release."
+    actions:
+      - id: MRBR
+        tcodes: [MRBR]
+        all_of:
+          - object: M_RECH_SPG
+            fields: {ACTVT: ["02"]}
+
+  - id: FN_CONTRATO
+    title: Crear o modificar contratos marco de compra
+    process: Compras
+    confidence: media
+    verify: "Confirmar objeto de contratos (M_RAHM_BSA) con SU24 de ME31K."
+    actions:
+      - id: ME31K
+        tcodes: [ME31K, ME32K]
+        all_of:
+          - object: M_RAHM_BSA
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_INFOREC
+    title: Mantener registros info y condiciones de compra
+    process: Compras
+    org_fields: [EKORG]
+    confidence: media
+    actions:
+      - id: ME11
+        tcodes: [ME11, ME12]
+        all_of:
+          - object: M_EINF_EKO
+            fields: {ACTVT: ["01", "02"]}
+
+  # ================================================================ ECC: Ventas a cobros (O2C)
+  - id: FN_CLIENTE_MANT
+    title: Mantener datos maestros de clientes
+    process: Ventas / Finanzas
+    confidence: alta
+    actions:
+      - id: XD02
+        tcodes: [XD01, XD02, FD01, FD02, VD01, VD02]
+        all_of:
+          - object: F_KNA1_APP
+            fields: {ACTVT: ["01", "02"]}
+      - id: BP
+        description: "S/4HANA (y ECC con BP): el cliente se mantiene como interlocutor comercial con rol de cliente."
+        tcodes: [BP]
+        all_of:
+          - object: B_BUPA_RLT
+            fields: {ACTVT: ["01", "02"], RELTYP: ["FLCU00", "FLCU01"]}
+          - object: F_KNA1_APP
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_COBROS
+    title: Registrar cobros de clientes
+    process: Finanzas
+    org_fields: [BUKRS]
+    confidence: alta
+    actions:
+      - id: F-28
+        tcodes: [F-28, F-26, FB05]
+        all_of:
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+          - object: F_BKPF_KOA
+            fields: {ACTVT: ["01"], KOART: ["D"]}
+
+  - id: FN_NC_CLIENTE
+    title: Registrar notas de crédito a clientes
+    process: Finanzas
+    org_fields: [BUKRS]
+    confidence: alta
+    actions:
+      - id: FB75
+        tcodes: [FB75, F-27]
+        all_of:
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+          - object: F_BKPF_KOA
+            fields: {ACTVT: ["01"], KOART: ["D"]}
+
+  - id: FN_PEDIDO_VENTA
+    title: Crear o modificar pedidos de venta
+    process: Ventas
+    org_fields: [VKORG]
+    confidence: alta
+    actions:
+      - id: VA01
+        tcodes: [VA01, VA02]
+        all_of:
+          - object: V_VBAK_AAT
+            fields: {ACTVT: ["01", "02"]}
+          - object: V_VBAK_VKO
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_FACTURAR
+    title: Crear facturas de venta
+    process: Ventas
+    org_fields: [VKORG]
+    confidence: alta
+    actions:
+      - id: VF01
+        tcodes: [VF01, VF04]
+        all_of:
+          - object: V_VBRK_FKA
+            fields: {ACTVT: ["01"]}
+          - object: V_VBRK_VKO
+            fields: {ACTVT: ["01"]}
+
+  - id: FN_LIMITE_CREDITO
+    title: Modificar límites de crédito de clientes
+    process: Ventas / Finanzas
+    confidence: media
+    verify: "Confirmar con SU24 de FD32 el objeto de gestión de crédito (F_KNKA_KKB)."
+    actions:
+      - id: FD32
+        tcodes: [FD32]
+        all_of:
+          - object: F_KNKA_KKB
+            fields: {ACTVT: ["02"]}
+
+  - id: FN_LIBERAR_CREDITO
+    title: Liberar documentos bloqueados por crédito
+    process: Ventas / Finanzas
+    confidence: baja
+    verify: "Objeto supuesto V_KNKK_FRE; confirmar con SU24 de VKM1/VKM3."
+    actions:
+      - id: VKM1
+        tcodes: [VKM1, VKM3, VKM4]
+        all_of:
+          - object: V_KNKK_FRE
+
+  - id: FN_PRECIOS_VENTA
+    title: Mantener condiciones de precio de venta
+    process: Ventas
+    confidence: media
+    verify: "Confirmar con SU24 de VK11 el objeto de condiciones (V_KONH_VKO)."
+    actions:
+      - id: VK11
+        tcodes: [VK11, VK12]
+        all_of:
+          - object: V_KONH_VKO
+            fields: {ACTVT: ["01", "02"]}
+
+  # ================================================================ ECC: Contabilidad general y materiales
+  - id: FN_CTA_MAYOR_MANT
+    title: Mantener cuentas de mayor
+    process: Contabilidad
+    confidence: alta
+    actions:
+      - id: FS00
+        tcodes: [FS00, FS01, FS02]
+        all_of:
+          - object: F_SKA1_BUK
+            fields: {ACTVT: ["01", "02"]}
+
+  - id: FN_ASIENTO_MAYOR
+    title: Contabilizar asientos de mayor
+    process: Contabilidad
+    org_fields: [BUKRS]
+    confidence: alta
+    actions:
+      - id: FB50
+        tcodes: [FB50, F-02]
+        all_of:
+          - object: F_BKPF_BUK
+            fields: {ACTVT: ["01"], BUKRS: {mode: present}}
+          - object: F_BKPF_KOA
+            fields: {ACTVT: ["01"], KOART: ["S"]}
+
+  - id: FN_MATERIAL_MANT
+    title: Crear o modificar maestros de materiales
+    process: Logística
+    confidence: alta
+    actions:
+      - id: MM02
+        tcodes: [MM01, MM02]
+        all_of:
+          - object: M_MATE_STA
+            fields: {ACTVT: ["01", "02"]}
+
+risks:
+  - id: SOD-FI-001
+    title: Mantener datos bancarios de proveedores y ejecutar pagos
+    functions: [FN_PROV_MANT, FN_PAGOS]
+    severity: critico
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Finanzas
+    description: Una misma persona podría cambiar la cuenta bancaria de un proveedor y procesar un pago hacia ella.
+    recommendation: Separar el mantenimiento de datos maestros de la ejecución de pagos; activar campos sensibles con doble control (FK08/FK09, confirmación de cambios).
+    mitigation_hint: Revisión independiente de cambios de datos bancarios (reporte de cambios de maestros) antes de cada corrida de pagos.
+
+  - id: SOD-FI-002
+    title: Registrar facturas de proveedores y ejecutar pagos
+    functions: [FN_FACT_PROV, FN_PAGOS]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Finanzas
+    compare_org_fields: [BUKRS]
+    description: Permite registrar una factura ficticia y pagarla sin intervención de un tercero.
+    recommendation: Separar contabilización de facturas y ejecución de pagos por persona.
+    mitigation_hint: Revisión de la propuesta de pagos por un responsable independiente.
+
+  - id: SOD-FI-003
+    title: Mantener proveedores y registrar facturas
+    functions: [FN_PROV_MANT, FN_FACT_PROV]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Finanzas
+    description: Permite crear un proveedor ficticio y registrarle facturas.
+    recommendation: Separar el mantenimiento de maestros del registro de facturas.
+
+  - id: SOD-MM-001
+    title: Crear pedidos de compra y liberarlos
+    functions: [FN_PO_CREAR, FN_PO_LIBERAR]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Una misma persona podría crear y aprobar sus propios pedidos.
+    recommendation: Separar creación y liberación; verificar estrategias de liberación (FRGGR/FRGCO).
+
+  - id: SOD-MM-002
+    title: Crear solicitudes de pedido y liberarlas
+    functions: [FN_SOLPED_CREAR, FN_SOLPED_LIBERAR]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite solicitar y aprobar las propias necesidades de compra.
+    recommendation: Separar creación y liberación de solicitudes.
+
+  - id: SOD-MM-003
+    title: Mantener proveedores y crear pedidos
+    functions: [FN_PROV_MANT, FN_PO_CREAR]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite dar de alta un proveedor y emitirle pedidos.
+    recommendation: Separar gestión de proveedores de compras operativas.
+
+  - id: SOD-MM-004
+    title: Contabilizar movimientos de mercancías y diferencias de inventario
+    functions: [FN_MOV_MERC, FN_INV_DIF]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Logística
+    compare_org_fields: [WERKS]
+    description: Permite registrar salidas de stock y luego regularizar las diferencias de inventario.
+    recommendation: Separar movimientos de mercancía de la contabilización de diferencias.
+
+  - id: SOD-SEG-001
+    title: Mantener roles y asignarlos a usuarios
+    functions: [FN_ROL_MANT, FN_ROL_ASIGNAR]
+    severity: critico
+    by_environment: {QA: alto, DEV: medio}
+    status: ejemplo
+    process: Seguridad SAP
+    description: Permite crear un rol con privilegios arbitrarios y asignárselo (incluso a sí mismo).
+    recommendation: Separar diseño de roles (sistemas de desarrollo) de la asignación en producción; usar flujo de aprobación (IdM/GRC).
+
+  - id: SOD-SEG-002
+    title: Crear usuarios y mantener roles
+    functions: [FN_USR_CREAR, FN_ROL_MANT]
+    severity: alto
+    by_environment: {DEV: bajo}
+    status: ejemplo
+    process: Seguridad SAP
+    description: Permite crear identidades y definir sus privilegios sin control independiente.
+    recommendation: Separar administración de usuarios y de roles.
+
+  - id: SOD-SEG-003
+    title: Administrar autorizaciones y el registro de auditoría
+    functions: [FN_ROL_MANT, FN_AUDITLOG_ADMIN]
+    severity: critico
+    by_environment: {QA: alto, DEV: medio}
+    status: ejemplo
+    process: Seguridad SAP
+    description: Quien modifica autorizaciones podría además alterar o borrar la evidencia de auditoría.
+    recommendation: Asignar la administración del Security Audit Log a un equipo independiente.
+
+  - id: SOD-TEC-001
+    title: Desarrollar programas e importarlos
+    functions: [FN_DESARROLLO, FN_TRANSP_IMPORT]
+    severity: critico
+    by_environment: {DEV: bajo}
+    status: ejemplo
+    process: Gestión de cambios
+    description: Permite introducir código en el sistema sin control de cambios independiente.
+    recommendation: Separar desarrollo de la importación de transportes (gestión de cambios).
+
+  # ================================================================ ECC: Compras a pagos
+  - id: SOD-P2P-001
+    title: Crear pedidos de compra y registrar su entrada de mercancías
+    functions: [FN_PO_CREAR, FN_GR]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite crear un pedido y confirmar la recepción de bienes que nunca llegaron.
+    recommendation: Separar compras de recepción en almacén.
+    mitigation_hint: Revisión periódica de entradas registradas por compradores.
+
+  - id: SOD-P2P-002
+    title: Crear pedidos de compra y registrar facturas de proveedor
+    functions: [FN_PO_CREAR, FN_FACT_PROV]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite generar el pedido y la factura que lo respalda, eliminando el control de tres vías independiente.
+    recommendation: Separar compras de verificación de facturas.
+
+  - id: SOD-P2P-003
+    title: Registrar entradas de mercancías y facturas de proveedor
+    functions: [FN_GR, FN_FACT_PROV]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    compare_org_fields: [WERKS]
+    description: Una misma persona controla dos de las tres pruebas del control de tres vías.
+    recommendation: Separar recepción de mercancías de verificación de facturas.
+
+  - id: SOD-P2P-004
+    title: Registrar facturas de proveedor y liberar facturas bloqueadas
+    functions: [FN_FACT_PROV, FN_FACT_LIBERAR]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Finanzas
+    description: Permite registrar una factura con diferencias y liberarla para pago sin revisión independiente.
+    recommendation: Asignar la liberación de facturas bloqueadas a un responsable distinto.
+
+  - id: SOD-P2P-005
+    title: Mantener condiciones de compra y crear pedidos
+    functions: [FN_INFOREC, FN_PO_CREAR]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite fijar precios favorables a un proveedor y emitirle pedidos.
+    recommendation: Separar el mantenimiento de condiciones de la compra operativa.
+
+  - id: SOD-P2P-006
+    title: Mantener proveedores y crear contratos marco
+    functions: [FN_PROV_MANT, FN_CONTRATO]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras
+    description: Permite crear un proveedor y comprometer compras de largo plazo con él.
+    recommendation: Separar gestión de proveedores de contratación.
+
+  - id: SOD-P2P-007
+    title: Crear pedidos de compra y ejecutar pagos
+    functions: [FN_PO_CREAR, FN_PAGOS]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Compras / Finanzas
+    description: Permite iniciar una compra y pagarla.
+    recommendation: Separar compras de tesorería.
+
+  # ================================================================ ECC: Ventas a cobros
+  - id: SOD-O2C-001
+    title: Mantener clientes y registrar cobros
+    functions: [FN_CLIENTE_MANT, FN_COBROS]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Ventas / Finanzas
+    description: Permite alterar datos de clientes y aplicar cobros, facilitando ocultar desvíos de fondos.
+    recommendation: Separar el mantenimiento de clientes de la aplicación de cobros.
+
+  - id: SOD-O2C-002
+    title: Modificar límites de crédito y crear pedidos de venta
+    functions: [FN_LIMITE_CREDITO, FN_PEDIDO_VENTA]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Ventas
+    description: Permite ampliar el crédito de un cliente y venderle por encima del riesgo aprobado.
+    recommendation: Asignar la gestión de crédito a finanzas, separada de ventas.
+
+  - id: SOD-O2C-003
+    title: Crear pedidos de venta y liberar bloqueos de crédito
+    functions: [FN_PEDIDO_VENTA, FN_LIBERAR_CREDITO]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Ventas
+    description: Permite vender a clientes bloqueados por riesgo crediticio sin aprobación independiente.
+    recommendation: Separar ventas de la liberación de crédito.
+
+  - id: SOD-O2C-004
+    title: Mantener precios de venta y facturar
+    functions: [FN_PRECIOS_VENTA, FN_FACTURAR]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Ventas
+    description: Permite modificar precios y emitir facturas con esos precios.
+    recommendation: Separar el mantenimiento de precios de la facturación.
+
+  - id: SOD-O2C-005
+    title: Registrar notas de crédito a clientes y registrar cobros
+    functions: [FN_NC_CLIENTE, FN_COBROS]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Finanzas
+    description: Permite ocultar un cobro desviado mediante una nota de crédito.
+    recommendation: Requerir aprobación independiente de notas de crédito.
+
+  - id: SOD-O2C-006
+    title: Mantener clientes y registrar notas de crédito
+    functions: [FN_CLIENTE_MANT, FN_NC_CLIENTE]
+    severity: alto
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Ventas / Finanzas
+    description: Permite crear un cliente y emitirle notas de crédito.
+    recommendation: Separar el mantenimiento de clientes de las notas de crédito.
+
+  # ================================================================ ECC: Contabilidad y materiales
+  - id: SOD-R2R-001
+    title: Mantener cuentas de mayor y contabilizar asientos
+    functions: [FN_CTA_MAYOR_MANT, FN_ASIENTO_MAYOR]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Contabilidad
+    description: Permite crear una cuenta y registrar asientos en ella sin revisión.
+    recommendation: Separar el mantenimiento del plan de cuentas de las contabilizaciones.
+
+  - id: SOD-INV-001
+    title: Mantener materiales y contabilizar movimientos de mercancías
+    functions: [FN_MATERIAL_MANT, FN_MOV_MERC]
+    severity: medio
+    by_environment: {QA: no_aplica, DEV: no_aplica}
+    status: ejemplo
+    process: Logística
+    description: Permite modificar datos del material (p. ej. unidades o valoración) y registrar movimientos.
+    recommendation: Separar el mantenimiento de maestros de la operación de almacén.

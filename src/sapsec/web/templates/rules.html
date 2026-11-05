@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, rstatus, filter %}
+{% macro env_sev(r, env) -%}{%- set x = r.severity_in(env) -%}{% if x %}{{ sev(x) }}{% else %}<span class="muted small">no aplica</span>{% endif %}{%- endmacro %}
+{% block title %}Administración de reglas{% endblock %}
+{% block content %}
+<h1>Administración de reglas</h1>
+<p class="subtitle">Reglas versionadas en <code>{{ rules_dir }}</code> · archivos {{ rules.files|join(', ') }} · hash <code>{{ rules.hash[:16] }}</code></p>
+<div class="warnbox">Estados: <b>ejemplo</b> (inicial, sin validar) → <b>validada</b> (seguridad SAP) → <b>aprobada</b> (dueño del riesgo). Las reglas de ejemplo NO son la matriz oficial de SAP GRC. Los cambios se realizan en los YAML bajo control de versiones (Git) y cada análisis registra el hash utilizado.</div>
+<p>Versiones: {% for k, v in rules.versions.items() %}<span class="pill">{{ k }} {{ v }}</span> {% endfor %}</p>
+<div class="note"><b>Controles distintos según el ambiente.</b> Cada regla tiene una gravedad para producción y puede tener otra
+(o no aplicar) en calidad y desarrollo: por ejemplo, desarrollar o liberar transportes es normal en DEV, pero crítico en PRD;
+los conflictos de procesos de negocio (pagos, compras, ventas) solo se evalúan en PRD. Se ajusta con <code>by_environment</code>
+en los YAML. {% if current_env %}El sistema seleccionado es <b>{{ current_env }}</b>.{% endif %}</div>
+<h2>Autorizaciones críticas ({{ rules.critical|length }})</h2>
+{{ filter("tcr") }}
+<table class="tbl compact sortable" id="tcr"><tr><th>ID</th><th>Título</th><th>Tipo</th><th>PRD</th><th>QA</th><th>DEV</th><th>Estado</th><th>Condición</th></tr>
+{% for r in rules.critical %}<tr><td class="nowrap">{{ r.id }}</td><td>{{ r.title }}</td><td>{{ r.type }}</td><td>{{ env_sev(r, 'PRD') }}</td><td>{{ env_sev(r, 'QA') }}</td><td>{{ env_sev(r, 'DEV') }}</td><td>{{ rstatus(r.status.value) }}</td>
+<td class="mono">{% for q in r.requirements %}{{ q.describe() }}<br>{% endfor %}{{ r.profiles|join(', ') }}{{ r.user_conditions or '' }}</td></tr>{% endfor %}
+</table>
+<h2>Funciones SoD ({{ rules.functions|length }})</h2>
+<table class="tbl compact"><tr><th>ID</th><th>Función</th><th>Proceso</th><th>Acciones</th></tr>
+{% for f in rules.functions.values() %}<tr><td>{{ f.id }}</td><td>{{ f.title }}</td><td>{{ f.process }}</td><td class="mono">{% for a in f.actions %}{{ a.id }}: {{ a.tcodes|join('/') or '(sin tcode)' }} → {% for q in a.requirements %}{{ q.describe() }}{{ ' + ' if not loop.last }}{% endfor %}<br>{% endfor %}</td></tr>{% endfor %}
+</table>
+<h2>Verificación de las reglas contra el sistema del snapshot actual</h2>
+{% if checks %}
+<p class="note">Cada acción se contrasta con su propio SAP: existencia de transacciones (TSTC) y objetos (TOBJ), y si la SU24 del sistema
+(USOBX_C) confirma que la transacción verifica el objeto. Las reglas «Confirmada por SU24» tienen respaldo en su sistema;
+el resto debe probarse con una traza (STAUTHTRACE) antes de aprobarlas.</p>
+<p>{% for k, v in check_summary.items() %}<span class="pill">{{ k }}: {{ v }}</span> {% endfor %}</p>
+{{ filter("tchk") }}
+<table class="tbl compact sortable" id="tchk"><tr><th>Función</th><th>Acción</th><th>Resultado</th><th>Confianza</th><th>Tcodes inexistentes</th><th>Objetos inexistentes</th><th>SU24 confirma</th><th>SU24 no confirma</th><th>A verificar</th></tr>
+{% for c in checks %}<tr><td>{{ c.function_title }}</td><td>{{ c.action_id }}</td><td>{{ c.label }}</td><td>{{ c.confidence }}</td>
+<td>{{ c.tcodes_missing|join(', ') }}</td><td>{{ c.objects_missing|join(', ') }}</td><td class="mono">{{ c.su24_confirmed|join(' ') }}</td>
+<td class="mono">{{ c.su24_unconfirmed|join(' ') }}</td><td>{{ c.verify }}</td></tr>{% endfor %}
+</table>
+{% else %}<p class="muted">Seleccione un snapshot para verificar las reglas contra un sistema.</p>{% endif %}
+<h2>Riesgos SoD ({{ rules.risks|length }})</h2>
+<table class="tbl compact sortable"><tr><th>ID</th><th>Riesgo</th><th>Funciones</th><th>PRD</th><th>QA</th><th>DEV</th><th>Estado</th><th>Compara org.</th><th>Usuarios afectados</th></tr>
+{% for r in rules.risks %}<tr><td class="nowrap">{{ r.id }}</td><td>{{ r.title }}</td><td>{{ r.functions|join(' × ') }}</td><td>{{ env_sev(r, 'PRD') }}</td><td>{{ env_sev(r, 'QA') }}</td><td>{{ env_sev(r, 'DEV') }}</td><td>{{ rstatus(r.status.value) }}</td><td>{{ r.compare_org_fields|join(', ') }}</td>
+<td class="right">{% if sod_hits.get(r.id) %}<a href="/sod">{{ sod_hits[r.id] }}</a>{% else %}0{% endif %}</td></tr>{% endfor %}
+</table>
+<h2>Puntuación</h2>
+<pre class="mono card">{{ rules.scoring|tojson(indent=2) }}</pre>
+{% endblock %}

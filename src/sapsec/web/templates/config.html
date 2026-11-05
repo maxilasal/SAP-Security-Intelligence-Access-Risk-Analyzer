@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Configuración y acceso{% endblock %}
+{% block content %}
+<h1>Configuración y acceso</h1>
+<p class="subtitle">Cómo entran otras personas, quién puede entrar y con qué parámetros trabaja la aplicación.</p>
+
+<h2 id="acceso">Acceso desde otras PC</h2>
+<div class="grid g2">
+<div class="card">
+  {% if net.mode == 'red' %}
+  <p><span class="status-dot on"></span><b>Abierta a la red de la empresa</b>{% if net.https %} · con HTTPS{% else %} · <span class="chip bad">SIN cifrar (solo pruebas)</span>{% endif %}</p>
+  <p class="small muted">Las otras PC entran con:</p>
+  {% for u in net.urls[:3] %}<div><span class="urlbox">{{ u }}</span></div>{% endfor %}
+  {% if net.https and net.ca %}<p class="small">La primera vez, en cada PC: <a href="/certificado">instalar el certificado</a> (evita la advertencia del navegador).</p>{% endif %}
+  {% else %}
+  <p><span class="status-dot off"></span><b>Solo esta PC</b> puede entrar (la aplicación escucha en 127.0.0.1).</p>
+  <p class="small">Para abrirla a otras PC de la empresa:</p>
+  <ol class="steps-list small">
+    <li>En esta PC, <b>una sola vez</b> y como administrador: <code>powershell -ExecutionPolicy Bypass -File scripts\habilitar_acceso_red.ps1</code> (abre el puerto {{ net.network_port }} solo para la red de la empresa).</li>
+    <li>Cerrar esta ventana de la aplicación y abrirla en modo red: <code>powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red</code></li>
+    <li>En las otras PC: abrir la dirección que muestra la ventana (ej. <code>https://NOMBRE-DE-ESTA-PC:{{ net.network_port }}</code>) e instalar el certificado una vez.</li>
+    <li>Opcional: que arranque sola con Windows: <code>scripts\iniciar_con_windows.ps1</code></li>
+  </ol>
+  {% endif %}
+</div>
+<div class="card">
+  <h3>Desde fuera de la oficina</h3>
+  <p><b>Recomendación:</b> conectarse primero a la <b>VPN de la empresa</b> y usar la misma dirección. No abra el puerto en el router ni en el firewall de internet: la aplicación tiene datos sensibles de seguridad de SAP.</p>
+  <p class="small muted">Aunque alguien abriera un puerto por error, la aplicación rechaza las direcciones de internet. Solo entra desde: {{ net.allowed|join(', ') }} y esta PC.
+  Si TI necesita publicarla sin VPN, que sea detrás de un proxy con inicio de sesión corporativo y doble factor.</p>
+  <p class="small muted">Su dirección actual: <code>{{ client_ip }}</code></p>
+</div>
+</div>
+
+{% if user.can('usuarios_app') %}
+<h2 id="usuarios">Usuarios de la aplicación</h2>
+<p class="muted small">Cada persona entra con su propio usuario (todo queda en el registro de auditoría). Tras {{ settings.security.max_failed_logins }} intentos fallidos el usuario se bloquea {% if settings.security.lockout_minutes %}{{ settings.security.lockout_minutes }} minutos{% else %}hasta que un administrador lo desbloquee{% endif %}.</p>
+<div class="tbl-wrap"><table class="tbl user-actions">
+<tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último ingreso</th><th>Acciones</th></tr>
+{% for u in app_users %}
+<tr><td><b>{{ u.username }}</b>{% if u.username == user.username %} <span class="chip">usted</span>{% endif %}</td>
+<td>{% if u.username != user.username %}<form method="post" action="/configuracion/usuarios/{{ u.id }}/rol"><input type="hidden" name="csrf" value="{{ csrf }}">
+  <select name="role" class="autosubmit">{% for r in roles %}<option {% if r == u.role %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></form>{% else %}{{ u.role }}{% endif %}</td>
+<td>{% if not u.active %}<span class="chip">desactivado</span>{% elif u.id in locked %}<span class="chip bad">bloqueado ({{ u.failed_logins }} intentos)</span>{% else %}<span class="chip good">activo</span>{% endif %}</td>
+<td class="small">{{ u.last_login_at.strftime('%d/%m/%Y %H:%M') if u.last_login_at else 'nunca' }}</td>
+<td>
+  {% if u.id in locked or u.failed_logins %}<form method="post" action="/configuracion/usuarios/{{ u.id }}/desbloquear"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small">Desbloquear</button></form>{% endif %}
+  <form method="post" action="/configuracion/usuarios/{{ u.id }}/contrasena"><input type="hidden" name="csrf" value="{{ csrf }}"><input name="password" type="password" minlength="12" required placeholder="Contraseña nueva" autocomplete="new-password"><button class="btn ghost small">Restablecer</button></form>
+  {% if u.username != user.username %}
+  {% if u.active %}<form method="post" action="/configuracion/usuarios/{{ u.id }}/desactivar" data-confirm="¿Desactivar a {{ u.username }}? No podrá entrar."><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost danger small">Desactivar</button></form>
+  {% else %}<form method="post" action="/configuracion/usuarios/{{ u.id }}/activar"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small">Activar</button></form>{% endif %}
+  {% endif %}
+</td></tr>
+{% endfor %}
+</table></div>
+<form class="card form-grid" method="post" action="/configuracion/usuarios">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Usuario nuevo<input name="username" required autocomplete="off"></label>
+  <label>Contraseña (mín. 12)<input name="password" type="password" minlength="12" required autocomplete="new-password"></label>
+  <label>Rol<select name="role">{% for r in roles %}<option {% if r == 'consultor' %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+  <button class="btn">Crear usuario</button>
+</form>
+<table class="tbl compact"><tr><th>Rol</th><th>Puede</th></tr>
+<tr><td>consultor</td><td>ver, simular y descargar reportes (solo lectura): para quien solo consulta</td></tr>
+<tr><td>auditor</td><td>lo anterior + extraer, registrar decisiones sobre hallazgos y controles mitigantes</td></tr>
+<tr><td>administrador</td><td>todo, incluidas las conexiones SAP y los usuarios de la aplicación</td></tr></table>
+{% endif %}
+
+<h2>Parámetros</h2>
+<div class="card"><table class="tbl compact">
+  <tr><td>Base de datos</td><td>{{ db_url }}</td></tr>
+  <tr><td>Reglas</td><td>{{ settings.rules_dir }}</td></tr>
+  <tr><td>Idiomas de textos</td><td>{{ settings.languages|join(', ') }}</td></tr>
+  <tr><td>Retención de datos</td><td>{{ settings.data_retention_days }} días · se conservan {{ settings.snapshots_to_keep or 'todos los' }} snapshots por sistema</td></tr>
+  <tr><td>Inactividad</td><td>{{ settings.analysis.inactivity_days }} días</td></tr>
+  <tr><td>Umbral equivalencia SAP_ALL</td><td>{{ settings.analysis.sap_all_equivalence_threshold }}</td></tr>
+  <tr><td>Snapshot desactualizado tras</td><td>{{ settings.analysis.stale_snapshot_days }} días</td></tr>
+  <tr><td>Muestra de validación BAPI</td><td>{{ settings.analysis.validation_sample_size }} usuarios</td></tr>
+  <tr><td>Almacén de credenciales</td><td>{{ settings.security.credential_store }}</td></tr>
+  <tr><td>Envío a IA externa</td><td>{{ 'permitido' if settings.security.ai_external_allowed else 'DESHABILITADO' }}</td></tr>
+  <tr><td>Nombre completo de usuarios</td><td>{{ 'se extrae' if settings.include_user_fullname else 'no se extrae' }}</td></tr>
+  <tr><td>Redes permitidas</td><td>{{ settings.network.allowed_networks|join(', ') }} (y esta PC)</td></tr>
+  <tr><td>Puerto en modo red</td><td>{{ settings.network.port }}{% if settings.network.tls_cert_file %} · certificado de la empresa{% else %} · certificado propio (CA local){% endif %}</td></tr>
+</table><p class="muted small">Se cambian en <code>config/settings.yaml</code> (o variables <code>SAPSEC_*</code>) y se aplican al reiniciar la aplicación.</p></div>
+
+{% if user.can('conexiones') %}
+<h2>Empezar de cero</h2>
+<form class="card danger-zone" method="post" action="/configuracion/borrar-datos-sap"
+      data-confirm="Se borrarán TODOS los sistemas, conexiones, snapshots, hallazgos, simulaciones, controles mitigantes y contraseñas guardadas. ¿Continuar?">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <p><b>Borrar todos los datos SAP de esta aplicación.</b> Se conservan los usuarios de la aplicación y el registro de auditoría.
+  En SAP no se modifica nada.</p>
+  <div class="form-grid"><label>Escriba BORRAR para confirmar<input name="confirmar" autocomplete="off" required></label>
+  <button class="btn danger">Borrar todo</button></div>
+</form>
+{% endif %}
+{% endblock %}

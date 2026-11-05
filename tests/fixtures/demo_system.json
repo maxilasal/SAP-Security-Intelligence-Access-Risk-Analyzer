@@ -1,0 +1,6578 @@
+{
+ "_comment": "SISTEMA SAP FICTICIO PARA PRUEBAS. Ningún dato corresponde a un sistema real.",
+ "system": {
+  "RFCSYSID": "DMO",
+  "RFCDBSYS": "HDB",
+  "RFCSAPRL": "758",
+  "RFCHOST": "demo-host",
+  "RFCOPSYS": "Linux",
+  "RFCKERNRL": "793"
+ },
+ "missing_functions": [
+  "SUSR_GET_ADMIN_USER_LOGIN_INFO",
+  "Z_SECX_READ"
+ ],
+ "unauthorized_tables": [],
+ "tables": {
+  "USR02": [
+   {
+    "BNAME": "USUARIO_TEST",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261102",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Usuario de prueba",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "ADMIN_BASIS",
+    "USTYP": "A",
+    "CLASS": "SUPER",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261103",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Administrador Basis (ficticio)",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "ADMIN_EQUIV",
+    "USTYP": "A",
+    "CLASS": "SUPER",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261101",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Administrador con permisos amplios",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "SEG_ADMIN",
+    "USTYP": "A",
+    "CLASS": "SEGURIDAD",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261030",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Administrador de seguridad",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "COMPRADOR1",
+    "USTYP": "A",
+    "CLASS": "COMPRAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261103",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Comprador",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "DEV_USER",
+    "USTYP": "A",
+    "CLASS": "DESARROLLO",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261020",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Desarrollador",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "USUARIO_BLOQ",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "64",
+    "TRDAT": "20260115",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Usuario bloqueado",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "USUARIO_VENC",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261001",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Usuario con rol vencido",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "RFC_TECH",
+    "USTYP": "B",
+    "CLASS": "TECNICOS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261104",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "DDIC",
+    "USTYP": "A",
+    "CLASS": "SUPER",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20260601",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "SAP*",
+    "USTYP": "A",
+    "CLASS": "SUPER",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "64",
+    "TRDAT": "",
+    "LTIME": "",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "CONTADOR1",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261101",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Contador",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "INACTIVO1",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20250101",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Usuario inactivo",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "ALMACEN1",
+    "USTYP": "A",
+    "CLASS": "LOGISTICA",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261102",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Almacenero",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "REPORTE1",
+    "USTYP": "A",
+    "CLASS": "FINANZAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261102",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Usuario de reportes",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   },
+   {
+    "BNAME": "COMPRA_FIORI",
+    "USTYP": "A",
+    "CLASS": "COMPRAS",
+    "GLTGV": "20250101",
+    "GLTGB": "",
+    "UFLAG": "0",
+    "TRDAT": "20261103",
+    "LTIME": "080000",
+    "ERDAT": "20250101",
+    "ANAME": "SEG_ADMIN",
+    "_FULLNAME": "Compradora que usa Fiori",
+    "BCODE": "DEADBEEFDEADBEEF",
+    "PWDSALTEDHASH": "{x-issha, 1024}FICTICIO"
+   }
+  ],
+  "AGR_DEFINE": [
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_FI_REPORTE",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "PARENT_AGR": "Z_MM_PEDIDOS_PADRE",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   },
+   {
+    "AGR_NAME": "Z_SIN_USUARIOS",
+    "PARENT_AGR": "",
+    "CREATE_USR": "SEG_ADMIN",
+    "CREATE_DAT": "20250101",
+    "CHANGE_USR": "SEG_ADMIN",
+    "CHANGE_DAT": "20260301"
+   }
+  ],
+  "AGR_TEXTS": [
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "BC: administración total (amplia)"
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "BC: desarrollo ABAP"
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "BC: usuario técnico RFC amplio"
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "BC: gestión de transportes"
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: perfil desactualizado respecto de PFCG"
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: registro de facturas de acreedor"
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: rol de prueba sin perfil generado"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: ejecución de pagos"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: pagos manuales sociedad 2000"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: consulta de pagos"
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: mantenimiento de proveedores (BP)"
+   },
+   {
+    "AGR_NAME": "Z_FI_REPORTE",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "FI: reporte Z con chequeo de inicio"
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: movimientos de almacén"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: comprador (compuesto)"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: aprobador de compras"
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: consultas"
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: pedidos org 1000 (derivado)"
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: liberación de pedidos"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: creación de pedidos org. 1000"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: gestionar pedidos de compra (app Fiori)"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "MM: pedidos (rol padre)"
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "SEG: mantenimiento de roles"
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "SPRAS": "S",
+    "LINE": "00000",
+    "TEXT": "SEG: administración de usuarios"
+   }
+  ],
+  "AGR_FLAGS": [
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "FLAG_TYPE": "COLL_AGR",
+    "FLAG_VALUE": "X"
+   }
+  ],
+  "AGR_AGRS": [
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "CHILD_AGR": "Z_MM_PEDIDOS"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "CHILD_AGR": "Z_MM_LIBERADOR"
+   }
+  ],
+  "AGR_USERS": [
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "UNAME": "USUARIO_TEST",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "UNAME": "USUARIO_TEST",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "UNAME": "ADMIN_EQUIV",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "UNAME": "SEG_ADMIN",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "UNAME": "SEG_ADMIN",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRADOR_C",
+    "UNAME": "COMPRADOR1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "UNAME": "COMPRADOR1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": "X"
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "UNAME": "COMPRADOR1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": "X"
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "UNAME": "DEV_USER",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "UNAME": "DEV_USER",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "UNAME": "USUARIO_BLOQ",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "UNAME": "USUARIO_BLOQ",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "UNAME": "USUARIO_VENC",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "20260630",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "UNAME": "USUARIO_VENC",
+    "FROM_DAT": "20270101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "UNAME": "USUARIO_VENC",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "UNAME": "RFC_TECH",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "UNAME": "CONTADOR1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "UNAME": "CONTADOR1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "UNAME": "INACTIVO1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "UNAME": "ALMACEN1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "UNAME": "ALMACEN1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_REPORTE",
+    "UNAME": "REPORTE1",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "UNAME": "COMPRA_FIORI",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "UNAME": "COMPRA_FIORI",
+    "FROM_DAT": "20250101",
+    "TO_DAT": "99991231",
+    "EXCLUDE": "",
+    "CHANGE_DAT": "20250101",
+    "ORG_FLAG": "",
+    "COL_FLAG": ""
+   }
+  ],
+  "AGR_1016": [
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000001",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000002",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000003",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000004",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000005",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000006",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000008",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000009",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000010",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000011",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_FI_REPORTE",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000012",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000013",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000015",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000016",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000017",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000018",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000019",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000020",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000021",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000022",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000023",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   },
+   {
+    "AGR_NAME": "Z_SIN_USUARIOS",
+    "COUNTER": "000001",
+    "PROFILE": "T-DM000024",
+    "VARIANT": "",
+    "GENERATED": "X",
+    "PSTATE": "A"
+   }
+  ],
+  "AGR_1251": [
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000101",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000002",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00000102",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000003",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00000102",
+    "VARIANT": "",
+    "FIELD": "CLASS",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000004",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00000103",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000005",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00000103",
+    "VARIANT": "",
+    "FIELD": "ACT_GROUP",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000006",
+    "OBJECT": "S_USER_PRO",
+    "AUTH": "T-DM00000104",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000007",
+    "OBJECT": "S_USER_PRO",
+    "AUTH": "T-DM00000104",
+    "VARIANT": "",
+    "FIELD": "PROFILE",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000008",
+    "OBJECT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000009",
+    "OBJECT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "VARIANT": "",
+    "FIELD": "OBJECT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000010",
+    "OBJECT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "VARIANT": "",
+    "FIELD": "AUTH",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000011",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000012",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "VARIANT": "",
+    "FIELD": "DEVCLASS",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000013",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "VARIANT": "",
+    "FIELD": "OBJTYPE",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000014",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "VARIANT": "",
+    "FIELD": "OBJNAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000015",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "VARIANT": "",
+    "FIELD": "P_GROUP",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000016",
+    "OBJECT": "S_TABU_DIS",
+    "AUTH": "T-DM00000107",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000017",
+    "OBJECT": "S_TABU_DIS",
+    "AUTH": "T-DM00000107",
+    "VARIANT": "",
+    "FIELD": "DICBERCLS",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000018",
+    "OBJECT": "S_TABU_NAM",
+    "AUTH": "T-DM00000108",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000019",
+    "OBJECT": "S_TABU_NAM",
+    "AUTH": "T-DM00000108",
+    "VARIANT": "",
+    "FIELD": "TABLE",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000020",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000021",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "VARIANT": "",
+    "FIELD": "RFC_NAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000022",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "VARIANT": "",
+    "FIELD": "RFC_TYPE",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000023",
+    "OBJECT": "S_PROGRAM",
+    "AUTH": "T-DM00000110",
+    "VARIANT": "",
+    "FIELD": "P_ACTION",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000024",
+    "OBJECT": "S_PROGRAM",
+    "AUTH": "T-DM00000110",
+    "VARIANT": "",
+    "FIELD": "P_GROUP",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000025",
+    "OBJECT": "S_ADMI_FCD",
+    "AUTH": "T-DM00000111",
+    "VARIANT": "",
+    "FIELD": "S_ADMI_FCD",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000026",
+    "OBJECT": "S_BTCH_ADM",
+    "AUTH": "T-DM00000112",
+    "VARIANT": "",
+    "FIELD": "BTCADMIN",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000027",
+    "OBJECT": "S_BTCH_NAM",
+    "AUTH": "T-DM00000113",
+    "VARIANT": "",
+    "FIELD": "BTCUNAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000028",
+    "OBJECT": "S_TRANSPRT",
+    "AUTH": "T-DM00000114",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000029",
+    "OBJECT": "S_TRANSPRT",
+    "AUTH": "T-DM00000114",
+    "VARIANT": "",
+    "FIELD": "TTYPE",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000030",
+    "OBJECT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000115",
+    "VARIANT": "",
+    "FIELD": "CTS_ADMFCT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000031",
+    "OBJECT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000032",
+    "OBJECT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "VARIANT": "",
+    "FIELD": "FILENAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_ADMIN_TOTAL",
+    "COUNTER": "000033",
+    "OBJECT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "VARIANT": "",
+    "FIELD": "PROGRAM",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000201",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SE38",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000201",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SE80",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000003",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000004",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000005",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000006",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "DEVCLASS",
+    "LOW": "Z*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000007",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "OBJTYPE",
+    "LOW": "PROG",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000008",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "OBJTYPE",
+    "LOW": "CLAS",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000009",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "OBJTYPE",
+    "LOW": "FUGR",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000010",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "OBJNAME",
+    "LOW": "Z*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_DESARROLLO",
+    "COUNTER": "000011",
+    "OBJECT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "VARIANT": "",
+    "FIELD": "P_GROUP",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000001",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "16",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000002",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "VARIANT": "",
+    "FIELD": "RFC_NAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000003",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "VARIANT": "",
+    "FIELD": "RFC_TYPE",
+    "LOW": "FUGR",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000004",
+    "OBJECT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "VARIANT": "",
+    "FIELD": "RFC_TYPE",
+    "LOW": "FUNC",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000005",
+    "OBJECT": "S_SERVICE",
+    "AUTH": "T-DM00000302",
+    "VARIANT": "",
+    "FIELD": "SRV_NAME",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_RFC_TOTAL",
+    "COUNTER": "000006",
+    "OBJECT": "S_SERVICE",
+    "AUTH": "T-DM00000302",
+    "VARIANT": "",
+    "FIELD": "SRV_TYPE",
+    "LOW": "HT",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000401",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "STMS",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "COUNTER": "000002",
+    "OBJECT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "VARIANT": "",
+    "FIELD": "CTS_ADMFCT",
+    "LOW": "IMPA",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "COUNTER": "000003",
+    "OBJECT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "VARIANT": "",
+    "FIELD": "CTS_ADMFCT",
+    "LOW": "IMPS",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_BC_TRANSPORTES",
+    "COUNTER": "000004",
+    "OBJECT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "VARIANT": "",
+    "FIELD": "CTS_ADMFCT",
+    "LOW": "TABL",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000501",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FK03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "COUNTER": "000002",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00000502",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_DESACTUALIZADO",
+    "COUNTER": "000003",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00000502",
+    "VARIANT": "",
+    "FIELD": "APPKZ",
+    "LOW": "F",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000601",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FB60",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000002",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000003",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000004",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000005",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000006",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000007",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000008",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_FACTURAS",
+    "COUNTER": "000009",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "VARIANT": "",
+    "FIELD": "KOART",
+    "LOW": "K",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000701",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FB60",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "COUNTER": "000002",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000702",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_NO_GENERADO",
+    "COUNTER": "000003",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000702",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000801",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "F110",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000801",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "F-53",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000003",
+    "OBJECT": "F_REGU_BUK",
+    "AUTH": "T-DM00000802",
+    "VARIANT": "",
+    "FIELD": "FBTCH",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000004",
+    "OBJECT": "F_REGU_BUK",
+    "AUTH": "T-DM00000802",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000005",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000006",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000007",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000008",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000009",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "COUNTER": "000010",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "VARIANT": "",
+    "FIELD": "KOART",
+    "LOW": "K",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00000901",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "F-53",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000002",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000902",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000003",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000902",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "2000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000004",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000903",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_2000",
+    "COUNTER": "000005",
+    "OBJECT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000903",
+    "VARIANT": "",
+    "FIELD": "KOART",
+    "LOW": "K",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001001",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "F110",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001001",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FK03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "COUNTER": "000003",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00001002",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "COUNTER": "000004",
+    "OBJECT": "F_BKPF_BUK",
+    "AUTH": "T-DM00001002",
+    "VARIANT": "",
+    "FIELD": "BUKRS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "BP",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FK02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000003",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FK03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000004",
+    "OBJECT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000005",
+    "OBJECT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000006",
+    "OBJECT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000007",
+    "OBJECT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "VARIANT": "",
+    "FIELD": "RELTYP",
+    "LOW": "FLVN00",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000008",
+    "OBJECT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "VARIANT": "",
+    "FIELD": "RELTYP",
+    "LOW": "FLVN01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000009",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000010",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000011",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "COUNTER": "000012",
+    "OBJECT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "VARIANT": "",
+    "FIELD": "APPKZ",
+    "LOW": "F",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_REPORTE",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001201",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ZFI_REP_PAGOS",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001301",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "MIGO",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001301",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "MI07",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000003",
+    "OBJECT": "M_MSEG_BWA",
+    "AUTH": "T-DM00001302",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000004",
+    "OBJECT": "M_MSEG_BWA",
+    "AUTH": "T-DM00001302",
+    "VARIANT": "",
+    "FIELD": "BWART",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000005",
+    "OBJECT": "M_ISEG_WDB",
+    "AUTH": "T-DM00001303",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_ALMACEN",
+    "COUNTER": "000006",
+    "OBJECT": "M_ISEG_WDB",
+    "AUTH": "T-DM00001303",
+    "VARIANT": "",
+    "FIELD": "WERKS",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME29N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME54N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000003",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME23N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000004",
+    "OBJECT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "VARIANT": "",
+    "FIELD": "FRGGR",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000005",
+    "OBJECT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "VARIANT": "",
+    "FIELD": "FRGCO",
+    "LOW": "A1",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_COMPRAS_APROBADOR",
+    "COUNTER": "000006",
+    "OBJECT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "VARIANT": "",
+    "FIELD": "FRGCO",
+    "LOW": "A2",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001601",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME23N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001601",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "FK03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "COUNTER": "000003",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001602",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_CONSULTA",
+    "COUNTER": "000004",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001602",
+    "VARIANT": "",
+    "FIELD": "BSART",
+    "LOW": "NB",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001701",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME21N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "COUNTER": "000002",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001702",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "COUNTER": "000003",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001702",
+    "VARIANT": "",
+    "FIELD": "EKORG",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001801",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME29N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001801",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME28",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "COUNTER": "000003",
+    "OBJECT": "M_EINK_FRG",
+    "AUTH": "T-DM00001802",
+    "VARIANT": "",
+    "FIELD": "FRGGR",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_LIBERADOR",
+    "COUNTER": "000004",
+    "OBJECT": "M_EINK_FRG",
+    "AUTH": "T-DM00001802",
+    "VARIANT": "",
+    "FIELD": "FRGCO",
+    "LOW": "A1",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME21N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME22N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000003",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME23N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000004",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000005",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000006",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000007",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "VARIANT": "",
+    "FIELD": "BSART",
+    "LOW": "NB",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000008",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000009",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000010",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS",
+    "COUNTER": "000011",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "VARIANT": "",
+    "FIELD": "EKORG",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000001",
+    "OBJECT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "VARIANT": "",
+    "FIELD": "SRV_NAME",
+    "LOW": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000002",
+    "OBJECT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "VARIANT": "",
+    "FIELD": "SRV_NAME",
+    "LOW": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000003",
+    "OBJECT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "VARIANT": "",
+    "FIELD": "SRV_TYPE",
+    "LOW": "HT",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000004",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000005",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000006",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000007",
+    "OBJECT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "VARIANT": "",
+    "FIELD": "BSART",
+    "LOW": "NB",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000008",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000009",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000010",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_FIORI",
+    "COUNTER": "000011",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "VARIANT": "",
+    "FIELD": "EKORG",
+    "LOW": "1000",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002101",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "ME21N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "COUNTER": "000002",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002102",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "COUNTER": "000003",
+    "OBJECT": "M_BEST_EKO",
+    "AUTH": "T-DM00002102",
+    "VARIANT": "",
+    "FIELD": "EKORG",
+    "LOW": "$EKORG",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002201",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "PFCG",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002201",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SUIM",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000003",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000004",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000005",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_ROLES",
+    "COUNTER": "000006",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "VARIANT": "",
+    "FIELD": "ACT_GROUP",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002301",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SU01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000002",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002301",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SUIM",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000003",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000004",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000005",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000006",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "05",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000007",
+    "OBJECT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "VARIANT": "",
+    "FIELD": "CLASS",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000008",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002303",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "22",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SEC_USUARIOS",
+    "COUNTER": "000009",
+    "OBJECT": "S_USER_AGR",
+    "AUTH": "T-DM00002303",
+    "VARIANT": "",
+    "FIELD": "ACT_GROUP",
+    "LOW": "Z*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SIN_USUARIOS",
+    "COUNTER": "000001",
+    "OBJECT": "S_TCODE",
+    "AUTH": "T-DM00002401",
+    "VARIANT": "",
+    "FIELD": "TCD",
+    "LOW": "SE16N",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SIN_USUARIOS",
+    "COUNTER": "000002",
+    "OBJECT": "S_TABU_DIS",
+    "AUTH": "T-DM00002402",
+    "VARIANT": "",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   },
+   {
+    "AGR_NAME": "Z_SIN_USUARIOS",
+    "COUNTER": "000003",
+    "OBJECT": "S_TABU_DIS",
+    "AUTH": "T-DM00002402",
+    "VARIANT": "",
+    "FIELD": "DICBERCLS",
+    "LOW": "*",
+    "HIGH": "",
+    "MODIFIED": "",
+    "DELETED": ""
+   }
+  ],
+  "AGR_1252": [
+   {
+    "AGR_NAME": "Z_MM_DERIVADO_1000",
+    "COUNTER": "000001",
+    "VARBL": "$EKORG",
+    "LOW": "1000",
+    "HIGH": ""
+   },
+   {
+    "AGR_NAME": "Z_MM_PEDIDOS_PADRE",
+    "COUNTER": "000001",
+    "VARBL": "$EKORG",
+    "LOW": "",
+    "HIGH": ""
+   }
+  ],
+  "AGR_TCODES": [
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "TYPE": "TR",
+    "TCODE": "F110",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS",
+    "TYPE": "TR",
+    "TCODE": "F-53",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PAGOS_CONSULTA",
+    "TYPE": "TR",
+    "TCODE": "F110",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "TYPE": "TR",
+    "TCODE": "BP",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "TYPE": "TR",
+    "TCODE": "FK02",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   },
+   {
+    "AGR_NAME": "Z_FI_PROVEEDORES",
+    "TYPE": "TR",
+    "TCODE": "FK03",
+    "EXCLUDE": "",
+    "DIRECT": "X",
+    "INHERITED": ""
+   }
+  ],
+  "UST04": [
+   {
+    "BNAME": "USUARIO_TEST",
+    "PROFILE": "T-DM000011"
+   },
+   {
+    "BNAME": "USUARIO_TEST",
+    "PROFILE": "T-DM000016"
+   },
+   {
+    "BNAME": "ADMIN_EQUIV",
+    "PROFILE": "T-DM000001"
+   },
+   {
+    "BNAME": "SEG_ADMIN",
+    "PROFILE": "T-DM000022"
+   },
+   {
+    "BNAME": "SEG_ADMIN",
+    "PROFILE": "T-DM000023"
+   },
+   {
+    "BNAME": "COMPRADOR1",
+    "PROFILE": "T-DM000019"
+   },
+   {
+    "BNAME": "COMPRADOR1",
+    "PROFILE": "T-DM000018"
+   },
+   {
+    "BNAME": "DEV_USER",
+    "PROFILE": "T-DM000002"
+   },
+   {
+    "BNAME": "DEV_USER",
+    "PROFILE": "T-DM000004"
+   },
+   {
+    "BNAME": "USUARIO_BLOQ",
+    "PROFILE": "T-DM000011"
+   },
+   {
+    "BNAME": "USUARIO_BLOQ",
+    "PROFILE": "T-DM000008"
+   },
+   {
+    "BNAME": "USUARIO_VENC",
+    "PROFILE": "T-DM000008"
+   },
+   {
+    "BNAME": "RFC_TECH",
+    "PROFILE": "T-DM000003"
+   },
+   {
+    "BNAME": "CONTADOR1",
+    "PROFILE": "T-DM000006"
+   },
+   {
+    "BNAME": "CONTADOR1",
+    "PROFILE": "T-DM000009"
+   },
+   {
+    "BNAME": "INACTIVO1",
+    "PROFILE": "T-DM000016"
+   },
+   {
+    "BNAME": "ALMACEN1",
+    "PROFILE": "T-DM000013"
+   },
+   {
+    "BNAME": "ALMACEN1",
+    "PROFILE": "T-DM000005"
+   },
+   {
+    "BNAME": "REPORTE1",
+    "PROFILE": "T-DM000012"
+   },
+   {
+    "BNAME": "COMPRA_FIORI",
+    "PROFILE": "T-DM000020"
+   },
+   {
+    "BNAME": "COMPRA_FIORI",
+    "PROFILE": "T-DM000018"
+   },
+   {
+    "BNAME": "ADMIN_BASIS",
+    "PROFILE": "SAP_ALL"
+   },
+   {
+    "BNAME": "DDIC",
+    "PROFILE": "SAP_NEW"
+   }
+  ],
+  "UST10C": [
+   {
+    "PROFN": "SAP_ALL",
+    "AKTPS": "A",
+    "SUBPROF": "&_SAP_ALL_1"
+   }
+  ],
+  "UST10S": [
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000101"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00000102"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00000103"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "T-DM00000104"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "T-DM00000105"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00000107"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "T-DM00000108"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000109"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "T-DM00000110"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_ADMI_FCD",
+    "AUTH": "T-DM00000111"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_BTCH_ADM",
+    "AUTH": "T-DM00000112"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_BTCH_NAM",
+    "AUTH": "T-DM00000113"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "T-DM00000114"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000115"
+   },
+   {
+    "PROFN": "T-DM000001",
+    "AKTPS": "A",
+    "OBJCT": "S_DATASET",
+    "AUTH": "T-DM00000116"
+   },
+   {
+    "PROFN": "T-DM000002",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000201"
+   },
+   {
+    "PROFN": "T-DM000002",
+    "AKTPS": "A",
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202"
+   },
+   {
+    "PROFN": "T-DM000003",
+    "AKTPS": "A",
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000301"
+   },
+   {
+    "PROFN": "T-DM000003",
+    "AKTPS": "A",
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00000302"
+   },
+   {
+    "PROFN": "T-DM000004",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000401"
+   },
+   {
+    "PROFN": "T-DM000004",
+    "AKTPS": "A",
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402"
+   },
+   {
+    "PROFN": "T-DM000005",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000501"
+   },
+   {
+    "PROFN": "T-DM000005",
+    "AKTPS": "A",
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00000502"
+   },
+   {
+    "PROFN": "T-DM000006",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000601"
+   },
+   {
+    "PROFN": "T-DM000006",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602"
+   },
+   {
+    "PROFN": "T-DM000006",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603"
+   },
+   {
+    "PROFN": "T-DM000008",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000801"
+   },
+   {
+    "PROFN": "T-DM000008",
+    "AKTPS": "A",
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "T-DM00000802"
+   },
+   {
+    "PROFN": "T-DM000008",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803"
+   },
+   {
+    "PROFN": "T-DM000008",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804"
+   },
+   {
+    "PROFN": "T-DM000009",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000901"
+   },
+   {
+    "PROFN": "T-DM000009",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000902"
+   },
+   {
+    "PROFN": "T-DM000009",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000903"
+   },
+   {
+    "PROFN": "T-DM000010",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001001"
+   },
+   {
+    "PROFN": "T-DM000010",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00001002"
+   },
+   {
+    "PROFN": "T-DM000011",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001101"
+   },
+   {
+    "PROFN": "T-DM000011",
+    "AKTPS": "A",
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102"
+   },
+   {
+    "PROFN": "T-DM000011",
+    "AKTPS": "A",
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103"
+   },
+   {
+    "PROFN": "T-DM000012",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001201"
+   },
+   {
+    "PROFN": "T-DM000013",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001301"
+   },
+   {
+    "PROFN": "T-DM000013",
+    "AKTPS": "A",
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "T-DM00001302"
+   },
+   {
+    "PROFN": "T-DM000013",
+    "AKTPS": "A",
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "T-DM00001303"
+   },
+   {
+    "PROFN": "T-DM000015",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001501"
+   },
+   {
+    "PROFN": "T-DM000015",
+    "AKTPS": "A",
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502"
+   },
+   {
+    "PROFN": "T-DM000016",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001601"
+   },
+   {
+    "PROFN": "T-DM000016",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001602"
+   },
+   {
+    "PROFN": "T-DM000017",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001701"
+   },
+   {
+    "PROFN": "T-DM000017",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001702"
+   },
+   {
+    "PROFN": "T-DM000018",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001801"
+   },
+   {
+    "PROFN": "T-DM000018",
+    "AKTPS": "A",
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001802"
+   },
+   {
+    "PROFN": "T-DM000019",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001901"
+   },
+   {
+    "PROFN": "T-DM000019",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902"
+   },
+   {
+    "PROFN": "T-DM000019",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903"
+   },
+   {
+    "PROFN": "T-DM000020",
+    "AKTPS": "A",
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00002001"
+   },
+   {
+    "PROFN": "T-DM000020",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002"
+   },
+   {
+    "PROFN": "T-DM000020",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003"
+   },
+   {
+    "PROFN": "T-DM000021",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002101"
+   },
+   {
+    "PROFN": "T-DM000021",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002102"
+   },
+   {
+    "PROFN": "T-DM000022",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002201"
+   },
+   {
+    "PROFN": "T-DM000022",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002202"
+   },
+   {
+    "PROFN": "T-DM000023",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002301"
+   },
+   {
+    "PROFN": "T-DM000023",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302"
+   },
+   {
+    "PROFN": "T-DM000023",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002303"
+   },
+   {
+    "PROFN": "T-DM000024",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002401"
+   },
+   {
+    "PROFN": "T-DM000024",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00002402"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_TCODE",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_RFCACL",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_DATASET",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_ADMI_FCD",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_BTCH_ADM",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_BTCH_NAM",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_SERVICE",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_ICF",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_LOG_COM",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_TABU_CLI",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "S_START",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_BANF_BSA",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_RECH_WRK",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "&_SAP_ALL_1",
+    "AKTPS": "A",
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "&_SAP_ALL"
+   },
+   {
+    "PROFN": "SAP_NEW",
+    "AKTPS": "A",
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_NEW_RFC"
+   }
+  ],
+  "UST12": [
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000101",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00000102",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00000102",
+    "AKTPS": "A",
+    "FIELD": "CLASS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00000103",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00000103",
+    "AKTPS": "A",
+    "FIELD": "ACT_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "T-DM00000104",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "T-DM00000104",
+    "AKTPS": "A",
+    "FIELD": "PROFILE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "AKTPS": "A",
+    "FIELD": "OBJECT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "T-DM00000105",
+    "AKTPS": "A",
+    "FIELD": "AUTH",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "AKTPS": "A",
+    "FIELD": "DEVCLASS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "AKTPS": "A",
+    "FIELD": "OBJTYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "AKTPS": "A",
+    "FIELD": "OBJNAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000106",
+    "AKTPS": "A",
+    "FIELD": "P_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00000107",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00000107",
+    "AKTPS": "A",
+    "FIELD": "DICBERCLS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "T-DM00000108",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "T-DM00000108",
+    "AKTPS": "A",
+    "FIELD": "TABLE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "AKTPS": "A",
+    "FIELD": "RFC_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000109",
+    "AKTPS": "A",
+    "FIELD": "RFC_TYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "T-DM00000110",
+    "AKTPS": "A",
+    "FIELD": "P_ACTION",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "T-DM00000110",
+    "AKTPS": "A",
+    "FIELD": "P_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_ADMI_FCD",
+    "AUTH": "T-DM00000111",
+    "AKTPS": "A",
+    "FIELD": "S_ADMI_FCD",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_BTCH_ADM",
+    "AUTH": "T-DM00000112",
+    "AKTPS": "A",
+    "FIELD": "BTCADMIN",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_BTCH_NAM",
+    "AUTH": "T-DM00000113",
+    "AKTPS": "A",
+    "FIELD": "BTCUNAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "T-DM00000114",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "T-DM00000114",
+    "AKTPS": "A",
+    "FIELD": "TTYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000115",
+    "AKTPS": "A",
+    "FIELD": "CTS_ADMFCT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "AKTPS": "A",
+    "FIELD": "FILENAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "T-DM00000116",
+    "AKTPS": "A",
+    "FIELD": "PROGRAM",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000201",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SE38",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000201",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SE80",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "DEVCLASS",
+    "VON": "Z*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "OBJTYPE",
+    "VON": "PROG",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "OBJTYPE",
+    "VON": "CLAS",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "OBJTYPE",
+    "VON": "FUGR",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "OBJNAME",
+    "VON": "Z*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "T-DM00000202",
+    "AKTPS": "A",
+    "FIELD": "P_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "16",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "AKTPS": "A",
+    "FIELD": "RFC_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "AKTPS": "A",
+    "FIELD": "RFC_TYPE",
+    "VON": "FUGR",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "T-DM00000301",
+    "AKTPS": "A",
+    "FIELD": "RFC_TYPE",
+    "VON": "FUNC",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00000302",
+    "AKTPS": "A",
+    "FIELD": "SRV_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00000302",
+    "AKTPS": "A",
+    "FIELD": "SRV_TYPE",
+    "VON": "HT",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000401",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "STMS",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "AKTPS": "A",
+    "FIELD": "CTS_ADMFCT",
+    "VON": "IMPA",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "AKTPS": "A",
+    "FIELD": "CTS_ADMFCT",
+    "VON": "IMPS",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "T-DM00000402",
+    "AKTPS": "A",
+    "FIELD": "CTS_ADMFCT",
+    "VON": "TABL",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000501",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FK03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00000502",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00000502",
+    "AKTPS": "A",
+    "FIELD": "APPKZ",
+    "VON": "F",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000601",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FB60",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000602",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000603",
+    "AKTPS": "A",
+    "FIELD": "KOART",
+    "VON": "K",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000801",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "F110",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000801",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "F-53",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "T-DM00000802",
+    "AKTPS": "A",
+    "FIELD": "FBTCH",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "T-DM00000802",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000803",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000804",
+    "AKTPS": "A",
+    "FIELD": "KOART",
+    "VON": "K",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00000901",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "F-53",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000902",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00000902",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "2000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000903",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "T-DM00000903",
+    "AKTPS": "A",
+    "FIELD": "KOART",
+    "VON": "K",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001001",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "F110",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001001",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FK03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00001002",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "T-DM00001002",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "BP",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FK02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001101",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FK03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "AKTPS": "A",
+    "FIELD": "RELTYP",
+    "VON": "FLVN00",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "T-DM00001102",
+    "AKTPS": "A",
+    "FIELD": "RELTYP",
+    "VON": "FLVN01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "T-DM00001103",
+    "AKTPS": "A",
+    "FIELD": "APPKZ",
+    "VON": "F",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001201",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ZFI_REP_PAGOS",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001301",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "MIGO",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001301",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "MI07",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "T-DM00001302",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "T-DM00001302",
+    "AKTPS": "A",
+    "FIELD": "BWART",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "T-DM00001303",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "T-DM00001303",
+    "AKTPS": "A",
+    "FIELD": "WERKS",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME29N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME54N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001501",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME23N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "AKTPS": "A",
+    "FIELD": "FRGGR",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "AKTPS": "A",
+    "FIELD": "FRGCO",
+    "VON": "A1",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001502",
+    "AKTPS": "A",
+    "FIELD": "FRGCO",
+    "VON": "A2",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001601",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME23N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001601",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "FK03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001602",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001602",
+    "AKTPS": "A",
+    "FIELD": "BSART",
+    "VON": "NB",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001701",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME21N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001702",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001702",
+    "AKTPS": "A",
+    "FIELD": "EKORG",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001801",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME29N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001801",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME28",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001802",
+    "AKTPS": "A",
+    "FIELD": "FRGGR",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "T-DM00001802",
+    "AKTPS": "A",
+    "FIELD": "FRGCO",
+    "VON": "A1",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME21N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME22N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00001901",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME23N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00001902",
+    "AKTPS": "A",
+    "FIELD": "BSART",
+    "VON": "NB",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00001903",
+    "AKTPS": "A",
+    "FIELD": "EKORG",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "AKTPS": "A",
+    "FIELD": "SRV_NAME",
+    "VON": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "AKTPS": "A",
+    "FIELD": "SRV_NAME",
+    "VON": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "T-DM00002001",
+    "AKTPS": "A",
+    "FIELD": "SRV_TYPE",
+    "VON": "HT",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "T-DM00002002",
+    "AKTPS": "A",
+    "FIELD": "BSART",
+    "VON": "NB",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002003",
+    "AKTPS": "A",
+    "FIELD": "EKORG",
+    "VON": "1000",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002101",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "ME21N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "T-DM00002102",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002201",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "PFCG",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002201",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SUIM",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002202",
+    "AKTPS": "A",
+    "FIELD": "ACT_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002301",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SU01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002301",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SUIM",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "01",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "02",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "05",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "T-DM00002302",
+    "AKTPS": "A",
+    "FIELD": "CLASS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002303",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "22",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "T-DM00002303",
+    "AKTPS": "A",
+    "FIELD": "ACT_GROUP",
+    "VON": "Z*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "T-DM00002401",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "SE16N",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00002402",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "03",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "T-DM00002402",
+    "AKTPS": "A",
+    "FIELD": "DICBERCLS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TCODE",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "TCD",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "CLASS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACT_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_PRO",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "PROFILE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "OBJECT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "AUTH",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "DEVCLASS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "OBJTYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "OBJNAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "P_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "DICBERCLS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_NAM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "TABLE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RFC_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RFC_TYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFCACL",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RFC_SYSID",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFCACL",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RFC_CLIENT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFCACL",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RFC_USER",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFCACL",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "P_ACTION",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_PROGRAM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "P_GROUP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "FILENAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "PROGRAM",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_ADMI_FCD",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "S_ADMI_FCD",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_BTCH_ADM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BTCADMIN",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_BTCH_NAM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BTCUNAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TRANSPRT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "TTYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "CTS_ADMFCT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "SRV_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "SRV_TYPE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_ICF",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ICF_FIELD",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_ICF",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ICF_VALUE",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_LOG_COM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "COMMAND",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_LOG_COM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "OPSYSTEM",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_LOG_COM",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "HOST",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_TABU_CLI",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "CLIIDMAINT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_START",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "AUTHPGMID",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_START",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "AUTHOBJTYP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_START",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "AUTHOBJNAM",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "FBTCH",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_REGU_BUK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BUKRS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "KOART",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "APPKZ",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "RELTYP",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BSART",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "EKORG",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "FRGGR",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "FRGCO",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BANF_BSA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_BANF_BSA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BSART",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_RECH_WRK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_RECH_WRK",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "WERKS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_MSEG_BWA",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "BWART",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "M_ISEG_WDB",
+    "AUTH": "&_SAP_ALL",
+    "AKTPS": "A",
+    "FIELD": "WERKS",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_NEW_RFC",
+    "AKTPS": "A",
+    "FIELD": "ACTVT",
+    "VON": "16",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_NEW_RFC",
+    "AKTPS": "A",
+    "FIELD": "RFC_NAME",
+    "VON": "*",
+    "BIS": ""
+   },
+   {
+    "OBJCT": "S_RFC",
+    "AUTH": "&_SAP_NEW_RFC",
+    "AKTPS": "A",
+    "FIELD": "RFC_TYPE",
+    "VON": "FUGR",
+    "BIS": ""
+   }
+  ],
+  "TOBJ": [
+   {
+    "OBJCT": "S_TCODE",
+    "OCLSS": "S",
+    "FIEL1": "TCD"
+   },
+   {
+    "OBJCT": "S_USER_GRP",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "CLASS"
+   },
+   {
+    "OBJCT": "S_USER_AGR",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "ACT_GROUP"
+   },
+   {
+    "OBJCT": "S_USER_PRO",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "PROFILE"
+   },
+   {
+    "OBJCT": "S_USER_AUT",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "OBJECT",
+    "FIEL3": "AUTH"
+   },
+   {
+    "OBJCT": "S_DEVELOP",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "DEVCLASS",
+    "FIEL3": "OBJTYPE",
+    "FIEL4": "OBJNAME",
+    "FIEL5": "P_GROUP"
+   },
+   {
+    "OBJCT": "S_TABU_DIS",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "DICBERCLS"
+   },
+   {
+    "OBJCT": "S_TABU_NAM",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "TABLE"
+   },
+   {
+    "OBJCT": "S_RFC",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "RFC_NAME",
+    "FIEL3": "RFC_TYPE"
+   },
+   {
+    "OBJCT": "S_RFCACL",
+    "OCLSS": "S",
+    "FIEL1": "RFC_SYSID",
+    "FIEL2": "RFC_CLIENT",
+    "FIEL3": "RFC_USER",
+    "FIEL4": "ACTVT"
+   },
+   {
+    "OBJCT": "S_PROGRAM",
+    "OCLSS": "S",
+    "FIEL1": "P_ACTION",
+    "FIEL2": "P_GROUP"
+   },
+   {
+    "OBJCT": "S_DATASET",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "FILENAME",
+    "FIEL3": "PROGRAM"
+   },
+   {
+    "OBJCT": "S_ADMI_FCD",
+    "OCLSS": "S",
+    "FIEL1": "S_ADMI_FCD"
+   },
+   {
+    "OBJCT": "S_BTCH_ADM",
+    "OCLSS": "S",
+    "FIEL1": "BTCADMIN"
+   },
+   {
+    "OBJCT": "S_BTCH_NAM",
+    "OCLSS": "S",
+    "FIEL1": "BTCUNAME"
+   },
+   {
+    "OBJCT": "S_TRANSPRT",
+    "OCLSS": "S",
+    "FIEL1": "ACTVT",
+    "FIEL2": "TTYPE"
+   },
+   {
+    "OBJCT": "S_CTS_ADMI",
+    "OCLSS": "S",
+    "FIEL1": "CTS_ADMFCT"
+   },
+   {
+    "OBJCT": "S_SERVICE",
+    "OCLSS": "S",
+    "FIEL1": "SRV_NAME",
+    "FIEL2": "SRV_TYPE"
+   },
+   {
+    "OBJCT": "S_ICF",
+    "OCLSS": "S",
+    "FIEL1": "ICF_FIELD",
+    "FIEL2": "ICF_VALUE"
+   },
+   {
+    "OBJCT": "S_LOG_COM",
+    "OCLSS": "S",
+    "FIEL1": "COMMAND",
+    "FIEL2": "OPSYSTEM",
+    "FIEL3": "HOST"
+   },
+   {
+    "OBJCT": "S_TABU_CLI",
+    "OCLSS": "S",
+    "FIEL1": "CLIIDMAINT"
+   },
+   {
+    "OBJCT": "S_START",
+    "OCLSS": "S",
+    "FIEL1": "AUTHPGMID",
+    "FIEL2": "AUTHOBJTYP",
+    "FIEL3": "AUTHOBJNAM"
+   },
+   {
+    "OBJCT": "F_REGU_BUK",
+    "OCLSS": "F",
+    "FIEL1": "FBTCH",
+    "FIEL2": "BUKRS"
+   },
+   {
+    "OBJCT": "F_BKPF_BUK",
+    "OCLSS": "F",
+    "FIEL1": "ACTVT",
+    "FIEL2": "BUKRS"
+   },
+   {
+    "OBJCT": "F_BKPF_KOA",
+    "OCLSS": "F",
+    "FIEL1": "ACTVT",
+    "FIEL2": "KOART"
+   },
+   {
+    "OBJCT": "F_LFA1_APP",
+    "OCLSS": "F",
+    "FIEL1": "ACTVT",
+    "FIEL2": "APPKZ"
+   },
+   {
+    "OBJCT": "B_BUPA_RLT",
+    "OCLSS": "B",
+    "FIEL1": "ACTVT",
+    "FIEL2": "RELTYP"
+   },
+   {
+    "OBJCT": "M_BEST_BSA",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "BSART"
+   },
+   {
+    "OBJCT": "M_BEST_EKO",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "EKORG"
+   },
+   {
+    "OBJCT": "M_EINK_FRG",
+    "OCLSS": "M",
+    "FIEL1": "FRGGR",
+    "FIEL2": "FRGCO"
+   },
+   {
+    "OBJCT": "M_BANF_BSA",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "BSART"
+   },
+   {
+    "OBJCT": "M_RECH_WRK",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "WERKS"
+   },
+   {
+    "OBJCT": "M_MSEG_BWA",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "BWART"
+   },
+   {
+    "OBJCT": "M_ISEG_WDB",
+    "OCLSS": "M",
+    "FIEL1": "ACTVT",
+    "FIEL2": "WERKS"
+   }
+  ],
+  "TOBJT": [
+   {
+    "OBJECT": "S_TCODE",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_TCODE"
+   },
+   {
+    "OBJECT": "S_USER_GRP",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_USER_GRP"
+   },
+   {
+    "OBJECT": "S_USER_AGR",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_USER_AGR"
+   },
+   {
+    "OBJECT": "S_USER_PRO",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_USER_PRO"
+   },
+   {
+    "OBJECT": "S_USER_AUT",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_USER_AUT"
+   },
+   {
+    "OBJECT": "S_DEVELOP",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_DEVELOP"
+   },
+   {
+    "OBJECT": "S_TABU_DIS",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_TABU_DIS"
+   },
+   {
+    "OBJECT": "S_TABU_NAM",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_TABU_NAM"
+   },
+   {
+    "OBJECT": "S_RFC",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_RFC"
+   },
+   {
+    "OBJECT": "S_RFCACL",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_RFCACL"
+   },
+   {
+    "OBJECT": "S_PROGRAM",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_PROGRAM"
+   },
+   {
+    "OBJECT": "S_DATASET",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_DATASET"
+   },
+   {
+    "OBJECT": "S_ADMI_FCD",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_ADMI_FCD"
+   },
+   {
+    "OBJECT": "S_BTCH_ADM",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_BTCH_ADM"
+   },
+   {
+    "OBJECT": "S_BTCH_NAM",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_BTCH_NAM"
+   },
+   {
+    "OBJECT": "S_TRANSPRT",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_TRANSPRT"
+   },
+   {
+    "OBJECT": "S_CTS_ADMI",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_CTS_ADMI"
+   },
+   {
+    "OBJECT": "S_SERVICE",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_SERVICE"
+   },
+   {
+    "OBJECT": "S_ICF",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_ICF"
+   },
+   {
+    "OBJECT": "S_LOG_COM",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_LOG_COM"
+   },
+   {
+    "OBJECT": "S_TABU_CLI",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_TABU_CLI"
+   },
+   {
+    "OBJECT": "S_START",
+    "LANGU": "S",
+    "TTEXT": "Objeto S_START"
+   },
+   {
+    "OBJECT": "F_REGU_BUK",
+    "LANGU": "S",
+    "TTEXT": "Objeto F_REGU_BUK"
+   },
+   {
+    "OBJECT": "F_BKPF_BUK",
+    "LANGU": "S",
+    "TTEXT": "Objeto F_BKPF_BUK"
+   },
+   {
+    "OBJECT": "F_BKPF_KOA",
+    "LANGU": "S",
+    "TTEXT": "Objeto F_BKPF_KOA"
+   },
+   {
+    "OBJECT": "F_LFA1_APP",
+    "LANGU": "S",
+    "TTEXT": "Objeto F_LFA1_APP"
+   },
+   {
+    "OBJECT": "B_BUPA_RLT",
+    "LANGU": "S",
+    "TTEXT": "Objeto B_BUPA_RLT"
+   },
+   {
+    "OBJECT": "M_BEST_BSA",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_BEST_BSA"
+   },
+   {
+    "OBJECT": "M_BEST_EKO",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_BEST_EKO"
+   },
+   {
+    "OBJECT": "M_EINK_FRG",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_EINK_FRG"
+   },
+   {
+    "OBJECT": "M_BANF_BSA",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_BANF_BSA"
+   },
+   {
+    "OBJECT": "M_RECH_WRK",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_RECH_WRK"
+   },
+   {
+    "OBJECT": "M_MSEG_BWA",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_MSEG_BWA"
+   },
+   {
+    "OBJECT": "M_ISEG_WDB",
+    "LANGU": "S",
+    "TTEXT": "Objeto M_ISEG_WDB"
+   }
+  ],
+  "TACTT": [
+   {
+    "SPRAS": "S",
+    "ACTVT": "01",
+    "LTEXT": "Crear o generar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "02",
+    "LTEXT": "Modificar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "03",
+    "LTEXT": "Visualizar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "05",
+    "LTEXT": "Bloquear"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "06",
+    "LTEXT": "Borrar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "16",
+    "LTEXT": "Ejecutar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "22",
+    "LTEXT": "Introducir, incluir, asignar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "34",
+    "LTEXT": "Grabar"
+   },
+   {
+    "SPRAS": "S",
+    "ACTVT": "43",
+    "LTEXT": "Liberar"
+   }
+  ],
+  "TSTC": [
+   {
+    "TCODE": "F110",
+    "PGMNA": "PROG_F110"
+   },
+   {
+    "TCODE": "F-53",
+    "PGMNA": "PROG_F_53"
+   },
+   {
+    "TCODE": "F-58",
+    "PGMNA": "PROG_F_58"
+   },
+   {
+    "TCODE": "FB60",
+    "PGMNA": "PROG_FB60"
+   },
+   {
+    "TCODE": "MIRO",
+    "PGMNA": "PROG_MIRO"
+   },
+   {
+    "TCODE": "BP",
+    "PGMNA": "PROG_BP"
+   },
+   {
+    "TCODE": "FK02",
+    "PGMNA": "PROG_FK02"
+   },
+   {
+    "TCODE": "FK03",
+    "PGMNA": "PROG_FK03"
+   },
+   {
+    "TCODE": "ME21N",
+    "PGMNA": "PROG_ME21N"
+   },
+   {
+    "TCODE": "ME22N",
+    "PGMNA": "PROG_ME22N"
+   },
+   {
+    "TCODE": "ME23N",
+    "PGMNA": "PROG_ME23N"
+   },
+   {
+    "TCODE": "ME29N",
+    "PGMNA": "PROG_ME29N"
+   },
+   {
+    "TCODE": "ME28",
+    "PGMNA": "PROG_ME28"
+   },
+   {
+    "TCODE": "ME51N",
+    "PGMNA": "PROG_ME51N"
+   },
+   {
+    "TCODE": "ME54N",
+    "PGMNA": "PROG_ME54N"
+   },
+   {
+    "TCODE": "MIGO",
+    "PGMNA": "PROG_MIGO"
+   },
+   {
+    "TCODE": "MI07",
+    "PGMNA": "PROG_MI07"
+   },
+   {
+    "TCODE": "SU01",
+    "PGMNA": "PROG_SU01"
+   },
+   {
+    "TCODE": "PFCG",
+    "PGMNA": "PROG_PFCG"
+   },
+   {
+    "TCODE": "SE38",
+    "PGMNA": "PROG_SE38"
+   },
+   {
+    "TCODE": "SE80",
+    "PGMNA": "PROG_SE80"
+   },
+   {
+    "TCODE": "STMS",
+    "PGMNA": "PROG_STMS"
+   },
+   {
+    "TCODE": "SM30",
+    "PGMNA": "PROG_SM30"
+   },
+   {
+    "TCODE": "SE16N",
+    "PGMNA": "PROG_SE16N"
+   },
+   {
+    "TCODE": "ZFI_REP_PAGOS",
+    "PGMNA": "PROG_ZFI_REP_PAGOS"
+   },
+   {
+    "TCODE": "SM18",
+    "PGMNA": "PROG_SM18"
+   },
+   {
+    "TCODE": "SUIM",
+    "PGMNA": "PROG_SUIM"
+   }
+  ],
+  "TSTCT": [
+   {
+    "SPRSL": "S",
+    "TCODE": "F110",
+    "TTEXT": "Pagos automáticos"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "F-53",
+    "TTEXT": "Contabilizar salida de pagos"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "F-58",
+    "TTEXT": "Pago con impresión"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "FB60",
+    "TTEXT": "Registrar factura de acreedor"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "MIRO",
+    "TTEXT": "Registrar factura recibida"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "BP",
+    "TTEXT": "Interlocutor comercial"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "FK02",
+    "TTEXT": "Modificar acreedor"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "FK03",
+    "TTEXT": "Visualizar acreedor"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME21N",
+    "TTEXT": "Crear pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME22N",
+    "TTEXT": "Modificar pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME23N",
+    "TTEXT": "Visualizar pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME29N",
+    "TTEXT": "Liberar pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME28",
+    "TTEXT": "Liberar pedidos (colectivo)"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME51N",
+    "TTEXT": "Crear solicitud de pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ME54N",
+    "TTEXT": "Liberar solicitud de pedido"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "MIGO",
+    "TTEXT": "Movimiento de mercancías"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "MI07",
+    "TTEXT": "Contabilizar diferencias de inventario"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SU01",
+    "TTEXT": "Mantenimiento de usuarios"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "PFCG",
+    "TTEXT": "Mantenimiento de roles"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SE38",
+    "TTEXT": "Editor ABAP"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SE80",
+    "TTEXT": "Object Navigator"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "STMS",
+    "TTEXT": "Sistema de transporte"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SM30",
+    "TTEXT": "Mantener vistas"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SE16N",
+    "TTEXT": "Visualizar tablas"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "ZFI_REP_PAGOS",
+    "TTEXT": "Reporte Z de pagos"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SM18",
+    "TTEXT": "Borrar Security Audit Log"
+   },
+   {
+    "SPRSL": "S",
+    "TCODE": "SUIM",
+    "TTEXT": "Sistema de información de usuarios"
+   }
+  ],
+  "TSTCA": [
+   {
+    "TCODE": "ZFI_REP_PAGOS",
+    "OBJCT": "F_BKPF_BUK",
+    "FIELD": "ACTVT",
+    "VALUE": "03"
+   }
+  ],
+  "USOBHASH": [
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "PGMID": "R3TR",
+    "OBJECT": "IWSG",
+    "OBJ_NAME": "ZMM_PEDIDOS_DEMO_SRV 0001",
+    "TYPE": "HT"
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "PGMID": "R3TR",
+    "OBJECT": "IWSG",
+    "OBJ_NAME": "ZMM_PEDIDOS_VER_DEMO_SRV 0001",
+    "TYPE": "HT"
+   }
+  ],
+  "USOBX_C": [
+   {
+    "NAME": "ME21N",
+    "TYPE": "TR",
+    "OBJECT": "M_BEST_BSA",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "ME21N",
+    "TYPE": "TR",
+    "OBJECT": "M_BEST_EKO",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "ME29N",
+    "TYPE": "TR",
+    "OBJECT": "M_EINK_FRG",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "PFCG",
+    "TYPE": "TR",
+    "OBJECT": "S_USER_AGR",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "SU01",
+    "TYPE": "TR",
+    "OBJECT": "S_USER_GRP",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "SU01",
+    "TYPE": "TR",
+    "OBJECT": "S_USER_AGR",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "F110",
+    "TYPE": "TR",
+    "OBJECT": "F_REGU_BUK",
+    "OKFLAG": "N"
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "OKFLAG": "X"
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "OKFLAG": "X"
+   }
+  ],
+  "USOBT_C": [
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "FIELD": "ACTVT",
+    "LOW": "01",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "FIELD": "ACTVT",
+    "LOW": "02",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0HASH0000001",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_BSA",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": ""
+   },
+   {
+    "NAME": "DEMO0FIORI0PEDIDOS0VER00000002",
+    "TYPE": "HT",
+    "OBJECT": "M_BEST_EKO",
+    "FIELD": "ACTVT",
+    "LOW": "03",
+    "HIGH": ""
+   }
+  ],
+  "CVERS": [
+   {
+    "COMPONENT": "SAP_BASIS",
+    "RELEASE": "758",
+    "EXTRELEASE": "0001",
+    "COMP_TYPE": "S"
+   },
+   {
+    "COMPONENT": "S4CORE",
+    "RELEASE": "108",
+    "EXTRELEASE": "0001",
+    "COMP_TYPE": "S"
+   },
+   {
+    "COMPONENT": "SAP_GWFND",
+    "RELEASE": "758",
+    "EXTRELEASE": "0001",
+    "COMP_TYPE": "S"
+   },
+   {
+    "COMPONENT": "SAP_UI",
+    "RELEASE": "758",
+    "EXTRELEASE": "0001",
+    "COMP_TYPE": "S"
+   }
+  ]
+ }
+}

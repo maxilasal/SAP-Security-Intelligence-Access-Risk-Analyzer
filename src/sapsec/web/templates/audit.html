@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import filter %}
+{% block title %}Auditorías e historial{% endblock %}
+{% block content %}
+<h1>Auditorías e historial</h1>
+<p><a href="/hallazgos">← Gestión de hallazgos</a></p>
+<div class="tabs" data-group="a"><a href="#" class="on" data-tab="a-snap">Snapshots</a><a href="#" data-tab="a-sim">Simulaciones</a><a href="#" data-tab="a-log">Registro de auditoría de la aplicación</a></div>
+<div class="tab on" id="a-snap" data-group="a">
+<table class="tbl sortable"><tr><th>#</th><th>Sistema</th><th>Fecha</th><th>Estado</th><th>Por</th><th>Reglas</th></tr>
+{% for s in snaps_all %}<tr><td><a href="/snapshots/{{ s.id }}">{{ s.id }}</a></td><td>{{ s.sid }}/{{ s.client }}</td><td>{{ s.started_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ s.status }}</td><td>{{ s.started_by }}</td><td><code>{{ (s.ruleset_hash or '')[:12] }}</code></td></tr>{% endfor %}</table>
+</div>
+<div class="tab" id="a-sim" data-group="a">
+<table class="tbl sortable"><tr><th>#</th><th>Fecha</th><th>Por</th><th>Usuario SAP</th><th>Escenario</th><th>Resultado</th><th>Reporte</th></tr>
+{% for s in sims %}<tr><td>{{ s.id }}</td><td>{{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</td><td>{{ s.created_by }}</td><td>{{ s.username }}</td><td class="mono">{{ s.scenario|tojson }}</td><td>{{ s.recommendation }}</td><td><a href="/simulaciones/{{ s.id }}/reporte?formato=pdf">PDF</a></td></tr>{% endfor %}</table>
+</div>
+<div class="tab" id="a-log" data-group="a">
+{{ filter("tlog") }}
+<table class="tbl compact sortable" id="tlog"><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Objeto</th><th>Detalle</th><th>IP</th></tr>
+{% for l in logs %}<tr><td class="nowrap">{{ l.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td><td>{{ l.username }}</td><td>{{ l.action }}</td><td>{{ l.target }}</td><td class="mono">{{ l.details|tojson }}</td><td>{{ l.ip }}</td></tr>{% endfor %}</table>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sapsec"
+version = "0.1.0"
+description = "SAP Security Intelligence & Access Risk Analyzer (solo lectura)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "LicenseRef-Propietario"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "jinja2>=3.1",
+    "sqlalchemy>=2.0",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "python-multipart>=0.0.9",
+    "itsdangerous>=2.1",
+    "openpyxl>=3.1",
+    "reportlab>=4.0",
+    "cryptography>=42",
+    "keyring>=25",
+]
+
+[project.urls]
+Repository = "https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer"
+Changelog = "https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+# Backend RFC heredado (archivado por SAP). Instalar solo si la organización lo acepta.
+pyrfc = ["pyrfc==3.3.1"]
+postgres = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+sapsec = "sapsec.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sapsec = ["web/templates/*.html", "web/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

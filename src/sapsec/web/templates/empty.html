@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+{% if busy %}<h1>Análisis en curso</h1><div class="warnbox">{{ busy }}</div>{% else %}<h1>Bienvenido</h1>
+<p class="subtitle">Todavía no hay snapshots de seguridad.</p>
+<div class="card">
+  <ol>
+    <li>Registre un sistema y mandante en <a href="/conexiones">Conexiones SAP</a>.</li>
+    <li>Pruebe la conectividad: el diagnóstico indica qué funciones y tablas puede leer el usuario RFC.</li>
+    <li>Ejecute una extracción. El análisis de riesgos se calcula automáticamente.</li>
+  </ol>
+  <p class="muted">Para una demostración sin SAP, use el backend <code>fixture</code> con
+  <code>tests/fixtures/demo_system.json</code> (o ejecute <code>sapsec demo</code>).</p>
+</div>
+{% endif %}{% endblock %}

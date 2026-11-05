@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Mi cuenta{% endblock %}
+{% block content %}
+<h1>Mi cuenta</h1>
+<p class="subtitle">{{ me.username }} · rol {{ me.role }} · último ingreso {{ me.last_login_at.strftime('%d/%m/%Y %H:%M') if me.last_login_at else '—' }}</p>
+{% if ok %}<div class="note">✓ Contraseña cambiada.</div>{% endif %}
+<form class="card form-grid" method="post" action="/mi-cuenta/contrasena">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Contraseña actual<input name="actual" type="password" required autocomplete="current-password"></label>
+  <label>Contraseña nueva (mín. 12)<input name="nueva" type="password" minlength="12" required autocomplete="new-password"></label>
+  <label>Repetir la nueva<input name="repetir" type="password" minlength="12" required autocomplete="new-password"></label>
+  <button class="btn">Cambiar contraseña</button>
+</form>
+<p class="small muted">¿Olvidó la contraseña? Un administrador puede restablecerla en «Configuración y acceso».</p>
+{% endblock %}

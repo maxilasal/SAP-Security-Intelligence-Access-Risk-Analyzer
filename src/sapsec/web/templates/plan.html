@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import task_card %}
+{% block title %}Todas las tareas{% endblock %}
+{% block content %}
+<h1>Todas las tareas</h1>
+<p class="subtitle">El plan completo. Cada tarea agrupa lo que se corrige con <b>un mismo cambio en SAP</b>; primero las más graves y las que afectan a más usuarios.</p>
+<form class="card form-grid" method="get">
+  <label>Buscar rol, usuario o tema<input name="q" value="{{ f.q }}" placeholder="Z_FI_PAGOS, JPEREZ, pagos…"></label>
+  <label>Gravedad<select name="gravedad"><option value="">Todas</option>{% for k in ["critico","alto","medio","bajo"] %}<option value="{{ k }}" {% if f.gravedad==k %}selected{% endif %}>{{ SEV_LABEL[k] }}</option>{% endfor %}</select></label>
+  <label>Tipo de tarea<select name="tipo"><option value="">Todas</option>{% for k, v in KIND_LABEL.items() %}<option value="{{ k }}" {% if f.tipo==k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
+  <label>Estado<select name="estado"><option value="pendientes" {% if f.estado=='pendientes' %}selected{% endif %}>Pendientes</option><option value="resueltas" {% if f.estado=='resueltas' %}selected{% endif %}>Resueltas o aceptadas</option><option value="todas" {% if f.estado=='todas' %}selected{% endif %}>Todas</option></select></label>
+  <button class="btn">Filtrar</button>
+</form>
+<p class="muted">{{ total }} tarea(s){% if total > shown|length %} · se muestran las primeras {{ shown|length }} · <a href="?{{ more_qs }}">mostrar más</a>{% endif %}</p>
+{% for t in shown %}{{ task_card(t) }}{% else %}<div class="card muted">No hay tareas con estos filtros.</div>{% endfor %}
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, cert, rstatus, evidence_table, reco_box %}
+{% block title %}Simular una asignación{% endblock %}
+{% block content %}
+<h1>Simular una asignación</h1>
+<p class="subtitle">Antes de dar (o quitar) un rol en SAP, vea aquí si le genera a la persona permisos peligrosos o
+conflictos de funciones. Nada se escribe en SAP.</p>
+{% if result %}
+{% set r = result %}
+{{ reco_box(reco, "Resultado", r.username ~ " · " ~ r.scenario.describe() ~ " · riesgo " ~ r.before.risk.inherent_level.label|lower ~ " → " ~ r.after.risk.inherent_level.label|lower) }}
+{% set motives = r.new_sod|length + r.new_critical|length %}
+<details class="more-items"><summary>Detalle de los motivos{% if motives %} ({{ motives }} riesgo{{ '' if motives == 1 else 's' }} nuevo{{ '' if motives == 1 else 's' }}){% endif %}</summary>
+  <ul class="reasons">
+    {% for h in r.new_sod %}<li><b>Conflicto nuevo ({{ h.severity.label }}): {{ h.title }}.</b>
+      {% for m in h.functions %}«{{ m.title }}» por {{ m.roles|join(', ') or 'perfil directo' }}{{ ' + ' if not loop.last }}{% endfor %}</li>{% endfor %}
+    {% for h in r.new_critical %}<li><b>Permiso crítico nuevo ({{ h.severity.label }}): {{ h.title }}</b> — por {{ h.roles|join(', ') or 'perfil' }}</li>{% endfor %}
+    {% for x in r.reasons if x.startswith('[Calidad') or x.startswith('El nivel') or x.startswith('No se detectaron') %}<li>{{ x|replace('[Calidad de datos] ', 'Datos: ') }}</li>{% endfor %}
+    {% if r.resolved_sod or r.resolved_critical %}<li>Riesgos que se eliminarían: {% for h in r.resolved_sod %}<span class="pill">{{ h.title }}</span> {% endfor %}{% for h in r.resolved_critical %}<span class="pill">{{ h.title }}</span> {% endfor %}</li>{% endif %}
+  </ul>
+</details>
+<p class="small muted">Orientativo: no reemplaza la decisión del responsable de seguridad.{% for x in r.reasons if x.startswith('Aviso') %} {{ x }}{% endfor %}</p>
+<p>
+  <a class="btn small" href="/simulaciones/{{ sim.id }}/reporte?formato=pdf&tipo=ejecutivo">Reporte ejecutivo (PDF)</a>
+  <a class="btn ghost small" href="/simulaciones/{{ sim.id }}/reporte?formato=pdf&tipo=tecnico">Técnico (PDF)</a>
+  <a class="btn ghost small" href="/simulaciones/{{ sim.id }}/reporte?formato=xlsx&tipo=tecnico">Excel</a>
+</p>
+{% endif %}
+{% if result %}<details class="card"><summary>Simular otro cambio</summary>{% endif %}
+<form class="{{ '' if result else 'card ' }}sim-form" method="post" action="/simulador">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="form-grid">
+    <label>Sistema / mandante<input value="{{ current_snap.sid }} / {{ current_snap.client }} (snapshot #{{ current_snap.id }})" disabled></label>
+    <label>Usuario *<input name="usuario" list="ulist" required value="{{ form.get('usuario','') }}"></label>
+    <datalist id="ulist">{% for u in data.users %}<option value="{{ u }}">{% endfor %}</datalist>
+    <label>Roles a agregar (separados por coma)<input name="agregar" list="rlist" value="{{ form.get('agregar','') }}" placeholder="Z_FI_PAGOS"></label>
+    <datalist id="rlist">{% for r in data.role_names|sort %}<option value="{{ r }}">{{ data.role_text.get(r,'') }}</option>{% endfor %}</datalist>
+    <label>Roles a quitar<input name="quitar" value="{{ form.get('quitar','') }}"></label>
+    <label>Sustituir rol actual…<input name="sust_old" list="rlist" value="{{ form.get('sust_old','') }}"></label>
+    <label>…por el rol<input name="sust_new" list="rlist" value="{{ form.get('sust_new','') }}"></label>
+  </div>
+  <details {% if form.get('ov_role') %}open{% endif %}><summary>Escenario hipotético: cambiar valores de un rol</summary>
+  <div class="form-grid">
+    <label>Rol<input name="ov_role" list="rlist" value="{{ form.get('ov_role','') }}"></label>
+    <label>Objeto<input name="ov_object" value="{{ form.get('ov_object','') }}" placeholder="F_BKPF_BUK"></label>
+    <label>Campo<input name="ov_field" value="{{ form.get('ov_field','') }}" placeholder="BUKRS"></label>
+    <label>Nuevos valores (coma; rango A-B)<input name="ov_values" value="{{ form.get('ov_values','') }}" placeholder="2000"></label>
+  </div>
+  <p class="muted">El cambio se aplica a todas las instancias del objeto en ese rol y se marca con certeza «Definido en rol».</p>
+  </details>
+  <p><button class="btn">Ver el resultado</button></p>
+</form>
+{% if result %}</details>{% endif %}
+{% if result %}
+{% set r = result %}
+<h2 class="tech-h">Evidencia técnica</h2>
+<div class="tabs" data-group="s">
+  <a href="#" class="on" data-tab="s-new">Evidencia de los riesgos nuevos ({{ r.new_sod|length + r.new_critical|length }})</a>
+  <a href="#" data-tab="s-before">Antes de la asignación</a>
+  <a href="#" data-tab="s-role">Rol propuesto</a>
+  <a href="#" data-tab="s-perm">Permisos nuevos ({{ r.new_permissions|length }})</a>
+  <a href="#" data-tab="s-alt">Alternativas ({{ r.alternatives|length }})</a>
+  <a href="#" data-tab="s-q">Calidad de datos ({{ r.issues|length }})</a>
+</div>
+<div class="tab on" id="s-new" data-group="s">
+  {% for h in r.new_sod %}
+  <details><summary>{{ sev(h.severity) }} Nuevo conflicto SoD {{ h.risk_id }} — {{ h.title }} {{ rstatus(h.rule_status) }} · {{ h.scope }}</summary>
+    <p>{{ h.explanation }}</p>{% for o in h.org_analysis %}<p class="note">{{ o }}</p>{% endfor %}
+    {% for m in h.functions %}<h3>{{ m.title }} <span class="muted">— aportado por {{ m.roles|join(', ') }}{% if m.direct_profiles %} / perfiles {{ m.direct_profiles|join(', ') }}{% endif %}</span></h3>{{ evidence_table(m.evidence) }}{% endfor %}
+    <p><b>Medida correctiva:</b> {{ h.recommendation }}</p>{% if h.mitigation_hint %}<p><b>Control mitigante posible:</b> {{ h.mitigation_hint }}</p>{% endif %}
+  </details>{% endfor %}
+  {% for h in r.new_critical %}
+  <details><summary>{{ sev(h.severity) }} Nueva autorización crítica {{ h.rule_id }} — {{ h.title }} {{ rstatus(h.rule_status) }}</summary>
+    <p>{{ h.description }}</p>{% for n in h.notes %}<p class="note">{{ n }}</p>{% endfor %}{{ evidence_table(h.evidence) }}<p><b>Recomendación:</b> {{ h.recommendation }}</p>
+  </details>{% endfor %}
+  {% if not r.new_sod and not r.new_critical %}<p class="muted">No se introducen riesgos nuevos según las reglas evaluadas.</p>{% endif %}
+  {% if r.resolved_sod or r.resolved_critical %}<h3>Riesgos que se eliminarían</h3><p>{% for h in r.resolved_sod %}<span class="pill">{{ h.risk_id }}</span> {% endfor %}{% for h in r.resolved_critical %}<span class="pill">{{ h.rule_id }}</span> {% endfor %}</p>{% endif %}
+</div>
+<div class="tab" id="s-before" data-group="s">
+  <p><b>Roles actuales:</b> {{ r.before.eff.valid_roles()|join(', ') or '—' }}</p>
+  <p><b>Nivel de riesgo inicial:</b> {{ sev(r.before.risk.inherent_level) }} ({{ r.before.risk.inherent_score }})</p>
+  <h3>Permisos críticos actuales</h3><ul>{% for h in r.before.critical %}<li>{{ sev(h.severity) }} {{ h.rule_id }} {{ h.title }} — {{ h.roles|join(', ') }}</li>{% else %}<li class="muted">Ninguno</li>{% endfor %}</ul>
+  <h3>Conflictos SoD actuales (preexistentes)</h3><ul>{% for h in r.before.sod %}<li>{{ sev(h.severity) }} {{ h.risk_id }} {{ h.title }} — {{ h.roles|join(', ') }}</li>{% else %}<li class="muted">Ninguno</li>{% endfor %}</ul>
+</div>
+<div class="tab" id="s-role" data-group="s">
+  {% for s in r.added_role_summary %}
+  <div class="card"><h3><a href="/roles/{{ s.rol }}">{{ s.rol }}</a> <span class="muted">{{ s.descripcion }} · {{ s.tipo }}</span></h3>
+  <p>{{ s.instancias_nuevas }} instancias de autorización · {{ s.ya_cubiertas }} ya cubiertas por permisos actuales · objetos críticos: {{ s.objetos_criticos|join(', ') or 'ninguno' }}</p></div>
+  {% else %}<p class="muted">El escenario no agrega roles.</p>{% endfor %}
+</div>
+<div class="tab" id="s-perm" data-group="s">
+  <table class="tbl compact sortable"><tr><th>Objeto</th><th>Autorización</th><th>Valores</th><th>Rol</th><th>Certeza</th><th>Ya lo tenía</th><th>Crítico</th></tr>
+  {% for p in r.new_permissions %}<tr><td><code>{{ p.object }}</code></td><td><code>{{ p.auth }}</code></td><td class="mono">{{ p['values'] if p is mapping else p.values }}</td><td>{{ p.role }}</td><td>{{ cert(p.certainty) }}</td><td>{{ 'sí (subsumido)' if p.already_covered else 'no' }}</td><td>{{ '⚠' if p.critical_object else '' }}</td></tr>{% endfor %}
+  </table>
+</div>
+<div class="tab" id="s-alt" data-group="s">
+  <p class="warnbox">Alternativas sugeridas por cobertura de transacciones del rol solicitado. <b>No garantizan</b> que el rol permita cumplir la función: valide valores de objetos, niveles organizativos y aplicaciones Fiori con el dueño del proceso.</p>
+  <table class="tbl"><tr><th>Rol</th><th>Descripción</th><th>Cobertura tcodes</th><th>Faltan</th><th>Nuevos críticos</th><th>Nuevos SoD</th><th>Máx. gravedad nueva</th><th>Confianza</th></tr>
+  {% for a in r.alternatives %}<tr><td><a href="/roles/{{ a.role }}">{{ a.role }}</a></td><td>{{ a.description }}</td><td>{{ (a.tcode_coverage*100)|round|int }}%</td><td>{{ a.missing_tcodes|join(', ') }}</td><td class="right">{{ a.new_critical }}</td><td class="right">{{ a.new_sod }}</td><td>{{ a.max_new_severity }}</td><td>{{ a.confidence }}</td></tr>
+  {% else %}<tr><td colspan="8" class="muted">Sin alternativas (solo se calculan cuando el resultado no es «aprobación recomendada» y se agrega un único rol).</td></tr>{% endfor %}</table>
+</div>
+<div class="tab" id="s-q" data-group="s">
+  <table class="tbl"><tr><th>Código</th><th>Gravedad</th><th>Mensaje</th></tr>{% for i in r.issues %}<tr><td><code>{{ i.code }}</code></td><td>{{ sev(i.severity) }}</td><td>{{ i.message }}</td></tr>{% endfor %}</table>
+</div>
+{% endif %}
+{% endblock %}

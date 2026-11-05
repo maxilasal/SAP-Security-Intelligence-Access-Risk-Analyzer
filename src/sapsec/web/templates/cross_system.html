@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, reco_box %}
+{% block title %}Desarrollo vs. producción{% endblock %}
+{% block content %}
+<h1>Desarrollo vs. producción</h1>
+<p class="subtitle">Personas que desarrollan en un sistema DEV y además tienen permisos críticos en el PRD de su mismo landscape
+(los sistemas por los que viajan sus transportes). Se usa el último snapshot de cada sistema.</p>
+{{ reco_box(reco) }}
+{% if x.rows %}
+<div class="tbl-wrap"><table class="tbl sortable">
+<tr><th>Persona</th><th>Desarrolla en</th><th>Producción</th><th>Puede hacer en producción</th><th></th></tr>
+{% for r in x.rows %}
+<tr><td><b>{{ r.user }}</b></td>
+<td>{% for d in r.dev %}<span class="chip">{{ d.connection.system.label }}</span> {% endfor %}{% if not r.same %}<br><span class="small muted">landscape sin definir: verificar que sean del mismo</span>{% endif %}</td>
+<td>{{ r.prd.connection.system.label }}<br><span class="small muted">{{ r.prd.sid }}/{{ r.prd.client }}</span></td>
+<td>{% for i in r["items"] %}<div>{{ sev(i.severity) }} {{ i.title }}</div>{% endfor %}</td>
+<td class="nowrap"><a class="btn ghost small" href="/usuarios/{{ r.user }}?sistema={{ r.prd.connection_id }}">Ver en {{ r.prd.connection.system.label }}</a></td></tr>
+{% endfor %}
+</table></div>
+{% endif %}
+<div class="card small">
+  <b>Sistemas que se comparan.</b> DEV: {% for s in x.dev %}<span class="chip">{{ s.connection.system.label }}{% if s.connection.system.landscape %} · {{ s.connection.system.landscape }}{% endif %}</span> {% else %}<span class="muted">ninguno extraído</span>{% endfor %}
+  · PRD: {% for s in x.prd %}<span class="chip">{{ s.connection.system.label }}{% if s.connection.system.landscape %} · {{ s.connection.system.landscape }}{% endif %}</span> {% else %}<span class="muted">ninguno extraído</span>{% endfor %}
+  <p class="muted">El «landscape» agrupa DEV, QA y PRD que comparten transportes (por ejemplo «ECC Uruguay» o «S/4 corporativo»); se define en
+  <a href="/conexiones">Conexiones SAP</a>. Si no está definido, se comparan todos los DEV con todos los PRD.
+  Quién desarrolla se detecta con la regla INFO-DEV-001 (S_DEVELOP crear/modificar) y los permisos de producción considerados
+  se configuran en <code>critical_auth.yaml › landscape</code>.</p>
+</div>
+{% endblock %}

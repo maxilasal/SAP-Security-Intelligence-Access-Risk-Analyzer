@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Comparador de sistemas{% endblock %}
+{% block content %}
+<h1>Comparador de sistemas y snapshots</h1>
+<p class="subtitle">Compare DEV/QA/PRD o dos momentos del mismo sistema. Cada snapshot respeta su sistema y mandante.</p>
+<form class="card form-grid" method="get">
+  <label>Snapshot A (referencia)<select name="snap_a">{% for s in all_snaps %}<option value="{{ s.id }}" {% if snap_a==s.id %}selected{% endif %}>#{{ s.id }} {{ s.label }}</option>{% endfor %}</select></label>
+  <label>Snapshot B (comparado)<select name="snap_b">{% for s in all_snaps %}<option value="{{ s.id }}" {% if snap_b==s.id %}selected{% endif %}>#{{ s.id }} {{ s.label }}</option>{% endfor %}</select></label>
+  <button class="btn">Comparar</button>
+</form>
+{% if result %}
+{% set sa, sb = result.sa, result.sb %}
+<p class="note">A = #{{ sa.id }} {{ sa.label }} · B = #{{ sb.id }} {{ sb.label }}.
+{% if sa.connection_id == sb.connection_id %}Mismo sistema y mandante: las diferencias son cambios en el tiempo (no se dispone de documentos de modificación; se reconstruyen por diferencia de snapshots).{% else %}Sistemas/mandantes distintos: las diferencias pueden ser legítimas.{% endif %}</p>
+<div class="grid g2">
+  <div class="card"><h3>Roles solo en A ({{ result.only_a|length }})</h3><p>{{ result.only_a|join(', ') or '—' }}</p></div>
+  <div class="card"><h3>Roles solo en B ({{ result.only_b|length }})</h3><p>{{ result.only_b|join(', ') or '—' }}</p></div>
+  <div class="card"><h3>Roles con autorizaciones distintas ({{ result.changed|length }})</h3>
+    <p>{% for r in result.changed %}<a href="/comparador-roles?a={{ r }}&b={{ r }}&snap_a={{ sa.id }}&snap_b={{ sb.id }}">{{ r }}</a> {% else %}—{% endfor %}</p></div>
+  <div class="card"><h3>Objetos críticos que difieren</h3>
+    <table class="tbl compact"><tr><th>Rol</th><th>Solo en A</th><th>Solo en B</th></tr>{% for d in result.crit_diff %}<tr><td>{{ d.rol }}</td><td>{{ d.solo_a|join(', ') }}</td><td>{{ d.solo_b|join(', ') }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Sin diferencias en objetos críticos</td></tr>{% endfor %}</table></div>
+  <div class="card"><h3>Asignaciones nuevas en B ({{ result.assign_added|length }})</h3><p>{% for u, r in result.assign_added %}{{ u }} → {{ r }}<br>{% else %}—{% endfor %}</p></div>
+  <div class="card"><h3>Asignaciones eliminadas en B ({{ result.assign_removed|length }})</h3><p>{% for u, r in result.assign_removed %}{{ u }} → {{ r }}<br>{% else %}—{% endfor %}</p></div>
+  <div class="card"><h3>Usuarios solo en A / solo en B</h3><p>{{ result.users_only_a|join(', ') or '—' }} / {{ result.users_only_b|join(', ') or '—' }}</p></div>
+</div>
+{% endif %}
+{% endblock %}

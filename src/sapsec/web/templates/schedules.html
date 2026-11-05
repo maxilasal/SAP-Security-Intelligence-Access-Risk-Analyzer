@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Extracciones programadas{% endblock %}
+{% block content %}
+{% if rows|selectattr('running')|list %}<meta http-equiv="refresh" content="10">{% endif %}
+<h1>Extracciones programadas</h1>
+<p class="subtitle">Para que los sistemas se extraigan solos, por ejemplo todas las madrugadas. Se procesan de a uno y al terminar se
+analizan; a la mañana «Qué corregir primero» ya está actualizado.</p>
+
+<div class="boxes">
+  <div class="box"><h4>1 · Con la aplicación abierta</h4><p>✓ La aplicación revisa cada minuto y ejecuta lo programado.</p></div>
+  <div class="box"><h4>2 · Aunque la aplicación esté cerrada</h4>
+    {% if win_task == 'instalada' %}<p>✓ Tarea de Windows <b>instalada</b>: revisa cada 30 minutos.</p>
+    {% elif is_windows %}<p><b>Falta instalar la tarea de Windows</b> (una sola vez). En PowerShell, en la carpeta de la aplicación:</p>
+      <p><code>powershell -ExecutionPolicy Bypass -File scripts\instalar_tarea_programada.ps1</code></p>
+    {% else %}<p class="muted">Disponible en Windows: <code>scripts\instalar_tarea_programada.ps1</code>.</p>{% endif %}</div>
+  <div class="box"><h4>Requisitos</h4><p class="small">El equipo encendido a esa hora (la tarea lo despierta si está suspendido) y el mismo
+    usuario de Windows que guardó las contraseñas de SAP. Si a la hora programada el equipo estaba apagado, se ejecuta al encenderse
+    dentro de las 3 horas siguientes; después se omite para no cargar PRD en horario laboral.</p></div>
+</div>
+
+<h2>Programaciones</h2>
+<div class="tbl-wrap"><table class="tbl">
+<tr><th>Nombre</th><th>Cuándo</th><th>Qué sistemas</th><th>Próxima</th><th>Última ejecución</th><th></th></tr>
+{% for r in rows %}{% set x = r.s %}
+<tr class="{{ '' if x.enabled else 'muted' }}">
+  <td><b>{{ x.name }}</b>{% if not x.enabled %} <span class="chip">pausada</span>{% endif %}</td>
+  <td>{{ r.when }}</td><td>{{ r.what }}</td>
+  <td class="nowrap">{{ r.next }}</td>
+  <td>
+    {% if r.running %}<span class="chip warn">en curso: {{ x.current or 'iniciando' }}</span>
+    {% elif x.finished_at %}
+      {% set ok = x.last_result|rejectattr('estado','equalto','error')|list|length %}{% set bad = x.last_result|selectattr('estado','equalto','error')|list|length %}
+      {{ r.last }} · <span class="chip {{ 'bad' if bad else 'good' }}">{{ ok }} correcto{{ '' if ok == 1 else 's' }}{% if bad %}, {{ bad }} con error{% endif %}</span>
+      <details class="more-items"><summary>detalle ({{ x.trigger }})</summary>
+        <table class="tbl compact">{% for it in x.last_result %}<tr><td>{{ it.sistema }}</td><td>{{ it.estado }}</td>
+        <td>{% if it.snapshot %}<a href="/snapshots/{{ it.snapshot }}">snapshot #{{ it.snapshot }}</a>{% endif %} <span class="small muted">{{ it.detalle }}</span></td></tr>{% endfor %}</table>
+      </details>
+    {% elif x.state == 'en_curso' %}<span class="chip bad">interrumpida</span>
+    {% else %}<span class="muted">todavía no se ejecutó</span>{% endif %}
+  </td>
+  <td class="nowrap">
+    {% if user.can('extraer') and not r.running %}<form class="inline" method="post" action="/programacion/{{ x.id }}/ejecutar" data-confirm="Se ejecutará ahora «{{ x.name }}» ({{ r.what }}). ¿Continuar?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small">Ejecutar ahora</button></form>{% endif %}
+    {% if user.can('conexiones') %}
+    <form class="inline" method="post" action="/programacion/{{ x.id }}/{{ 'pausar' if x.enabled else 'activar' }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small">{{ 'Pausar' if x.enabled else 'Activar' }}</button></form>
+    <form class="inline" method="post" action="/programacion/{{ x.id }}/eliminar" data-confirm="¿Eliminar la programación «{{ x.name }}»? Los snapshots ya extraídos no se borran."><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Eliminar</button></form>
+    {% endif %}
+  </td>
+</tr>
+{% else %}<tr><td colspan="6" class="muted">No hay extracciones programadas.</td></tr>{% endfor %}
+</table></div>
+
+{% if user.can('conexiones') %}
+<h2>Nueva programación</h2>
+<form class="card" method="post" action="/programacion">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="form-grid">
+    <label>Nombre<input name="name" placeholder="PRD todas las madrugadas" maxlength="100"></label>
+    <label>Hora (de este equipo)<input type="time" name="time_hhmm" value="03:00" required></label>
+    <label>Sistemas<select name="environment">
+      <option value="TODOS">Todos los sistemas</option><option value="PRD" selected>Todos los PRD</option>
+      <option value="QA">Todos los QA</option><option value="DEV">Todos los DEV</option></select></label>
+  </div>
+  <p><b>Días:</b>
+    {% for i in range(7) %}<label class="nowrap"><input type="checkbox" name="days" value="{{ i }}" checked> {{ ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"][i] }}</label> {% endfor %}</p>
+  {% if conns %}<details class="more-items"><summary>Elegir sistemas puntuales (opcional: reemplaza la opción «Sistemas»)</summary>
+    <p>{% for c in conns %}<label class="nowrap"><input type="checkbox" name="connection_ids" value="{{ c.id }}"> {{ c.label }}</label><br>{% endfor %}</p>
+  </details>{% endif %}
+  <p><button class="btn">Guardar programación</button></p>
+  <p class="small muted">Sugerencia: PRD de madrugada (por ejemplo 03:00) y DEV en otro horario, para no extraer todo junto.</p>
+</form>
+{% endif %}
+{% endblock %}

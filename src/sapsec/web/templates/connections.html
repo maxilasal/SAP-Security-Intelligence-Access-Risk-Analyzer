@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Conexiones SAP{% endblock %}
+{% block content %}
+<h1>Conexiones SAP</h1>
+{% if deleted %}<div class="note">{% if deleted == 'todo' %}Se borraron todos los sistemas, snapshots, hallazgos y contraseñas guardadas. Los usuarios de la aplicación y la auditoría se conservan.{% else %}Eliminado: {{ deleted }} (incluye sus snapshots, hallazgos y la contraseña guardada).{% endif %}</div>{% endif %}
+<p class="subtitle">Sistemas y mandantes registrados. Las contraseñas se guardan en el almacén de credenciales del sistema operativo (o cifradas), nunca en la base de datos.</p>
+{% if updated %}<div class="note">Datos del sistema actualizados. Si cambió el ambiente, vuelva a extraer el sistema para aplicar los controles de ese ambiente.</div>{% endif %}
+<datalist id="landscapes">{% for l in landscapes %}<option value="{{ l }}">{% endfor %}</datalist>
+
+{% for c in conns %}
+<div class="card" id="c{{ c.id }}">
+  <h3><span class="env env-{{ (c.system.environment or 'OTRO')|upper }}">{{ (c.system.environment or 'OTRO')|upper }}</span> {{ c.system.label }} <span class="pill">{{ c.system.sid }} / {{ c.client }}</span> <span class="pill">{{ c.name }}</span> <span class="pill">backend {{ c.backend }}</span>
+  {% if c.snc_mode %}<span class="pill">SNC</span>{% endif %}</h3>
+  <p class="muted">Usuario RFC {{ c.rfc_user }} · {{ c.ashost or c.mshost or c.fixture_path or '' }} {{ c.sysnr or '' }} · usuarios vía {{ c.user_logon_source }}
+   · límites {{ c.limits }}{% if c.system.landscape %} · landscape <b>{{ c.system.landscape }}</b>{% endif %}</p>
+  {% if user.can('conexiones') %}
+  <form class="inline sysedit" method="post" action="/sistemas/{{ c.system.id }}/datos">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="small">Ambiente <select name="environment">{% for e in ['PRD','QA','DEV','OTRO'] %}<option {% if (c.system.environment or 'OTRO')|upper == e %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></label>
+    <label class="small">Landscape <input name="landscape" list="landscapes" value="{{ c.system.landscape }}" placeholder="ej. ECC Uruguay"></label>
+    <button class="btn ghost small">Guardar</button>
+  </form>
+  {% endif %}
+  {% if user.can('extraer') %}
+  <form class="inline" method="post" action="/conexiones/{{ c.id }}/probar"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small">Probar conectividad y permisos</button></form>
+  <form class="inline" method="post" action="/conexiones/{{ c.id }}/extraer" data-confirm="Se ejecutará una extracción de solo lectura en {{ c.system.sid }}/{{ c.client }} respetando los límites de carga configurados. ¿Continuar?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn small">Extraer snapshot</button></form>
+  {% endif %}
+  <a class="btn ghost small" href="/sistemas/{{ c.id }}">Historial</a>
+  {% if user.can('conexiones') %}
+  {% if c.fingerprint %}<form class="inline" method="post" action="/conexiones/{{ c.id }}/huella" data-confirm="La huella identifica al sistema real ({{ c.fingerprint }}). Restablecerla solo si el servidor cambió legítimamente (p. ej. migración). ¿Continuar?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small" title="Huella: {{ c.fingerprint }}">Restablecer huella</button></form>{% endif %}
+  <form class="inline" method="post" action="/conexiones/{{ c.id }}/eliminar"
+        data-confirm="Se eliminará la conexión {{ c.system.sid }}/{{ c.client }} ({{ c.name }}) junto con sus {{ snap_counts.get(c.id, 0) }} snapshot(s), hallazgos, simulaciones y la contraseña guardada en este equipo. SAP no se modifica. ¿Continuar?">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Eliminar conexión</button></form>
+  {% endif %}
+  {% if c.last_test_result %}
+  <details {% if not c.last_test_result.ok %}open{% endif %}><summary>Último diagnóstico ({{ c.last_test_result.fecha }}) — {{ 'OK' if c.last_test_result.ok else 'ERROR' }}</summary>
+    {% if c.last_test_result.error %}<div class="errbox">{{ c.last_test_result.error }}</div>{% endif %}
+    {% if c.last_test_result.sid_coincide == false %}<div class="errbox">El SID devuelto no coincide con el registrado.</div>{% endif %}
+    <div class="grid g3">
+      <div><h3>Sistema</h3><table class="tbl compact">{% for k,v in c.last_test_result.sistema.items() %}<tr><td>{{ k }}</td><td>{{ v }}</td></tr>{% endfor %}
+      {% if c.last_test_result.sdk %}<tr><td>NW RFC SDK</td><td>{{ c.last_test_result.sdk }}</td></tr>{% endif %}</table></div>
+      <div><h3>Funciones RFC</h3><table class="tbl compact">{% for k,v in c.last_test_result.funciones.items() %}<tr><td><code>{{ k }}</code></td><td>{{ v }}</td></tr>{% endfor %}</table></div>
+      <div><h3>Tablas (lectura)</h3><table class="tbl compact">{% for k,v in c.last_test_result.tablas.items() %}<tr><td><code>{{ k }}</code></td><td>{{ v }}</td></tr>{% endfor %}</table></div>
+    </div>
+  </details>
+  {% endif %}
+</div>
+{% else %}<p class="muted">No hay conexiones registradas.</p>{% endfor %}
+
+{% if user.can('conexiones') %}
+<h2>Registrar conexión</h2>
+<form class="card" method="post" action="/conexiones">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="form-grid">
+    <label>Nombre del sistema *<input name="system_name" maxlength="100" required placeholder="PRD Uruguay"></label>
+    <label>SID *<input name="sid" maxlength="8" required placeholder="PRD"></label>
+    <label>Mandante *<input name="client" maxlength="3" required placeholder="100"></label>
+    <label>Ambiente<select name="environment"><option>DEV</option><option>QA</option><option>PRD</option><option>OTRO</option></select></label>
+    <label>Landscape (DEV, QA y PRD que comparten transportes)<input name="landscape" list="landscapes" maxlength="100" placeholder="ECC Uruguay · S/4 corporativo"></label>
+    <label>Sensibilidad (factor de riesgo)<input name="sensitivity" placeholder="PRD 1.0 · QA 0.6 · DEV 0.5"></label>
+    <label>Nombre<input name="name" placeholder="PRD 100 auditoría"></label>
+    <label>Descripción del sistema<input name="description"></label>
+    <label>Backend RFC<select name="backend"><option value="nwrfc">nwrfc (SAP NW RFC SDK, recomendado)</option><option value="pyrfc">pyrfc (heredado)</option><option value="fixture">fixture (datos de prueba)</option></select></label>
+    <label>Servidor de aplicación (ashost)<input name="ashost"></label>
+    <label>Nº de instancia (sysnr)<input name="sysnr" maxlength="2"></label>
+    <label>Message server (mshost)<input name="mshost"></label>
+    <label>Servicio MS (msserv)<input name="msserv"></label>
+    <label>Grupo de logon<input name="logon_group"></label>
+    <label>SAProuter<input name="saprouter"></label>
+    <label>Usuario RFC (tipo Sistema) *<input name="rfc_user" required maxlength="12"></label>
+    <label>Contraseña (se guarda en el almacén seguro)<input name="password" type="password" autocomplete="new-password"></label>
+    <label>Idioma<input name="lang" value="ES" maxlength="2"></label>
+    <label><span><input type="checkbox" name="snc_mode"> SNC (recomendado en PRD)</span></label>
+    <label>SNC QoP<input name="snc_qop" placeholder="9"></label>
+    <label>SNC my name<input name="snc_myname"></label>
+    <label>SNC partner name<input name="snc_partnername"></label>
+    <label>SNC librería<input name="snc_lib"></label>
+    <label>Datos de usuarios<select name="user_logon_source"><option value="usr02_restricted">USR02 (campos restringidos, incluye último acceso)</option><option value="bapi">BAPI_USER_GET_DETAIL (sin S_TABU_NAM sobre USR02)</option></select></label>
+    <label>Filas máx. por llamada<input name="max_rows_per_call" value="20000"></label>
+    <label>Llamadas máx. por minuto<input name="max_calls_per_minute" value="120"></label>
+    <label>Claves por lote IN<input name="batch_size_in_list" value="150"></label>
+    <label>Archivo fixture (solo pruebas)<input name="fixture_path" placeholder="tests/fixtures/demo_system.json"></label>
+  </div>
+  <p><button class="btn">Registrar</button></p>
+</form>
+{% endif %}
+
+<h2>Snapshots</h2>
+<div class="tbl-wrap"><table class="tbl sortable">
+<tr><th>#</th><th>Sistema</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Backend</th><th>Por</th><th>Analizado</th><th></th></tr>
+{% for s in snaps_all %}<tr><td><a href="/snapshots/{{ s.id }}">{{ s.id }}</a></td><td>{{ s.connection.system.label }} · {{ s.sid }}/{{ s.client }}</td><td>{{ s.started_at.strftime('%Y-%m-%d %H:%M') }}</td>
+<td>{{ s.finished_at.strftime('%H:%M:%S') if s.finished_at else '' }}</td><td>{{ s.status }}{% if s.is_test_data %} (prueba){% endif %}</td><td>{{ s.backend }}</td><td>{{ s.started_by }}</td><td>{{ 'sí' if s.analyzed_at else 'no' }}</td>
+<td>{% if user.can('conexiones') %}<form class="inline" method="post" action="/snapshots/{{ s.id }}/eliminar" data-confirm="¿Eliminar el snapshot #{{ s.id }} de {{ s.sid }}/{{ s.client }} con sus hallazgos y simulaciones?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Eliminar</button></form>{% endif %}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

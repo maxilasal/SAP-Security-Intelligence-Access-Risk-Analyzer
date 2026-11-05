@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_macros.html" import filter %}
+{% block title %}Reducir permisos (opcional){% endblock %}
+{% block content %}
+<h1>Reducir permisos (mejoras opcionales)</h1>
+<p class="subtitle">Ideas para dejar a cada usuario solo con lo que usa: roles que sobran, vencidos o sin uso. <b>No son urgentes</b>: primero resuelva <a href="/">Qué corregir primero</a>. Ninguna se aplica sola; cada una indica beneficio, impacto y confianza.</p>
+{% if recs is none %}<meta http-equiv="refresh" content="15">
+<div class="warnbox">Calculando recomendaciones en segundo plano para este snapshot (puede tardar unos minutos). La página se actualizará sola.</div>
+{% else %}
+{{ filter("trec") }} <span class="muted">{{ recs|length }} recomendaciones</span>
+<div class="tbl-wrap"><table class="tbl sortable" id="trec">
+<tr><th>Tipo</th><th>Objeto</th><th>Detalle</th><th>Beneficio</th><th>Impacto funcional / consecuencias</th><th>Confianza</th></tr>
+{% for r in recs %}<tr><td>{{ r.tipo }}</td><td><a href="{{ r.link }}">{{ r.objeto }}</a></td><td>{{ r.detalle }}</td><td>{{ r.beneficio }}</td><td>{{ r.impacto }}</td><td>{{ r.confianza }}</td></tr>
+{% else %}<tr><td colspan="6" class="muted">Sin recomendaciones.</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+<p class="note">Para separar funciones incompatibles o evaluar un rol alternativo, use el <a href="/simulador">simulador</a>: verifica que la alternativa no introduzca riesgos nuevos, pero la cobertura funcional debe confirmarla el dueño del proceso.</p>
+{% endblock %}

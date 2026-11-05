@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cert %}
+{% block title %}Objetos de autorización{% endblock %}
+{% block content %}
+<h1>Objetos de autorización · búsqueda inversa</h1>
+<p class="subtitle">¿Qué usuarios poseen una autorización determinada? Cada coincidencia se evalúa dentro de una misma instancia.</p>
+<form class="card form-grid" method="get">
+  <label>Objeto<input name="objeto" list="objlist" value="{{ p.objeto }}" placeholder="S_USER_AGR"></label>
+  <datalist id="objlist">{% for o in objects %}<option value="{{ o }}">{{ data.object_text.get(o,'') }}</option>{% endfor %}</datalist>
+  <label>Campo<input name="campo" value="{{ p.campo }}" placeholder="{{ fields|join(', ') or 'ACTVT' }}"></label>
+  <label>Valor que debe cubrir<input name="valor" value="{{ p.valor }}" placeholder="02"></label>
+  <label><span><input type="checkbox" name="comodin" value="1" {% if p.comodin %}checked{% endif %}> Solo comodín total (*)</span></label>
+  <label>Transacción ejecutable<input name="tcode" value="{{ p.tcode }}" placeholder="SU01"></label>
+  <label>Rol vigente<input name="rol" value="{{ p.rol }}"></label>
+  <label>Perfil<input name="perfil" value="{{ p.perfil }}" placeholder="SAP_ALL"></label>
+  <label>Nivel de riesgo mínimo<select name="gravedad"><option value="">—</option>{% for k in ["critico","alto","medio","bajo"] %}<option value="{{ k }}" {% if p.gravedad==k %}selected{% endif %}>{{ SEV_LABEL[k] }}</option>{% endfor %}</select></label>
+  <button class="btn">Buscar</button>
+</form>
+<p class="muted">Ejemplos:
+  <a href="?objeto=S_USER_AGR&campo=ACTVT&valor=02">mantener roles</a> ·
+  <a href="?objeto=S_TABU_DIS&campo=DICBERCLS&comodin=1">acceso amplio a tablas</a> ·
+  <a href="?objeto=S_RFC&campo=RFC_NAME&comodin=1">RFC amplio</a> ·
+  <a href="?objeto=S_DEVELOP&campo=ACTVT&valor=02">desarrollo</a> ·
+  <a href="?tcode=SU01">pueden iniciar SU01</a> ·
+  <a href="?perfil=SAP_ALL">SAP_ALL</a></p>
+{% if searched %}
+<h2>{{ results|length }} usuario(s)</h2>
+<div class="tbl-wrap"><table class="tbl sortable">
+<tr><th>Usuario</th><th>Tipo</th><th>Estado</th><th>Evidencia (instancia · valores · procedencia)</th></tr>
+{% for r in results %}
+<tr><td><a href="/usuarios/{{ r.user.username }}">{{ r.user.username }}</a></td><td>{{ r.user.type_label }}</td><td>{{ r.user.lock_label }}</td>
+<td>{% for e in r.evidence %}<div class="mono">{{ e.instance.as_text() }}</div><div class="muted">{{ e.provenance() }} {{ cert(e.certainty) }}</div>{% endfor %}</td></tr>
+{% endfor %}
+</table></div>
+{% endif %}
+{% endblock %}

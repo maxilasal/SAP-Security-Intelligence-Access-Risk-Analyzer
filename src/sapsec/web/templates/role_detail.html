@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, cert, fix_item, fix_list, sev_counts, filter, reco_box, fiori_table %}
+{% block title %}Rol {{ ra.role }}{% endblock %}
+{% block content %}
+{% set q = ra.quality %}
+{% set qsev = 'bajo' if q.score >= 80 else ('medio' if q.score >= 50 else 'critico') %}
+<div class="crumbs"><a href="/roles">Roles</a> › {{ ra.role }}</div>
+<h1>{{ ra.role }}</h1>
+<p class="subtitle">{{ ra.description or '— sin descripción —' }}</p>
+<div class="facts">
+  <span><b>Rol {{ ra.role_type }}</b></span>
+  <span><b>{{ ra.users|length }}</b> usuario{{ '' if ra.users|length == 1 else 's' }}</span>
+  {% if ra.consistency and not ra.consistency.consistent %}<span class="chip bad">perfil {{ 'no generado' if not ra.consistency.generated else 'desactualizado' }}</span>{% elif ra.role_type != 'compuesto' %}<span class="chip good">perfil al día</span>{% endif %}
+  {% set cd = data.role_meta.get(ra.role, {}).get('change_dat','') %}
+  <span>modificado {{ (cd[:4] ~ '-' ~ cd[4:6] ~ '-' ~ cd[6:8]) if cd|length == 8 else (cd or '?') }} por {{ data.role_meta.get(ra.role, {}).get('change_usr','') or '?' }}</span>
+</div>
+<p><a class="btn ghost small" href="/simulador?agregar={{ ra.role }}">Simular asignarlo a alguien</a>
+  {% if task_key %}<a class="btn ghost small" href="/acciones/{{ task_key }}">Ver la tarea de corrección</a>{% endif %}
+  <a class="btn ghost small" href="/comparador-roles?a={{ ra.role }}">Comparar con otro rol</a></p>
+
+{{ reco_box(reco, "Recomendación", "calidad del rol: " ~ q.score ~ "/100") }}
+
+{% if fixes %}
+<h2>Qué corregir en este rol ({{ fixes|length }})</h2>
+<p class="sevline">{{ sev_counts(fixes) }}</p>
+{{ fix_list(fixes, 6) }}
+{% endif %}
+
+<h2>No combinar con</h2>
+{% if incompat is none %}<div class="warnbox small">Calculando incompatibilidades… recargue en unos minutos.</div>
+{% elif incompat %}
+<p class="muted small">Si un usuario tiene este rol, no debería recibir también estos roles.</p>
+<ul class="fixlist">
+{% for x in incompat %}
+<li><details><summary>{{ sev(x.severity) }}<span class="grow"><b>Roles que dan «{{ x.missing_title }}»</b><br><span class="muted">{{ x.risk_title }}</span></span>
+  <span class="muted nowrap">{{ x.total_roles }} rol{{ '' if x.total_roles == 1 else 'es' }}</span><span class="more">ver roles ▸</span></summary>
+  <div class="chips">{% for r in x.roles %}<a class="chip" href="/roles/{{ r }}">{{ r }}</a>{% endfor %}{% if x.total_roles > x.roles|length %}<span class="chip">+{{ x.total_roles - x.roles|length }}</span>{% endif %}</div>
+</details></li>
+{% endfor %}
+</ul>
+{% else %}<p class="muted">Sin incompatibilidades con otros roles{% if intra %} (los conflictos que el rol tiene por sí solo están en «Qué corregir»){% endif %}.</p>{% endif %}
+
+<section class="tech">
+<h2>Detalle técnico</h2>
+<div class="tabs" data-group="r">
+  <a href="#" class="on" data-tab="r-auth">Objetos y valores ({{ objects|length }})</a>
+  <a href="#" data-tab="r-menu">Transacciones y menú</a>
+  {% if fiori_services %}<a href="#" data-tab="r-fiori">Fiori / OData ({{ fiori_services|length }})</a>{% endif %}
+  <a href="#" data-tab="r-rel">Usuarios y relaciones</a>
+  <a href="#" data-tab="r-sim">Roles similares</a>
+  <a href="#" data-tab="r-q">Criterios de calidad</a>
+</div>
+<div class="tab on" id="r-auth" data-group="r">
+  {{ filter("trauth") }}
+  <table class="tbl compact sortable" id="trauth"><tr><th>Objeto</th><th>Autorización</th><th>Valores</th><th>Aportado por</th><th>Certeza</th></tr>
+  {% for e in objects %}<tr><td><code>{{ e.instance.object }}</code></td><td><code>{{ e.instance.auth }}</code></td><td class="mono">{{ e.instance.as_text().split('] ',1)[1] }}</td><td>{{ e.roles|join(', ') }}</td><td>{{ cert(e.certainty) }}</td></tr>{% endfor %}
+  </table>
+  {% if ra.org_levels %}<p class="small"><b>Niveles organizativos:</b> {% for o in ra.org_levels %}<span class="chip">{{ o.variable }} = {{ o.desde or 'sin mantener' }}{% if o.hasta %}–{{ o.hasta }}{% endif %}</span> {% endfor %}</p>{% endif %}
+</div>
+<div class="tab" id="r-menu" data-group="r">
+  <p><b>Transacciones autorizadas (S_TCODE):</b></p>
+  <div class="chips">{% for t in ra.tcodes %}<span class="chip" title="{{ data.tcode_text.get(t,'') }}">{{ t }}</span>{% else %}<span class="muted">ninguna</span>{% endfor %}</div>
+  <p class="small muted">El menú del rol (o ver una aplicación Fiori) no otorga autorización: la autorización real está en S_TCODE/S_SERVICE y en los objetos de negocio.</p>
+</div>
+{% if fiori_services %}<div class="tab" id="r-fiori" data-group="r">{{ fiori_table(fiori_services) }}</div>{% endif %}
+<div class="tab" id="r-rel" data-group="r">
+  <div class="grid g2"><div>
+  <table class="tbl compact">{% for k, v in ra.related.items() %}<tr><td>{{ k|replace('_',' ') }}</td><td>{% for r in v %}<a href="/roles/{{ r }}">{{ r }}</a> {% else %}—{% endfor %}</td></tr>{% endfor %}</table></div>
+  <div><table class="tbl compact"><tr><th>Usuario</th><th>Desde</th><th>Hasta</th><th>Heredado</th></tr>
+  {% for x in ra.users[:200] %}<tr><td><a href="/usuarios/{{ x.usuario }}">{{ x.usuario }}</a></td><td>{{ x.desde }}</td><td>{{ x.hasta }}</td><td>{{ 'sí' if x.heredado else '' }}</td></tr>{% else %}<tr><td colspan="4" class="muted">Sin usuarios</td></tr>{% endfor %}</table></div></div>
+</div>
+<div class="tab" id="r-sim" data-group="r">
+  <table class="tbl compact"><tr><th>Rol</th><th>Similitud</th><th>Observación</th><th></th></tr>
+  {% for s in similar %}<tr><td><a href="/roles/{{ s.role }}">{{ s.role }}</a></td><td>{{ (s.similarity*100)|round|int }}%</td><td>{% if s.contains %}Este rol está contenido en {{ s.role }}{% elif s.contained %}{{ s.role }} está contenido en este rol{% endif %}</td>
+  <td><a href="/comparador-roles?a={{ ra.role }}&b={{ s.role }}">comparar</a></td></tr>{% else %}<tr><td colspan="4" class="muted">Sin roles con similitud ≥ 50%</td></tr>{% endfor %}</table>
+</div>
+<div class="tab" id="r-q" data-group="r">
+  <p class="small muted">Puntaje de calidad: 100 menos el peso de cada criterio incumplido.</p>
+  <table class="tbl compact"><tr><th>Criterio</th><th>Peso</th><th>Resultado</th><th>Detalle</th></tr>
+  {% for c in q.criteria %}<tr><td>{{ c.label }}</td><td class="right">{{ c.weight }}</td><td>{{ '✔' if c.passed else '✘' }}</td><td class="small">{{ c.detail }}</td></tr>{% endfor %}
+  </table>
+</div>
+</section>
+{% endblock %}

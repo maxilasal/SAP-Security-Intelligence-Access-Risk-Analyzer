@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}SAP Security Analyzer{% endblock %} · SAP Security Intelligence</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/app.js" defer></script>
+</head>
+<body>
+{% if user %}
+<aside class="sidebar">
+  <div class="brand"><span class="logo">◆</span> SAP Security<br><small>Intelligence &amp; Access Risk</small></div>
+  {% set groups = [
+    ("", [("sistemas","/sistemas","Todos los sistemas"), ("dashboard","/","Qué corregir primero"), ("plan","/acciones","Todas las tareas")]),
+    ("Antes de asignar un rol", [("simulador","/simulador","Simular una asignación")]),
+    ("Consultar", [("usuarios","/usuarios","Usuarios"), ("roles","/roles","Roles"), ("objetos","/objetos","Quién tiene un permiso")]),
+    ("Análisis detallado", [("criticas","/criticas","Permisos críticos"), ("sod","/sod","Conflictos de funciones (SoD)"), ("recomendaciones","/recomendaciones","Reducir permisos (opcional)")]),
+    ("Comparar", [("comparador_roles","/comparador-roles","Dos roles"), ("comparador_sistemas","/comparador-sistemas","Sistemas o fechas"), ("entre","/entre-sistemas","Desarrollo vs. producción")]),
+    ("Seguimiento", [("auditorias","/hallazgos","Hallazgos e historial"), ("reportes","/reportes","Reportes")]),
+    ("Administración", [("conexiones","/conexiones","Conexiones SAP"), ("programacion","/programacion","Extracciones programadas"), ("reglas","/reglas","Reglas"), ("configuracion","/configuracion","Configuración y acceso")])
+  ] %}
+  <nav>
+  {% for gname, items in groups %}
+    {% if gname %}<div class="side-group">{{ gname }}</div>{% endif %}
+    {% for key, href, label in items %}
+    <a href="{{ href }}" class="{{ 'active' if active == key else '' }}">{{ label }}</a>
+    {% endfor %}
+  {% endfor %}
+  </nav>
+  <div class="ro-note">Solo lectura · nunca modifica SAP</div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <form method="get" action="" class="snap-select">
+      <label>Sistema
+      <select name="sistema" class="autosubmit">
+        {% for env, items in systems %}<optgroup label="{{ env }}">
+          {% for it in items %}<option value="{{ it.cid }}" {% if current_snap and current_snap.connection_id == it.cid %}selected{% endif %}>{{ it.label }} · {{ it.sid }}/{{ it.client }} · {{ it.date.strftime('%d/%m %H:%M') if it.date else 'sin datos' }}{% if it.test %} · PRUEBA{% endif %}</option>{% endfor %}
+        </optgroup>{% else %}<option>Sin sistemas</option>{% endfor %}
+      </select></label>
+    </form>
+    {% if current_snap %}
+      {% set envx = (current_snap.connection.system.environment or 'OTRO')|upper %}
+      <span class="env env-{{ envx }}">{{ envx }}</span>
+      <span class="muted small">datos del {{ current_snap.started_at.strftime('%d/%m/%Y %H:%M') }}</span>
+      {% if pending_snap %}<span class="badge warn">{% if pending_snap.status == 'error' %}la última extracción (#{{ pending_snap.id }}) falló · <a href="/snapshots/{{ pending_snap.id }}">ver por qué</a>{% elif pending_snap.status == 'en_curso' %}extracción #{{ pending_snap.id }} en curso{% else %}extracción #{{ pending_snap.id }} en análisis{% endif %} · se muestran los datos anteriores</span>{% endif %}
+      {% if newer_snap %}<span class="badge warn">snapshot anterior #{{ current_snap.id }} · <a href="?sistema={{ current_snap.connection_id }}">ver el último</a></span>{% endif %}
+      {% if current_snap.is_test_data %}<span class="badge test">DATOS DE PRUEBA</span>{% endif %}
+      {% if current_snap.status != 'completo' %}<span class="badge warn">Snapshot {{ current_snap.status }}</span>{% endif %}
+    {% endif %}
+    <div class="spacer"></div>
+    <span class="who"><a href="/mi-cuenta" title="Cambiar mi contraseña">{{ user.username }}</a> · {{ user.role }}</span>
+    <a class="btn ghost" href="/logout">Salir</a>
+  </header>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">Las detecciones se basan en reglas y evidencia verificable. Los resultados indican capacidad potencial y no sustituyen la decisión del responsable de seguridad.</footer>
+</div>
+{% else %}
+  {% block public %}{% endblock %}
+{% endif %}
+</body>
+</html>

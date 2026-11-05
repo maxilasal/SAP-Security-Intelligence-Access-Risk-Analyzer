@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, rstatus, cert, evidence_table %}
+{% block title %}{{ f.code }}{% endblock %}
+{% block content %}
+<h1>{{ f.code }} — {{ f.title }}</h1>
+<p class="subtitle">{{ sev(f.severity) }} {{ rstatus(f.rule_status) }} {{ cert(f.certainty) }} · regla <b>{{ f.rule_id }}</b> v{{ f.rule_version }} · {{ f.sid }}/{{ f.client }} · snapshot #{{ f.snapshot_id }}</p>
+<div class="grid g2">
+<div class="card">
+  <dl class="qa">
+    <dt>Usuario afectado</dt><dd>{% if f.subject_user %}<a href="/usuarios/{{ f.subject_user }}">{{ f.subject_user }}</a>{% else %}—{% endif %}</dd>
+    <dt>Rol</dt><dd>{% if f.subject_role %}<a href="/roles/{{ f.subject_role }}">{{ f.subject_role }}</a>{% else %}—{% endif %}</dd>
+    <dt>Roles responsables</dt><dd>{% for r in f.roles_responsible %}<a href="/roles/{{ r }}">{{ r }}</a> {% endfor %}</dd>
+    <dt>Descripción</dt><dd>{{ f.description }}</dd>
+    <dt>Recomendación</dt><dd>{{ f.recommendation }}</dd>
+    <dt>Riesgo inherente / residual</dt><dd>{{ f.inherent_score }} / {{ f.residual_score }}</dd>
+    <dt>Detectado</dt><dd>{{ f.detected_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+    <dt>Última validación</dt><dd>{{ f.last_validated_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+    <dt>Estado</dt><dd>{{ f.status }}</dd>
+    <dt>Responsable de revisión</dt><dd>{{ f.owner or '—' }}</dd>
+    <dt>Justificación de excepción</dt><dd>{{ f.exception_justification or '—' }}</dd>
+    <dt>Vencimiento de excepción</dt><dd>{{ f.exception_expires or '—' }}</dd>
+    <dt>Control mitigante</dt><dd>{{ f.mitigation_id or '—' }}</dd>
+  </dl>
+</div>
+<div class="card">
+  {% if user.can('hallazgos_gestionar') %}
+  <h3>Gestionar</h3>
+  <form method="post" action="/hallazgos/{{ f.id }}" class="form-grid">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Estado<select name="status">{% for k in ["abierto","en_revision","mitigado","excepcion","corregido","falso_positivo"] %}<option {% if f.status==k %}selected{% endif %}>{{ k }}</option>{% endfor %}</select></label>
+    <label>Responsable<input name="owner" value="{{ f.owner or '' }}"></label>
+    <label>Vence excepción<input type="date" name="exception_expires"></label>
+    <label>Control mitigante<select name="mitigation_id"><option value="">—</option>{% for m in mits %}<option value="{{ m.id }}">{{ m.code }} (hasta {{ m.valid_to.date() }})</option>{% endfor %}</select></label>
+    <label>Justificación<textarea name="exception_justification" rows="2"></textarea></label>
+    <button class="btn">Guardar</button>
+  </form>
+  {% endif %}
+  {% if user.can('mitigaciones') %}
+  <details><summary>Registrar control mitigante para {{ f.rule_id }}</summary>
+  <form method="post" action="/mitigaciones" class="form-grid">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="rule_id" value="{{ f.rule_id }}"><input type="hidden" name="back" value="/hallazgos/{{ f.id }}">
+    <input type="hidden" name="sid" value="{{ f.sid }}">
+    <label>Código<input name="code" required></label>
+    <label>Usuario (alcance)<input name="scope_user" value="{{ f.subject_user or '' }}"></label>
+    <label>Rol (alcance)<input name="scope_role" value="{{ f.subject_role or '' }}"></label>
+    <label>Dueño del control<input name="owner" required></label>
+    <label>Aprobado por<input name="approved_by" required></label>
+    <label>Eficacia (0–0,9)<input name="effectiveness" value="0.5"></label>
+    <label>Vigente hasta<input type="date" name="valid_to" required></label>
+    <label>Descripción<textarea name="description" rows="2" required></textarea></label>
+    <button class="btn">Registrar control</button>
+  </form></details>
+  {% endif %}
+</div>
+</div>
+<h2>Evidencia técnica</h2>
+{% set ev = f.evidence %}
+{% if ev.evidencia %}{{ evidence_table(ev.evidencia) }}{% endif %}
+{% for n in ev.get('notas', []) %}<p class="note">{{ n }}</p>{% endfor %}
+{% if ev.alcance %}<p><b>Alcance:</b> {{ ev.alcance }}</p>{% endif %}
+{% for o in ev.get('organizacion', []) %}<p class="note">{{ o }}</p>{% endfor %}
+{% for fn in ev.get('funciones', []) %}<h3>{{ fn.titulo }} <span class="muted">({{ fn.funcion }} / {{ fn.accion }} {{ fn.tcodes|join(', ') }})</span></h3>{{ evidence_table(fn.evidencia) }}{% endfor %}
+{% if ev.solo_en_rol is defined %}<p>Solo en PFCG: <code>{{ ev.solo_en_rol|join('; ') }}</code></p><p>Solo en perfil: <code>{{ ev.solo_en_perfil|join('; ') }}</code></p>{% endif %}
+<h2>Historial del hallazgo</h2>
+<table class="tbl compact"><tr><th>Snapshot</th><th>Estado</th><th>Validado</th></tr>{% for h in history %}<tr><td>#{{ h.snapshot_id }}</td><td>{{ h.status }}</td><td>{{ h.last_validated_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>{% endfor %}</table>
+{% endblock %}

@@ -1,0 +1,472 @@
+# Catálogo inicial de autorizaciones críticas.
+#
+# IMPORTANTE: estas reglas son EJEMPLOS técnicos iniciales basados en conocimiento
+# público de seguridad SAP. NO constituyen una matriz oficial de SAP ni de SAP GRC.
+# Cada regla debe ser revisada y pasar a "validada" (equipo de seguridad SAP) y luego
+# a "aprobada" (dueño del riesgo) antes de usarse como criterio formal de auditoría.
+#
+# Semántica:
+#   type: profile             -> perfil asignado (UST04), p. ej. SAP_ALL
+#   type: requirements        -> all_of: lista de requisitos; CADA requisito se cumple con
+#                                UNA instancia de autorización (no se mezclan instancias)
+#   type: sap_all_equivalence -> cobertura de objetos con '*' frente al perfil SAP_ALL del sistema
+#   type: user_attributes     -> atributos del maestro de usuarios
+# Gravedad según el ambiente del sistema (DEV / QA / PRD), opcional:
+#   by_environment: {DEV: bajo, QA: medio}   -> en DEV la regla vale «bajo», en QA «medio», en PRD la de «severity»
+#   by_environment: {DEV: no_aplica}         -> en DEV no se evalúa (p. ej. liberar transportes es normal allí)
+#   environments: [PRD, QA]                  -> la regla solo existe en esos ambientes
+#   Gravedad «informativo»: no genera tareas; sirve de dato (p. ej. quién desarrolla en DEV).
+# Condiciones de campo:
+#   ["01","02"]        -> la instancia cubre alguno de esos valores
+#   {all_of: [...]}    -> cubre todos
+#   "*"                -> el campo tiene comodín total
+#   {mode: generic}    -> comodín, prefijo genérico o rango
+#   {mode: present}    -> cualquier valor
+ruleset:
+  id: CRIT
+  version: "2026.11-0.2"
+  owner: "Seguridad SAP (a definir)"
+  approved_by: null
+
+# Control entre sistemas: quien desarrolla en DEV (regla developer_rule) no debería tener en PRD del
+# mismo landscape ninguno de estos permisos (podría llevar su propio código a producción o saltear controles).
+landscape:
+  developer_rule: INFO-DEV-001
+  production_rules: [CRIT-PRF-001, CRIT-PRF-003, CRIT-EQV-001, CRIT-DEV-001, CRIT-DEV-002, CRIT-CTS-001,
+                     CRIT-TAB-001, CRIT-TAB-004, CRIT-USR-001, CRIT-USR-002, CRIT-USR-003, CRIT-USR-004,
+                     CRIT-USR-005, CRIT-OS-001, CRIT-JOB-001]
+
+rules:
+  # ---------------------------------------------------------------- Superusuarios
+  - id: CRIT-PRF-001
+    title: Perfil SAP_ALL asignado
+    type: profile
+    profiles: [SAP_ALL]
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: superusuario
+    description: El perfil SAP_ALL otorga todas las autorizaciones del sistema.
+    recommendation: Retirar SAP_ALL. Usar procedimiento de acceso de emergencia (firefighter) con registro y revisión.
+
+  - id: CRIT-PRF-002
+    title: Perfil SAP_NEW asignado
+    type: profile
+    profiles: [SAP_NEW]
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: superusuario
+    description: SAP_NEW agrupa autorizaciones nuevas de actualizaciones de release; suele ser excesivo y no debe asignarse de forma permanente.
+    recommendation: Retirar SAP_NEW tras la actualización y mantener las autorizaciones necesarias mediante SU25/PFCG.
+
+  - id: CRIT-PRF-003
+    title: Perfil administrativo estándar S_A.SYSTEM asignado
+    type: profile
+    profiles: [S_A.SYSTEM]
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: superusuario
+    description: Perfil estándar de administración del sistema con privilegios muy amplios.
+    recommendation: Sustituir por roles PFCG específicos y acotados.
+
+  - id: CRIT-EQV-001
+    title: Privilegios equivalentes a SAP_ALL (sin el perfil SAP_ALL)
+    type: sap_all_equivalence
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: superusuario
+    description: El usuario dispone de comodín total en una proporción de los objetos de SAP_ALL igual o superior al umbral configurado, por combinación de roles y perfiles.
+    recommendation: Revisar los roles que aportan comodines totales y descomponerlos por función.
+    # Se usa si el perfil SAP_ALL no pudo leerse del sistema.
+    reference_objects: [S_TCODE, S_USER_GRP, S_USER_AGR, S_USER_PRO, S_USER_AUT, S_DEVELOP, S_TABU_DIS,
+                        S_TABU_NAM, S_RFC, S_PROGRAM, S_DATASET, S_ADMI_FCD, S_BTCH_ADM, S_BTCH_NAM,
+                        S_TRANSPRT, S_CTS_ADMI, S_SERVICE, S_ICF, S_LOG_COM, S_RFCACL]
+
+  # ---------------------------------------------------------- Administración de usuarios
+  - id: CRIT-USR-001
+    title: Crear o modificar usuarios de cualquier grupo
+    type: requirements
+    all_of:
+      - object: S_USER_GRP
+        fields: {ACTVT: ["01", "02"], CLASS: "*"}
+    tcodes: [SU01, SU10]
+    severity: alto
+    status: ejemplo
+    category: administracion_usuarios
+    description: Permite mantener usuarios de todos los grupos, incluidos administradores.
+    recommendation: Restringir CLASS a los grupos que administra el puesto; excluir grupos de superusuarios.
+
+  - id: CRIT-USR-002
+    title: Asignar roles a usuarios con alcance total de roles
+    type: requirements
+    all_of:
+      - object: S_USER_GRP
+        fields: {ACTVT: ["02"]}
+      - object: S_USER_AGR
+        fields: {ACTVT: ["22"], ACT_GROUP: "*"}
+    tcodes: [SU01, SU10, PFCG]
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: elevacion_privilegios
+    description: Quien modifica usuarios y puede asignar cualquier rol puede asignarse a sí mismo privilegios (no existe un chequeo estándar que impida la auto-asignación).
+    recommendation: Acotar ACT_GROUP en S_USER_AGR a espacios de nombres de roles funcionales y separar la administración de usuarios del mantenimiento de roles.
+
+  - id: CRIT-USR-003
+    title: Asignar perfiles directamente con alcance total
+    type: requirements
+    all_of:
+      - object: S_USER_GRP
+        fields: {ACTVT: ["02"]}
+      - object: S_USER_PRO
+        fields: {ACTVT: ["22"], PROFILE: "*"}
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: elevacion_privilegios
+    description: Permite asignar cualquier perfil (incluido SAP_ALL) a usuarios.
+    recommendation: Excluir SAP_ALL/SAP_NEW y perfiles críticos de PROFILE; preferir asignación de roles.
+
+  - id: CRIT-USR-004
+    title: Mantener roles con alcance total
+    type: requirements
+    all_of:
+      - object: S_USER_AGR
+        fields: {ACTVT: ["01", "02"], ACT_GROUP: "*"}
+    tcodes: [PFCG]
+    severity: alto
+    by_environment: {DEV: bajo}
+    status: ejemplo
+    category: administracion_autorizaciones
+    description: Permite crear o modificar cualquier rol, incluidos los asignados a otros administradores.
+    recommendation: En producción, no mantener roles (se transportan); restringir a visualización (03).
+
+  - id: CRIT-USR-005
+    title: Mantener valores de autorizaciones (S_USER_AUT) con alcance total
+    type: requirements
+    all_of:
+      - object: S_USER_AUT
+        fields: {ACTVT: ["01", "02"], OBJECT: "*"}
+    severity: alto
+    by_environment: {DEV: bajo}
+    status: ejemplo
+    category: administracion_autorizaciones
+    description: Permite modificar valores de autorizaciones de cualquier objeto.
+    recommendation: Restringir a visualización en producción.
+
+  # ---------------------------------------------------------------- Desarrollo
+  - id: CRIT-DEV-001
+    title: Desarrollo ABAP en producción o calidad
+    type: requirements
+    environments: [PRD, QA]
+    all_of:
+      - object: S_DEVELOP
+        fields: {ACTVT: ["01", "02"], OBJTYPE: ["PROG", "FUGR", "CLAS"]}
+    tcodes: [SE38, SE80, SE37, SE24]
+    severity: critico
+    by_environment: {QA: alto}
+    status: ejemplo
+    category: desarrollo
+    description: Crear o modificar programas fuera de desarrollo evita el proceso de transporte y control de cambios.
+    recommendation: Retirar en producción y calidad; los cambios se hacen en desarrollo y se transportan. Para urgencias, acceso de emergencia controlado.
+
+  - id: INFO-DEV-001
+    title: Desarrollador ABAP (crea o modifica código)
+    type: requirements
+    environments: [DEV]
+    all_of:
+      - object: S_DEVELOP
+        fields: {ACTVT: ["01", "02"], OBJTYPE: ["PROG", "FUGR", "CLAS"]}
+    tcodes: [SE38, SE80, SE37, SE24]
+    severity: informativo
+    status: ejemplo
+    category: perfil_tecnico
+    description: En desarrollo es normal. Se registra para detectar desarrolladores que además tienen permisos críticos en producción (control entre sistemas).
+    recommendation: Ninguna en DEV. Ver «Entre sistemas» para su acceso en producción.
+
+  - id: CRIT-DEV-002
+    title: Depuración con modificación de valores (debug & replace)
+    type: requirements
+    all_of:
+      - object: S_DEVELOP
+        fields: {ACTVT: ["02"], OBJTYPE: ["DEBUG"]}
+    severity: critico
+    by_environment: {QA: alto, DEV: bajo}
+    status: ejemplo
+    category: desarrollo
+    description: Permite alterar variables y el flujo de programas en ejecución, eludiendo cualquier control de autorización.
+    recommendation: No asignar en producción salvo acceso de emergencia registrado.
+
+  # ---------------------------------------------------------------- Tablas
+  - id: CRIT-TAB-001
+    title: Modificar todas las tablas (S_TABU_DIS con '*')
+    type: requirements
+    all_of:
+      - object: S_TABU_DIS
+        fields: {ACTVT: ["02"], DICBERCLS: "*"}
+    tcodes: [SM30, SM31, SE16N, SE16]
+    severity: critico
+    by_environment: {QA: alto, DEV: medio}
+    status: ejemplo
+    category: acceso_datos
+    description: Mantenimiento de cualquier grupo de autorización de tablas.
+    recommendation: Acotar DICBERCLS a grupos de customizing necesarios; en producción solo tablas de mantenimiento corriente.
+
+  - id: CRIT-TAB-002
+    title: Visualizar todas las tablas (S_TABU_DIS con '*')
+    type: requirements
+    all_of:
+      - object: S_TABU_DIS
+        fields: {ACTVT: ["03"], DICBERCLS: "*"}
+    severity: alto
+    by_environment: {QA: medio, DEV: bajo}
+    status: ejemplo
+    category: acceso_datos
+    description: Lectura de cualquier tabla, incluidas tablas con datos personales o de seguridad.
+    recommendation: Acotar DICBERCLS o usar S_TABU_NAM con lista de tablas.
+
+  - id: CRIT-TAB-003
+    title: Acceso a todas las tablas por nombre (S_TABU_NAM con '*')
+    type: requirements
+    all_of:
+      - object: S_TABU_NAM
+        fields: {ACTVT: ["02", "03"], TABLE: "*"}
+    severity: alto
+    by_environment: {QA: medio, DEV: bajo}
+    status: ejemplo
+    category: acceso_datos
+    description: S_TABU_NAM con '*' equivale a acceso a cualquier tabla cuando falla S_TABU_DIS.
+    recommendation: Enumerar tablas explícitamente.
+
+  - id: CRIT-TAB-004
+    title: Mantenimiento de tablas independientes de mandante
+    type: requirements
+    all_of:
+      - object: S_TABU_CLI
+        fields: {CLIIDMAINT: ["X"]}
+    severity: alto
+    by_environment: {QA: medio, DEV: bajo}
+    status: ejemplo
+    category: configuracion
+    description: Cambios de tablas que afectan a todos los mandantes del sistema.
+    recommendation: Restringir a administradores de Basis con control de cambios.
+
+  # ---------------------------------------------------------------- RFC / interfaces
+  - id: CRIT-RFC-001
+    title: Ejecutar cualquier módulo RFC (S_RFC con '*')
+    type: requirements
+    all_of:
+      - object: S_RFC
+        fields: {ACTVT: ["16"], RFC_NAME: "*"}
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: interfaces
+    description: Permite invocar remotamente cualquier función habilitada para RFC.
+    recommendation: Definir S_RFC por grupo/función según trazas (STAUTHTRACE / UCON).
+
+  - id: CRIT-RFC-002
+    title: RFC de confianza para cualquier usuario (S_RFCACL con '*')
+    type: requirements
+    all_of:
+      - object: S_RFCACL
+        fields: {RFC_USER: "*"}
+    severity: critico
+    by_environment: {DEV: alto}
+    status: ejemplo
+    category: interfaces
+    description: Permite que desde un sistema de confianza se inicie sesión como cualquier usuario.
+    recommendation: Restringir RFC_SYSID, RFC_CLIENT y RFC_USER; RFC_EQUSER según necesidad.
+
+  # ---------------------------------------------------------------- Sistema operativo y programas
+  - id: CRIT-OS-001
+    title: Comandos de sistema operativo (S_LOG_COM)
+    type: requirements
+    all_of:
+      - object: S_LOG_COM
+        fields: {COMMAND: {mode: present}}
+    tcodes: [SM49, SM69]
+    severity: alto
+    status: ejemplo
+    category: sistema_operativo
+    description: Ejecución de comandos externos en el servidor de aplicación.
+    recommendation: Limitar COMMAND a comandos específicos; '*' es crítico.
+
+  - id: CRIT-OS-002
+    title: Escritura de archivos en servidor con '*' (S_DATASET)
+    type: requirements
+    all_of:
+      - object: S_DATASET
+        fields: {ACTVT: ["34"], FILENAME: "*", PROGRAM: "*"}
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: sistema_operativo
+    description: Escritura de cualquier archivo del servidor desde cualquier programa.
+    recommendation: Restringir PROGRAM y FILENAME; usar rutas lógicas (S_PATH / SPTH).
+
+  - id: CRIT-PRG-001
+    title: Ejecutar cualquier programa (S_PROGRAM con '*')
+    type: requirements
+    all_of:
+      - object: S_PROGRAM
+        fields: {P_ACTION: ["SUBMIT"], P_GROUP: "*"}
+    tcodes: [SA38, SE38]
+    severity: medio
+    by_environment: {QA: bajo, DEV: no_aplica}
+    status: ejemplo
+    category: ejecucion
+    description: Ejecución de cualquier programa con grupo de autorización.
+    recommendation: Asignar grupos de programas específicos.
+
+  # ---------------------------------------------------------------- Jobs
+  - id: CRIT-JOB-001
+    title: Ejecutar jobs en nombre de cualquier usuario (S_BTCH_NAM con '*')
+    type: requirements
+    all_of:
+      - object: S_BTCH_NAM
+        fields: {BTCUNAME: "*"}
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: elevacion_privilegios
+    description: Permite planificar pasos de job con otro usuario (incluso uno con más privilegios).
+    recommendation: Restringir BTCUNAME a usuarios técnicos específicos.
+
+  - id: CRIT-JOB-002
+    title: Administración de jobs en segundo plano
+    type: requirements
+    all_of:
+      - object: S_BTCH_ADM
+        fields: {BTCADMIN: ["Y"]}
+    severity: medio
+    by_environment: {QA: bajo, DEV: bajo}
+    status: ejemplo
+    category: administracion_tecnica
+    description: Administración de jobs de todos los usuarios.
+    recommendation: Limitar a operación de Basis.
+
+  # ---------------------------------------------------------------- Transportes
+  - id: CRIT-CTS-001
+    title: Importar transportes
+    type: requirements
+    all_of:
+      - object: S_CTS_ADMI
+        fields: {CTS_ADMFCT: ["IMPA", "IMPS"]}
+    tcodes: [STMS]
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: gestion_cambios
+    description: Importación de órdenes de transporte en el sistema.
+    recommendation: Reservar a gestión de cambios; separar de desarrollo.
+
+  - id: CRIT-CTS-002
+    title: Crear y liberar órdenes de transporte
+    type: requirements
+    all_of:
+      - object: S_TRANSPRT
+        fields: {ACTVT: ["01", "43"], TTYPE: "*"}
+    severity: medio
+    by_environment: {DEV: no_aplica}
+    status: ejemplo
+    category: gestion_cambios
+    description: Creación y liberación de cualquier tipo de orden.
+    recommendation: Restringir TTYPE; en producción no debería requerirse.
+
+  # ---------------------------------------------------------------- Administración
+  - id: CRIT-ADM-001
+    title: Funciones de administración de sistema con '*' (S_ADMI_FCD)
+    type: requirements
+    all_of:
+      - object: S_ADMI_FCD
+        fields: {S_ADMI_FCD: "*"}
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: administracion_tecnica
+    description: Todas las funciones de administración de Basis.
+    recommendation: Asignar únicamente los códigos de función necesarios.
+
+  - id: CRIT-ADM-002
+    title: Administración del Security Audit Log
+    type: requirements
+    all_of:
+      - object: S_ADMI_FCD
+        fields: {S_ADMI_FCD: ["AUDA"]}
+    severity: alto
+    by_environment: {DEV: medio}
+    status: ejemplo
+    category: auditoria
+    description: Permite administrar (p. ej. borrar) archivos del registro de auditoría de seguridad.
+    recommendation: Separar de administradores de autorizaciones; revisar con SoD SEG-004.
+
+  # ---------------------------------------------------------------- Fiori / ICF
+  - id: CRIT-FIO-001
+    title: Acceso a cualquier servicio OData / ICF (S_SERVICE con '*')
+    type: requirements
+    all_of:
+      - object: S_SERVICE
+        fields: {SRV_NAME: "*"}
+    severity: alto
+    by_environment: {QA: medio, DEV: bajo}
+    status: ejemplo
+    category: fiori
+    description: Autorización de inicio para todos los servicios. No implica autorización de negocio en backend, pero elimina la primera barrera.
+    recommendation: Asignar servicios mediante catálogos/roles (SU24) en lugar de comodines.
+
+  - id: CRIT-FIO-002
+    title: Inicio de cualquier aplicación (S_START con '*')
+    type: requirements
+    all_of:
+      - object: S_START
+        fields: {AUTHOBJNAM: "*"}
+    severity: medio
+    by_environment: {QA: bajo, DEV: bajo}
+    status: ejemplo
+    category: fiori
+    description: Autorización de inicio para cualquier aplicación Web Dynpro/objeto TADIR protegido por S_START.
+    recommendation: Restringir AUTHOBJTYP/AUTHOBJNAM.
+
+  - id: CRIT-TCD-001
+    title: Todas las transacciones (S_TCODE con '*')
+    type: requirements
+    all_of:
+      - object: S_TCODE
+        fields: {TCD: "*"}
+    severity: alto
+    by_environment: {QA: medio, DEV: bajo}
+    status: ejemplo
+    category: acceso_amplio
+    description: El usuario puede iniciar cualquier transacción; la protección depende solo de los chequeos de cada programa.
+    recommendation: Enumerar transacciones necesarias.
+
+  # ---------------------------------------------------------------- Usuarios estándar
+  - id: CRIT-STD-001
+    title: Usuario estándar SAP desbloqueado
+    type: user_attributes
+    user_conditions:
+      usernames: ["SAP*", "DDIC", "EARLYWATCH", "TMSADM", "SAPCPIC"]
+      locked: false
+    severity: alto
+    status: ejemplo
+    category: usuarios_estandar
+    description: Los usuarios estándar con contraseñas conocidas o privilegios amplios deben estar bloqueados o protegidos (ver RSUSR003). DDIC/TMSADM pueden requerirse para tareas técnicas; evaluar caso a caso.
+    recommendation: Bloquear, cambiar contraseñas y restringir tipo de usuario según la guía de seguridad SAP.
+
+  - id: CRIT-USR-INA-001
+    title: Usuario de diálogo sin actividad prolongada
+    type: user_attributes
+    user_conditions:
+      user_types: ["A"]
+      locked: false
+      inactive_days_gt: 90
+      include_never_logged_on: true
+    severity: bajo
+    status: ejemplo
+    category: higiene_usuarios
+    description: Usuario de diálogo desbloqueado sin inicio de sesión en más de 90 días (o nunca).
+    recommendation: Confirmar necesidad y bloquear o retirar accesos.

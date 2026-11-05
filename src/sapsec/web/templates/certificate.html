@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Certificado de seguridad{% endblock %}
+{% macro body() %}
+<h1>Instalar el certificado (una vez por PC)</h1>
+{% if net.ca %}
+<p class="subtitle">La conexión ya está cifrada. Instalar el certificado sirve para que el navegador reconozca a este servidor y deje de mostrar «La conexión no es privada» (la primera vez, para llegar hasta acá, se elige <b>Configuración avanzada › Continuar</b>).</p>
+<div class="reco reco-bajo"><div class="reco-top"><span class="reco-label">Cómo hacerlo</span></div>
+<div class="reco-steps"><ol>
+  <li><a class="btn small" href="/certificado/ca.crt">Descargar el certificado</a></li>
+  <li>Abrir el archivo descargado › <b>Instalar certificado…</b> › <b>Usuario actual</b> › Siguiente › «Colocar todos los certificados en el siguiente almacén» › <b>Examinar…</b> › <b>Entidades de certificación raíz de confianza</b> › Aceptar › Siguiente › Finalizar.</li>
+  <li>Windows pregunta si confía: la <b>huella (sha1)</b> debe ser <span class="fp">{{ net.ca_thumbprint }}</span>. Si coincide, <b>Sí</b>; si no, no lo instale y avise a seguridad.</li>
+  <li>Cerrar y volver a abrir el navegador.</li>
+</ol></div>
+</div>
+<p class="small muted">Para todas las PC a la vez, TI puede distribuirlo por directiva de grupo (GPO): Configuración del equipo › Directivas › Configuración de Windows › Configuración de seguridad › Directivas de clave pública › Entidades de certificación raíz de confianza.
+Firefox usa su propio almacén: Ajustes › Privacidad y seguridad › Ver certificados › Autoridades › Importar.</p>
+<p class="small muted">El certificado solo es válido para este servidor, su dominio y direcciones privadas: no sirve para suplantar otros sitios. Huella SHA-256: <span class="fp">{{ net.ca_fingerprint }}</span></p>
+{% elif net.company_cert %}
+<p class="subtitle">Este servidor usa un certificado de la empresa: no hace falta instalar nada.</p>
+{% else %}
+<p class="subtitle">La aplicación no está en modo red con HTTPS: no hay certificado para instalar.</p>
+{% endif %}
+<p><a href="/">Ir a la aplicación</a></p>
+{% endmacro %}
+{% block content %}{{ body() }}{% endblock %}
+{% block public %}<main class="content narrow">{{ body() }}</main>{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, rstatus, filter %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% if 'sod' in kinds %}<p class="note">Las reglas SoD de ejemplo no constituyen una matriz oficial. Un conflicto sin solapamiento organizativo se muestra igualmente, marcado para verificación.</p>{% endif %}
+{% if active == 'auditorias' %}<p><a href="/auditoria">Ver historial de snapshots, simulaciones y registro de auditoría de la aplicación →</a></p>{% endif %}
+<form class="form-grid card" method="get">
+  <label>Gravedad<select name="gravedad"><option value="">Todas</option>{% for k in ["critico","alto","medio","bajo","informativo"] %}<option value="{{ k }}" {% if sev==k %}selected{% endif %}>{{ SEV_LABEL[k] }}</option>{% endfor %}</select></label>
+  <label>Estado<select name="estado"><option value="">Todos</option>{% for k in ["abierto","en_revision","mitigado","excepcion","corregido","falso_positivo"] %}<option {% if st==k %}selected{% endif %}>{{ k }}</option>{% endfor %}</select></label>
+  <button class="btn">Filtrar</button>
+</form>
+<p></p>{{ filter("tf") }} <span class="muted">{{ rows|length }} hallazgos</span>
+<div class="tbl-wrap"><table class="tbl sortable" id="tf">
+<tr><th>Hallazgo</th><th>Gravedad</th><th>Regla</th><th>Estado regla</th><th>Título</th><th>Usuario / Rol</th><th>Roles responsables</th><th>Puntos</th><th>Estado</th><th>Detectado</th></tr>
+{% for f in rows %}
+<tr><td><a href="/hallazgos/{{ f.id }}">{{ f.code }}</a></td><td>{{ sev(f.severity) }}</td><td>{{ f.rule_id }}</td><td>{{ rstatus(f.rule_status) }}</td><td>{{ f.title }}</td>
+<td>{% if f.subject_user %}<a href="/usuarios/{{ f.subject_user }}">{{ f.subject_user }}</a>{% else %}<a href="/roles/{{ f.subject_role }}">{{ f.subject_role }}</a>{% endif %}</td>
+<td>{% for r in f.roles_responsible %}<a href="/roles/{{ r }}">{{ r }}</a> {% endfor %}</td><td class="right">{{ f.inherent_score }}</td><td>{{ f.status }}</td><td>{{ f.detected_at.strftime('%Y-%m-%d') }}</td></tr>
+{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_macros.html" import filter %}
+{% block title %}Comparador de roles{% endblock %}
+{% block content %}
+<h1>Comparador de roles</h1>
+<p class="subtitle">Compare dos roles del mismo snapshot o el mismo rol entre sistemas/mandantes (p. ej. QA vs PRD).</p>
+<form class="card form-grid" method="get">
+  <label>Rol A<input name="a" value="{{ a }}" required></label>
+  <label>Snapshot A<select name="snap_a">{% for s in all_snaps %}<option value="{{ s.id }}" {% if sa and s.id==sa.id %}selected{% endif %}>#{{ s.id }} {{ s.label }}</option>{% endfor %}</select></label>
+  <label>Rol B<input name="b" value="{{ b }}" required></label>
+  <label>Snapshot B<select name="snap_b">{% for s in all_snaps %}<option value="{{ s.id }}" {% if sb and s.id==sb.id %}selected{% endif %}>#{{ s.id }} {{ s.label }}</option>{% endfor %}</select></label>
+  <button class="btn">Comparar</button>
+</form>
+{% if diff %}
+  {% if diff.error %}<div class="errbox">{{ diff.error }}</div>{% else %}
+  <h2>Similitud {{ (diff.similarity*100)|round|int }}%</h2>
+  <p class="note">{{ diff.note }} Diferencias entre ambientes no implican error: la herramienta no asume que deban ser idénticos.</p>
+  {{ filter("tdiff") }}
+  <table class="tbl compact sortable" id="tdiff"><tr><th>Objeto</th><th>Campo</th><th>A: {{ a }} ({{ sa.label }})</th><th>B: {{ b }} ({{ sb.label }})</th><th>Resultado</th></tr>
+  {% for r in diff.rows %}<tr class="diff-{{ r.status|replace(' ','_') }}"><td><code>{{ r.object }}</code></td><td>{{ r.field }}</td><td class="mono">{{ r.a|join(', ') }}</td><td class="mono">{{ r.b|join(', ') }}</td><td>{{ r.status }}</td></tr>{% endfor %}
+  </table>
+  {% endif %}
+{% endif %}
+{% endblock %}

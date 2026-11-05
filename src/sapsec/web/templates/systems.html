@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Todos los sistemas{% endblock %}
+{% block content %}
+<h1>Todos los sistemas</h1>
+<p class="subtitle">Un renglón por sistema y mandante, con su último snapshot analizado. Clic en el nombre para trabajar con ese sistema.</p>
+
+{% if user.can('extraer') and rows %}
+<div class="card">
+  <form class="inline" method="post" action="/sistemas/extraer" data-confirm="Se extraerán, uno por vez, todos los sistemas activos. ¿Continuar?">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="ambiente" value="TODOS"><button class="btn small">Extraer todos</button></form>
+  {% for e in envs %}
+  <form class="inline" method="post" action="/sistemas/extraer" data-confirm="Se extraerán, uno por vez, todos los sistemas {{ e }}. ¿Continuar?">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="ambiente" value="{{ e }}"><button class="btn ghost small">Extraer todos los {{ e }}</button></form>
+  {% endfor %}
+  <span class="muted small">Se procesan de a uno para no cargar los sistemas. Se conservan los últimos {{ keep or 'todos los' }} snapshots de cada sistema.</span>
+</div>
+{% endif %}
+{% if running or queue %}<div class="queue">{% if running %}<b>Extrayendo ahora:</b> {{ running }}. {% endif %}{% if queue %}<b>En cola:</b> {{ queue|join(' → ') }}{% endif %}</div>{% endif %}
+
+{% for e in envs %}
+<div class="sys-group"><span class="env env-{{ e }}">{{ e }}</span></div>
+<div class="tbl-wrap"><table class="tbl">
+<tr><th>Sistema</th><th>SID / mandante</th><th>Datos del</th><th class="right">Usuarios</th><th class="right">Con riesgo crítico</th><th class="right">Con riesgo alto</th><th class="right">Con conflictos SoD</th><th class="right">SAP_ALL</th><th></th></tr>
+{% for r in rows if r.env == e %}
+{% set c = r.conn %}
+<tr>
+  <td><a href="/?sistema={{ c.id }}"><b>{{ c.system.label }}</b></a>{% if c.system.description %}<br><span class="muted small">{{ c.system.description }}</span>{% endif %}</td>
+  <td>{{ c.system.sid }}/{{ c.client }}{% set prod = ((r.snap.system_info or {}).get('PRODUCTO') or {}) if r.snap else {} %}{% if prod.label %}<br><span class="muted small">{{ prod.label }}{% if prod.fiori %} · Fiori{% endif %}</span>{% endif %}</td>
+  {% if r.snap %}
+  <td class="{{ 'cell-warn' if r.stale }}">{{ r.snap.started_at.strftime('%d/%m/%Y %H:%M') }}<br><span class="small {{ 'cell-warn' if r.stale else 'muted' }}">hace {{ r.age }} día{{ '' if r.age == 1 else 's' }}{% if r.stale %} · actualizar{% endif %}{% if r.snap.status != 'completo' %} · {{ r.snap.status }}{% endif %}{% if r.snap.is_test_data %} · prueba{% endif %}</span></td>
+  <td class="right">{{ r.usuarios }}</td>
+  <td class="right {{ 'cell-bad' if r.criticos }}">{{ r.criticos }}</td>
+  <td class="right {{ 'cell-warn' if r.altos }}">{{ r.altos }}</td>
+  <td class="right">{{ r.sod }}</td>
+  <td class="right {{ 'cell-bad' if r.sap_all }}">{{ r.sap_all }}</td>
+  {% else %}
+  <td colspan="6" class="muted">Sin snapshot analizado todavía.</td>
+  {% endif %}
+  <td class="nowrap">
+    {% if r.job == 'en_curso' %}<a class="chip warn" href="/conexiones/{{ c.id }}/progreso">extrayendo…</a>
+    {% elif r.job == 'en_cola' %}<a class="chip" href="/conexiones/{{ c.id }}/progreso">en cola</a>
+    {% elif user.can('extraer') %}<form class="inline" method="post" action="/conexiones/{{ c.id }}/extraer"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small">Extraer</button></form>{% endif %}
+    {% if r.snap %}<a class="btn small" href="/?sistema={{ c.id }}">Qué corregir</a>{% endif %}
+    <a class="btn ghost small" href="/sistemas/{{ c.id }}">Historial ({{ r.n_snaps or 0 }})</a>
+  </td>
+</tr>
+{% endfor %}
+</table></div>
+{% else %}
+<div class="card">No hay sistemas registrados. <a href="/conexiones">Registrar el primero</a>.</div>
+{% endfor %}
+<p class="note small">Para que se extraigan solos todas las noches: <a href="/programacion">Extracciones programadas</a>.</p>
+{% endblock %}

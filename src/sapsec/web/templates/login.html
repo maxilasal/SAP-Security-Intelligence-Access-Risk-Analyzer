@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Ingreso{% endblock %}
+{% block public %}
+<div class="login-wrap">
+  <form class="login" method="post" action="/login">
+    <h1>SAP Security Intelligence</h1>
+    <p class="muted">Access Risk Analyzer · acceso autenticado</p>
+    {% if error %}<div class="errbox">{{ error }}</div>{% endif %}
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Usuario<input name="username" autocomplete="username" required autofocus></label>
+    <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn" type="submit">Ingresar</button>
+    <p class="muted">Herramienta de solo lectura. Todas las consultas quedan registradas.</p>
+    {% if insecure %}<div class="warnbox small">Conexión <b>sin cifrar</b>: la contraseña viaja legible por la red. Pida al administrador que use el modo red con HTTPS.</div>{% endif %}
+    {% if show_cert %}<p class="small muted">¿El navegador mostró una advertencia de seguridad? <a href="/certificado">Instalar el certificado</a> (una vez por PC).</p>{% endif %}
+  </form>
+</div>
+{% endblock %}
