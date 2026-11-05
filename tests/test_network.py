@@ -120,3 +120,11 @@ def test_network_mode_serves_https_with_verifiable_certificate(tmp_path):
             proc.kill()
             out = ""
     assert "Desde otras PC" in out or "En esta PC" in out
+
+
+def test_windows_console_without_color_codes():
+    """En Windows la consola clásica muestra los colores de uvicorn como «←[32mINFO←[0m»: se desactivan."""
+    from sapsec.webserver import uvicorn_options
+    assert uvicorn_options(windows=True)["use_colors"] is False
+    assert "use_colors" not in uvicorn_options(windows=False)
+    assert uvicorn_options(windows=False)["server_header"] is False

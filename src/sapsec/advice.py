@@ -89,8 +89,9 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
                        mp.why + f" Al quitarlo desaparecen también {rest}.").strip()
         steps = [Step(f"Confirmar con el responsable qué tareas hace {'el usuario' if one else 'cada usuario'}.")]
         if prof == "SAP_ALL":
-            steps.append(Step("Si se usa para emergencias: un usuario de emergencia, bloqueado, que se habilita solo con "
-                              "aprobación y cuyo uso queda registrado y se revisa."))
+            steps.append(Step("Si es un usuario de emergencia (bloqueado, se habilita solo con aprobación y su uso se "
+                              "revisa): declararlo como tal en lugar de quitarle el perfil; mientras esté bloqueado no "
+                              "figura como pendiente.", "/emergencia", "Usuarios de emergencia"))
         steps += [Step(f"SU01 › usuario › Modificar › pestaña Perfiles › borrar {prof} › Grabar. "
                        "Para varios usuarios a la vez: SU10."),
                   Step("Asignar en la pestaña Roles solo los roles que necesita (probarlo antes en el simulador).",
@@ -100,8 +101,10 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
         locked = [u for u in t.users if data is not None and data.users.get(u) is not None and data.users[u].is_locked]
         if locked:
             adv.note = (f"{len(locked)} de {n_users} {'está bloqueado' if len(locked) == 1 else 'están bloqueados'}: hoy no "
-                        "pueden ingresar. Si son usuarios de emergencia, registrar la decisión (control mitigante con "
-                        "vencimiento) en lugar de dejarlos pendientes; igual conviene quitarles el perfil.")
+                        f"{'puede' if len(locked) == 1 else 'pueden'} ingresar. Si "
+                        f"{'es un usuario' if len(locked) == 1 else 'son usuarios'} de emergencia, "
+                        "declararlos en «Usuarios de emergencia» (botón en la tabla de abajo): dejan de figurar como "
+                        "pendientes mientras sigan bloqueados.")
     elif t.kind == "rol":
         r = t.roles[0] if t.roles else ""
         parent = (data.role_parent.get(r, "") if data is not None else "") or ""
@@ -178,6 +181,9 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
             adv.headline = t.what or t.title
             adv.steps = [Step(t.what), _resync()] if t.what else [_resync()]
         adv.where = "SU01 / SU10"
+    elif t.kind == "emergencia":
+        _emergency_task_advice(t, adv)
+        return adv
     elif t.kind == "calidad":
         k = len(vp)
         adv.headline = (f"Generar el perfil de {_n(k, 'rol', 'roles')} y actualizar a sus usuarios "
@@ -203,6 +209,181 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
         adv.level = "ok"
         adv.note = "Esta tarea ya está resuelta o tiene una decisión registrada (excepción, control mitigante…)."
     return adv
+
+
+def _fmt(iso: str) -> str:
+    """2026-11-04 → 04/11/2026."""
+    return f"{iso[8:10]}/{iso[5:7]}/{iso[:4]}" if len(iso) >= 10 else iso
+
+
+def _emergency_task_advice(t: Task, adv: Advice) -> None:
+    rec: dict[str, dict[str, Any]] = t.info.get("emergencia", {})
+    users = [u for u in t.users if u in rec]
+    unlocked = [u for u in users if rec[u].get("estado") == "desbloqueado"]
+    expired = [u for u in users if rec[u].get("estado") == "vencida"]
+    controlled = [u for u in users if rec[u].get("estado") in ("controlado", "fuera_de_validez")]
+    adv.impact = f"{_n(len(users), 'usuario de emergencia', 'usuarios de emergencia')} · " \
+                 f"{_n(len(controlled), 'bloqueado', 'bloqueados')}"
+    adv.why = ("Un usuario de emergencia tiene permisos amplios a propósito: solo debe poder ingresar mientras dura una "
+               "emergencia aprobada.")
+    if unlocked:
+        one = len(unlocked) == 1
+        who = f"el usuario de emergencia {unlocked[0]}" if one else f"estos {len(unlocked)} usuarios de emergencia"
+        adv.headline = f"Bloquear {who} si no hay una emergencia en curso."
+        resp = _join(sorted({rec[u].get("responsable", "") for u in unlocked}))
+        adv.steps = [Step(f"Confirmar con {resp or 'el responsable'} si hay una emergencia en curso que justifique "
+                          f"tener{'lo' if one else 'los'} desbloqueado{'' if one else 's'}."),
+                     Step("Si no la hay: SU01 › usuario › Bloquear/Desbloquear › Bloquear (para varios a la vez: SU10)."),
+                     Step("Si se usó: revisar lo que se hizo con él en el registro de auditoría de seguridad (SM20 o "
+                          "RSAU_READ_LOG, si está activo en el sistema) y dejar constancia de la revisión."),
+                     _resync()]
+        adv.where = "SU01 / SU10 › Bloquear"
+        if expired:
+            adv.note = (f"Además, la declaración de {_join(expired)} venció: renovarla o quitarla en «Usuarios de "
+                        "emergencia».")
+    elif expired:
+        one = len(expired) == 1
+        when = _fmt(min(rec[u].get("revisar", "") for u in expired))
+        adv.headline = (f"Renovar o quitar la declaración de {expired[0] if one else _join(expired)}: "
+                        f"venció la fecha de revisión ({when}).")
+        adv.why = ("La declaración tiene fecha de revisión para confirmar periódicamente que el usuario sigue haciendo "
+                   "falta y que se usa según el procedimiento.")
+        adv.steps = [Step("Revisar con el responsable si el usuario sigue siendo necesario y si cada uso respetó el "
+                          "procedimiento declarado."),
+                     Step("Renovar la declaración con una nueva fecha de revisión, o quitarla: sus alertas vuelven a "
+                          "la tarea que corresponda (por ejemplo, «Quitar el perfil SAP_ALL»).",
+                          "/emergencia", "Usuarios de emergencia")]
+        adv.where = "Usuarios de emergencia (en esta aplicación)"
+    else:
+        nxt = min((rec[u].get("revisar", "") for u in users), default="")
+        adv.level = "ok"
+        adv.headline = ("El usuario de emergencia está bloqueado: no hay nada que hacer." if len(users) == 1 else
+                        "Los usuarios de emergencia están bloqueados: no hay nada que hacer.")
+        adv.steps = [Step("Cuando haya una emergencia: desbloquearlo con la aprobación del responsable, usarlo lo "
+                          "mínimo indispensable y volver a bloquearlo; después, revisar lo hecho."),
+                     Step(f"Revisar la declaración antes del {_fmt(nxt)}." if nxt else "Revisar la declaración "
+                          "periódicamente.", "/emergencia", "Usuarios de emergencia")]
+        adv.where = "SU01 › Bloquear/Desbloquear"
+        adv.note = ("Sus alertas quedan controladas mientras sigan bloqueados y la declaración esté vigente; si alguno "
+                    "se desbloquea, la próxima extracción vuelve a marcar esta tarea como pendiente.")
+    if not t.pending:
+        adv.level = "ok"
+
+
+def emergency_user_advice(username: str, rec: dict[str, Any]) -> Advice:
+    """Recomendación de la ficha de un usuario de emergencia declarado."""
+    state = rec.get("estado", "")
+    review = _fmt(rec.get("revisar", ""))
+    resp = rec.get("responsable", "") or "el responsable"
+    if state == "desbloqueado":
+        return Advice("critico", f"Bloquear {username} si no hay una emergencia en curso.",
+                      why="Es un usuario de emergencia declarado: tiene permisos amplios a propósito y solo debe poder "
+                          "ingresar mientras dura una emergencia aprobada.",
+                      steps=[Step(f"Confirmar con {resp} si hay una emergencia en curso."),
+                             Step("Si no la hay: SU01 › Bloquear/Desbloquear › Bloquear."),
+                             Step("Si se usó: revisar lo que se hizo (SM20 o RSAU_READ_LOG, si el registro de "
+                                  "auditoría de seguridad está activo)."), _resync()],
+                      where="SU01 › Bloquear/Desbloquear")
+    if state == "vencida":
+        return Advice("alto", f"Renovar o quitar la declaración de {username} como usuario de emergencia "
+                              f"(venció el {review}).",
+                      why="La fecha de revisión obliga a confirmar periódicamente que el usuario sigue haciendo falta.",
+                      steps=[Step("Renovarla con una nueva fecha o quitarla.", "/emergencia", "Usuarios de emergencia")],
+                      where="Usuarios de emergencia (en esta aplicación)")
+    return Advice("ok", f"{username} es un usuario de emergencia declarado y está bloqueado: no hay nada que corregir "
+                        "mientras siga así.",
+                  why="Tiene permisos amplios a propósito; el control es que permanezca bloqueado fuera de una "
+                      "emergencia.",
+                  steps=[Step(f"Revisar la declaración antes del {review}.", "/emergencia", "Usuarios de emergencia")],
+                  note=f"Responsable: {resp}. Procedimiento: {rec.get('procedimiento', '')}")
+
+
+def emergency_page_advice(rows: list[dict[str, Any]], candidates: list[dict[str, Any]]) -> Advice:
+    """Recomendación de la página «Usuarios de emergencia»."""
+    unlocked = sorted({r["d"].username for r in rows if r["estado"] == "desbloqueado"})
+    expired = sorted({r["d"].username for r in rows if r["estado"] == "vencida"})
+    n_cand = len({(c["username"], c["conn"].id) for c in candidates})
+    pending = (f"Hay {_n(n_cand, 'usuario')} con SAP_ALL sin declarar: si es de emergencia, declararlo; si no, "
+               "quitarle el perfil." if n_cand else "")
+    if unlocked:
+        one = len(unlocked) == 1
+        return Advice("critico", f"Bloquear {unlocked[0] if one else _join(unlocked)} si no hay una emergencia en curso.",
+                      why="Un usuario de emergencia solo debe poder ingresar mientras dura una emergencia aprobada.",
+                      steps=[Step("Confirmar con el responsable que figura en la tabla si hay una emergencia en curso."),
+                             Step("Si no la hay: SU01 › Bloquear/Desbloquear › Bloquear (varios a la vez: SU10)."),
+                             Step("Si se usó: revisar lo que se hizo (SM20 o RSAU_READ_LOG, si el registro de "
+                                  "auditoría de seguridad está activo) y dejar constancia."), _resync()],
+                      where="SU01 / SU10", note=pending)
+    if expired:
+        return Advice("alto", f"Renovar o quitar la declaración de {_join(expired)}: venció la fecha de revisión.",
+                      why="La fecha de revisión obliga a confirmar periódicamente que el usuario sigue haciendo falta "
+                          "y que se usa según el procedimiento.",
+                      steps=[Step("Revisar con el responsable si sigue siendo necesario."),
+                             Step("En la tabla: «Renovar» con una fecha nueva, o «Quitar» (sus alertas vuelven a la "
+                                  "tarea que corresponda).")], note=pending)
+    if not rows:
+        if n_cand:
+            return Advice("medio", "Declarar acá los usuarios que tienen SAP_ALL a propósito para emergencias.",
+                          why="Así, mientras estén bloqueados, dejan de figurar como pendientes en cada extracción, y "
+                              "la aplicación avisa si alguno queda desbloqueado.",
+                          steps=[Step("En «Usuarios con SAP_ALL sin declarar», usar «Declarar» en los que son de "
+                                      "emergencia (responsable, procedimiento y fecha de revisión)."),
+                                 Step("A los demás hay que quitarles el perfil: ver la tarea «Quitar el perfil SAP_ALL».",
+                                      "/acciones", "Ver tareas")])
+        return Advice("ok", "No hay usuarios de emergencia declarados ni usuarios con SAP_ALL en los sistemas.",
+                      why="Si la empresa usa usuarios de emergencia, conviene declararlos acá para controlarlos.")
+    nxt = min(r["d"].review_by for r in rows)
+    return Advice("ok", "Los usuarios de emergencia declarados están bloqueados: no hay nada que hacer.",
+                  why="Sus alertas quedan controladas mientras sigan bloqueados y la declaración esté vigente.",
+                  steps=[Step(f"Próxima revisión: {nxt:%d/%m/%Y}. Antes de esa fecha, confirmar que siguen haciendo "
+                              "falta y renovar la declaración.")], note=pending)
+
+
+def changes_advice(x: dict[str, Any]) -> Advice:
+    """Recomendación de «Qué cambió» entre dos extracciones del mismo sistema."""
+    a, b = x["a"], x["b"]
+    period = (f"el {b.started_at:%d/%m/%Y} (entre las {a.started_at:%H:%M} y las {b.started_at:%H:%M})"
+              if a.started_at.date() == b.started_at.date() else
+              f"entre el {a.started_at:%d/%m/%Y} y el {b.started_at:%d/%m/%Y}")
+    new, resolved = x["new"], x["resolved"]
+    crit = [r for r in new if r["severity"] == "critico"]
+    impact = f"{_n(len(new), 'alerta nueva', 'alertas nuevas')} · {_n(len(resolved), 'resuelta', 'resueltas')}"
+    who = Step("Para saber quién hizo cada cambio en SAP: SUIM › Documentos de modificación (usuarios: RSUSR100N; "
+               "roles: RSSCD100_PFCG).")
+    explain = Step("En «Cambios en SAP» (más abajo) figura qué cambió: asignaciones de roles, perfiles asignados a mano, "
+                   "usuarios y roles modificados.")
+    if x["sap_all_added"]:
+        users = sorted({r["user"] for r in x["sap_all_added"]})
+        return Advice("critico", f"Revisar por qué se asignó SAP_ALL a {_join(users)} {period}.",
+                      why="SAP_ALL da acceso total al sistema: asignarlo debería pasar por una aprobación excepcional.",
+                      steps=[Step("Confirmar con el responsable de seguridad si estaba aprobado. Si es un usuario de "
+                                  "emergencia, declararlo como tal.", "/emergencia", "Usuarios de emergencia"),
+                             Step("Si no estaba aprobado: quitarlo (SU01 › pestaña Perfiles) y revisar lo que hizo el "
+                                  "usuario mientras lo tuvo."), who], impact=impact)
+    if crit:
+        head = (f"Revisar la alerta crítica nueva {period}: «{crit[0]['title']}» ({crit[0]['user'] or crit[0]['role']})."
+                if len(crit) == 1 else f"Revisar las {len(crit)} alertas críticas nuevas {period}.")
+        return Advice("critico", head,
+                      why="Aparecieron entre una extracción y la otra: alguien asignó un rol o un perfil, o se modificó "
+                          "un rol.",
+                      steps=[explain, Step("Confirmar con quien hizo el cambio si estaba aprobado; si no, revertirlo."),
+                             who], impact=impact)
+    if new:
+        top = max(new, key=lambda r: SEV_RANK.get(r["severity"], 0))["severity"]
+        return Advice(_level(top), "Revisar la alerta nueva " + period + "." if len(new) == 1 else
+                      f"Revisar las {len(new)} alertas nuevas {period}.",
+                      why="Aparecieron entre una extracción y la otra; ninguna es crítica.",
+                      steps=[explain, Step("Confirmar que cada cambio estaba aprobado."), who], impact=impact)
+    if resolved:
+        return Advice("ok", f"No aparecieron alertas nuevas {period}; se " +
+                      ("resolvió 1." if len(resolved) == 1 else f"resolvieron {len(resolved)}."),
+                      why="Lo resuelto se verificó con la extracción: ya no está en SAP.", impact=impact)
+    if x["n_sap_changes"]:
+        return Advice("ok", f"Hubo cambios en SAP {period}, pero no generaron alertas nuevas.",
+                      why="Según las reglas evaluadas, no dan permisos críticos ni combinaciones incompatibles.",
+                      impact=_n(x["n_sap_changes"], "cambio en SAP", "cambios en SAP"))
+    return Advice("ok", f"No se detectaron cambios {period}.",
+                  why="Mismas alertas, usuarios, asignaciones, perfiles y roles en las dos extracciones.")
 
 
 def home_advice(t: Task | None, data: Any = None, env: str = "") -> Advice:

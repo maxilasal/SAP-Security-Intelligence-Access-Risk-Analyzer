@@ -8,6 +8,7 @@ usuario (SU01/SU10). Por eso los hallazgos "usuario × regla" se agrupan en tare
 * ``perfil``       – Quitar un perfil asignado directamente (SAP_ALL, SAP_NEW…) y todo lo que origina.
 * ``perfil_otro``  – Permisos críticos que no vienen de ningún rol (perfiles directos o residuales).
 * ``usuarios``     – Ajustar usuarios (estándar desbloqueados, inactivos…).
+* ``emergencia``   – Usuarios de emergencia declarados: se controlan manteniéndolos bloqueados (ver emergency.py).
 * ``calidad``      – Regenerar perfiles de roles desactualizados.
 
 Cada tarea tiene una lista de *puntos* (problemas) con qué cambiar y por qué. Las tareas se
@@ -17,6 +18,7 @@ ordenan por gravedad y cantidad de usuarios afectados.
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -30,7 +32,8 @@ SEV_RANK = {"critico": 4, "alto": 3, "medio": 2, "bajo": 1, "informativo": 0}
 HANDLED = {"corregido", "falso_positivo", "excepcion", "mitigado"}
 
 KIND_LABEL = {"rol": "Corregir rol", "combinacion": "Separar roles", "perfil": "Quitar perfil",
-              "perfil_otro": "Perfiles sin rol", "usuarios": "Ajustar usuarios", "calidad": "Regenerar perfiles"}
+              "perfil_otro": "Perfiles sin rol", "usuarios": "Ajustar usuarios", "emergencia": "Usuarios de emergencia",
+              "calidad": "Regenerar perfiles"}
 
 
 @dataclass
@@ -74,6 +77,7 @@ class Task:
     status_counts: dict[str, int] = field(default_factory=dict)
     profile: str = ""      # tareas «perfil»: perfil a quitar
     rule_id: str = ""      # tareas «usuarios»: regla que las origina
+    info: dict[str, Any] = field(default_factory=dict)   # tareas «emergencia»: estado de cada usuario declarado
 
     @property
     def visible_problems(self) -> list[Problem]:
@@ -140,10 +144,12 @@ _CACHE: dict[tuple, list[Task]] = {}
 
 def build_tasks(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
     """Tareas del snapshot. La agrupación se cachea; el estado de los hallazgos se lee en cada llamada."""
-    ckey = (snap.id, snap.analyzed_at, rules.hash)
+    from .emergency import record_for
+    emergency = record_for(db, snap)  # vuelve a aplicar las declaraciones si alguna venció desde la última vez
+    ckey = (snap.id, snap.analyzed_at, rules.hash, json.dumps(emergency, sort_keys=True, default=str))
     tasks = _CACHE.get(ckey)
     if tasks is None:
-        tasks = _group(db, snap, rules)
+        tasks = _group(db, snap, rules, emergency)
         _CACHE.clear()
         _CACHE[ckey] = tasks
     status = dict(db.execute(select(Finding.id, Finding.status).where(Finding.snapshot_id == snap.id)).all())
@@ -170,9 +176,13 @@ def get_task(db: Session, snap: Snapshot, rules: RuleSet, key: str) -> Task | No
     return next((t for t in build_tasks(db, snap, rules) if t.key == key), None)
 
 
-def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
+def _group(db: Session, snap: Snapshot, rules: RuleSet,
+           emergency: dict[str, dict[str, Any]] | None = None) -> list[Task]:
     risks = {r.id: r for r in rules.risks}
     tasks: dict[str, dict[str, Any]] = {}
+    # Usuarios de emergencia declarados (y existentes en el snapshot): todo lo suyo va a una tarea propia, que se
+    # resuelve manteniéndolos bloqueados y no quitándoles los permisos.
+    emer = {u for u, r in (emergency or {}).items() if r.get("estado") != "no_existe"}
 
     def task(key: str, kind: str, roles: tuple[str, ...] = (), **extra: Any) -> dict[str, Any]:
         t = tasks.get(key)
@@ -207,6 +217,26 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
             return "Separar «" + "» de «".join(names) + "»"
         return ""
 
+    def emergency_problem(fid: int, kind: str, rid: str, sev: str, user: str, ev: Any, st: str) -> None:
+        t = task(_key("emergencia"), "emergencia", info={"emergencia": emergency or {}})
+        if kind == "sod":
+            r = risks.get(rid)
+            title, why, pkind = (r.title if r else rid), _sentence(r.description if r else ""), "sod"
+        else:
+            rule = rules.critical_by_id(rid)
+            title, why = (rule.title if rule else rid), (_sentence(rule.description) if rule else "")
+            pkind = "usuario" if rule is not None and rule.type == "user_attributes" else "critica"
+        p = problem(t, rid, rule_id=rid, kind=pkind, severity=sev, title=title,
+                    change="Lo tiene a propósito: se controla manteniendo el usuario bloqueado", why=why)
+        p.finding_ids.append(fid)
+        p.fid_user[fid] = user
+        ev = ev if isinstance(ev, dict) else {}
+        if st != "corregido":
+            for c in ev.get("consecuencias") or []:
+                e = p.consequences.setdefault(c["regla"], {"titulo": c["titulo"], "gravedad": c["gravedad"],
+                                                           "tipo": c.get("tipo", ""), "usuarios": set()})
+                e["usuarios"].add(user)
+
     rows = list(db.execute(select(
         Finding.id, Finding.kind, Finding.rule_id, Finding.severity, Finding.subject_user, Finding.subject_role,
         Finding.roles_responsible, Finding.title, Finding.status, Finding.evidence).where(
@@ -219,6 +249,8 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
     profile_open: dict[str, str] = {}
     profile_any: dict[str, str] = {}
     for (fid, kind, rid, sev, user, role, roles, title, st, ev) in rows:
+        if user in emer:
+            continue  # va a la tarea de usuarios de emergencia (más abajo)
         rule = rules.critical_by_id(rid) if kind == "critica" else None
         if rule is not None and rule.type == "profile" and user:
             prof = ", ".join(rule.profiles)
@@ -247,7 +279,10 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
         m = profile_any if st == "corregido" else profile_open
         return m.get(user or "") or _key("perfil_otro")
 
-    for (fid, kind, rid, sev, user, role, roles, title, st, _ev) in rows:
+    for (fid, kind, rid, sev, user, role, roles, title, st, ev) in rows:
+        if kind == "critica" and user in emer:
+            emergency_problem(fid, kind, rid, sev, user, ev, st)
+            continue
         roles = tuple(sorted(roles or []))
         if kind == "calidad":
             t = task(_key("calidad"), "calidad")
@@ -294,6 +329,9 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
     for (fid, rid, sev, user, ev, st) in db.execute(select(
             Finding.id, Finding.rule_id, Finding.severity, Finding.subject_user, Finding.evidence, Finding.status)
             .where(Finding.snapshot_id == snap.id, Finding.kind == "sod", Finding.severity != "informativo")):
+        if user in emer:
+            emergency_problem(fid, "sod", rid, sev, user, ev, st)
+            continue
         r = risks.get(rid)
         ev = ev or {}
         scope = str(ev.get("alcance", ""))
@@ -379,6 +417,13 @@ def _describe(key: str, t: dict[str, Any], texts: dict[str, str]) -> Task:
         subtitle = "Perfiles asignados directamente o perfiles residuales (rol vencido sin comparación PFUD)."
         what = "Retirar los perfiles directos o ejecutar la comparación de usuarios, y asignar roles acotados."
         where = "SU01 › pestaña Perfiles · PFUD"
+    elif kind == "emergencia":
+        title = "Mantener bloqueados los usuarios de emergencia"
+        subtitle = ("Usuarios declarados de emergencia: tienen permisos amplios a propósito y solo se habilitan ante "
+                    "una emergencia.")
+        what = ("Que estén bloqueados mientras no haya una emergencia en curso; después de usarlos, volver a "
+                "bloquearlos y revisar lo que se hizo.")
+        where = "SU01 / SU10 › Bloquear · Usuarios de emergencia (en esta aplicación)"
     elif kind == "usuarios":
         rule = t.get("rule")
         title = {"CRIT-STD-001": "Bloquear usuarios estándar de SAP",
@@ -396,7 +441,7 @@ def _describe(key: str, t: dict[str, Any], texts: dict[str, str]) -> Task:
     rule = t.get("rule")
     return Task(key=key, kind=kind, title=title, subtitle=subtitle, what=what, where=where, roles=roles,
                 problems=problems, profile=t.get("profile", "") if kind == "perfil" else "",
-                rule_id=rule.id if rule is not None and kind == "usuarios" else "")
+                rule_id=rule.id if rule is not None and kind == "usuarios" else "", info=t.get("info") or {})
 
 
 def summary(tasks: list[Task]) -> dict[str, Any]:

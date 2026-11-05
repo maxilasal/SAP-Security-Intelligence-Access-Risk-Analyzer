@@ -421,3 +421,72 @@ def test_dev_system_controls_and_dev_vs_prd_page(client):
     login(client, "consulta", "Clave-de-prueba-456")
     tok = csrf(client, "/simulador")
     assert client.post(f"/sistemas/{prd_id}/datos", data={"csrf": tok, "landscape": "X"}).status_code == 403
+
+
+def test_emergency_users_page_declare_and_remove(client):
+    """Declarar un usuario de emergencia desde la web: tarea propia, ficha del usuario, auditoría y baja."""
+    from datetime import date, timedelta
+
+    from sapsec.storage.db import session_scope
+    from sapsec.storage.orm import SapConnection, SapSystem
+    with session_scope() as db:
+        cid = db.scalars(select(SapConnection).join(SapSystem).where(SapSystem.name == "PRD Uruguay")).one().id
+    login(client, "consulta", "Clave-de-prueba-456")
+    page = client.get("/emergencia").text
+    assert "Usuarios con SAP_ALL sin declarar" in page and "ADMIN_BASIS" in page and 'action="/emergencia"' not in page
+    tok = csrf(client, "/simulador")
+    assert client.post("/emergencia", data={"csrf": tok, "usuario": "ADMIN_BASIS"}).status_code == 403
+
+    login(client)
+    review = (date.today() + timedelta(days=60)).isoformat()
+    form = {"conexion": str(cid), "usuario": "admin_basis", "responsable": "Jefe de Basis", "revisar": review,
+            "procedimiento": "Se desbloquea solo con ticket aprobado y se revisa el registro de auditoría."}
+    tok = csrf(client, "/emergencia")
+    bad = client.post("/emergencia", data={**form, "csrf": tok,
+                                           "revisar": (date.today() + timedelta(days=500)).isoformat()})
+    assert bad.status_code == 400 and "como máximo dentro de un año" in bad.text
+    r = client.post("/emergencia", data={**form, "csrf": tok}, follow_redirects=False)
+    assert r.status_code == 303
+    page = client.get(r.headers["location"]).text
+    assert "Usuario declarado." in page and "Desbloqueado" in page and "Jefe de Basis" in page
+    assert "Bloquear ADMIN_BASIS si no hay una emergencia en curso." in page  # en la fixture está desbloqueado
+    plan = client.get(f"/acciones?sistema={cid}").text
+    assert "Mantener bloqueados los usuarios de emergencia" in plan
+    key = re.search(r'href="/acciones/([0-9a-f]+)">Ver la tarea del plan', page).group(1)  # type: ignore[union-attr]
+    task = client.get(f"/acciones/{key}").text
+    assert "Bloquear el usuario de emergencia ADMIN_BASIS si no hay una emergencia en curso." in task
+    assert "SM20 o RSAU_READ_LOG" in task
+    user_page = client.get("/usuarios/ADMIN_BASIS").text
+    assert "usuario de emergencia · desbloqueado" in user_page and "Lo que puede hacer" in user_page
+    assert "emergencia_declarada" in client.get("/auditoria").text
+
+    eid = re.search(r'action="/emergencia/(\d+)/quitar"', page).group(1)  # type: ignore[union-attr]
+    tok = csrf(client, "/emergencia")
+    r = client.post(f"/emergencia/{eid}/quitar", data={"csrf": tok}, follow_redirects=False)
+    assert r.status_code == 303 and "Declaración quitada" in client.get(r.headers["location"]).text
+    assert "Mantener bloqueados los usuarios de emergencia" not in client.get(f"/acciones?sistema={cid}").text
+    assert "emergencia_quitada" in client.get("/auditoria").text
+
+
+def test_what_changed_page_and_download(client):
+    """«Qué cambió»: inicio con el resumen, página entre dos fechas, historial con el enlace y descarga en Excel."""
+    from sapsec.storage.db import session_scope
+    from sapsec.storage.orm import SapConnection, SapSystem, Snapshot
+    with session_scope() as db:
+        cid = db.scalars(select(SapConnection).join(SapSystem).where(SapSystem.name == "PRD Uruguay")).one().id
+        ids = list(db.scalars(select(Snapshot.id).where(Snapshot.connection_id == cid, Snapshot.analyzed_at.is_not(None))
+                              .order_by(Snapshot.id.desc())))
+        other = db.scalars(select(Snapshot.id).join(SapConnection).join(SapSystem)
+                           .where(SapSystem.name == "PRD Argentina")).first()
+    assert len(ids) >= 2
+    login(client)
+    home = client.get(f"/?sistema={cid}").text
+    assert "Desde la extracción anterior" in home and f"/cambios?desde={ids[1]}&hasta={ids[0]}" in home
+    page = client.get("/cambios").text  # por defecto: la última contra la anterior del sistema elegido
+    assert "Qué cambió en PRD Uruguay" in page and "No se detectaron cambios" in page  # mismos datos ficticios
+    assert f'<option value="{ids[1]}" selected>' in page
+    assert f"/cambios?desde={ids[-1]}&hasta={ids[0]}" in client.get(f"/sistemas/{cid}").text
+    r = client.get(f"/cambios/descargar?desde={ids[1]}&hasta={ids[0]}&formato=xlsx")
+    assert r.status_code == 200 and r.content.startswith(b"PK")
+    r = client.get(f"/cambios?desde={other}&hasta={ids[0]}")
+    assert r.status_code == 400 and "mismo sistema" in r.text

@@ -209,3 +209,16 @@ a.chip:hover{text-decoration:none;background:#e2eaf4}
 .hint{font-size:12px;color:var(--muted);margin:4px 0 10px}
 .cons-row{display:flex;gap:10px;align-items:baseline;padding:8px 12px;font-size:13.5px}
 .cons-row .grow{flex:1;min-width:0}.cons-row .muted{font-size:12.5px}
+/* Usuarios de emergencia y «Qué cambió» */
+.form-grid label.wide{grid-column:1/-1}
+.form-grid textarea{width:100%}
+.decl-proc{min-width:260px;max-width:420px}
+.decl-actions form{display:flex;gap:6px;align-items:center;margin:0 0 6px}
+.decl-actions input[type=date]{padding:2px 4px;font-size:12px}
+.delta{display:inline-block;min-width:2.2em;text-align:right;font-weight:600}
+.delta.up{color:#b3261e}.delta.down{color:#2f7d4f}
+.chg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.chg-grid .card h3{margin-top:0}
+.chg-list{margin:0;padding-left:18px}
+.chg-list li{margin:3px 0}
+

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_macros.html" import reco_box %}
+{% block title %}Usuarios de emergencia{% endblock %}
+{% block content %}
+<h1>Usuarios de emergencia</h1>
+<p class="subtitle">Usuarios que tienen permisos amplios (por ejemplo SAP_ALL) a propósito: se mantienen bloqueados y se habilitan solo ante una emergencia, con aprobación. Declararlos acá evita que figuren como pendientes en cada extracción mientras sigan bloqueados.</p>
+{% if ok %}<div class="note">{{ {'declarado': 'Usuario declarado.', 'modificado': 'Declaración actualizada.', 'renovado': 'Declaración renovada.', 'quitado': 'Declaración quitada: sus alertas vuelven a la tarea que corresponda.'}.get(ok, 'Listo.') }} Las alertas del último análisis de cada sistema ya se recalcularon.</div>{% endif %}
+{{ reco_box(reco) }}
+
+{% set ids = rows|map(attribute='d.id')|unique|list %}
+<div class="section-head"><h2>Declarados ({{ ids|length }})</h2>{% if ids %}<a href="/acciones/{{ task_key }}">Ver la tarea del plan ›</a>{% endif %}</div>
+{% if rows %}
+<div class="tbl-wrap"><table class="tbl compact">
+<tr><th>Usuario</th><th>Sistema</th><th>Estado según la última extracción</th><th>Último acceso</th><th>Responsable y procedimiento</th><th>Revisar antes de</th>{% if user.can('hallazgos_gestionar') %}<th></th>{% endif %}</tr>
+{% set seen = namespace(ids=[]) %}
+{% for r in rows %}{% set d = r.d %}{% set general = d.connection_id is none %}
+<tr>
+  <td>{% if r.conn and r.estado not in ('no_existe', 'sin_datos') %}<a href="/usuarios/{{ d.username }}?sistema={{ r.conn.id }}"><b>{{ d.username }}</b></a>{% else %}<b>{{ d.username }}</b>{% endif %}</td>
+  <td>{% if r.conn and not (general and r.estado == 'no_existe') %}{{ r.conn.system.label }} · {{ r.conn.system.sid }}/{{ r.conn.client }}{% endif %}{% if general %}<br><span class="small muted">declarado para todos los sistemas</span>{% endif %}</td>
+  <td><span class="chip {{ 'good' if r.estado in ('controlado', 'fuera_de_validez') else 'bad' if r.estado == 'desbloqueado' else 'warn' if r.estado == 'vencida' else '' }}">{% if general and r.estado == 'no_existe' %}No existe en ningún sistema{% else %}{{ labels.get(r.estado, 'Sin datos todavía') }}{% endif %}</span>
+    {% if r.user and r.user.hasta and r.estado == 'fuera_de_validez' %}<br><span class="small muted">válido hasta {{ r.user.hasta.strftime('%d/%m/%Y') }}</span>{% endif %}
+    {% if r.snap and not (general and r.estado == 'no_existe') %}<br><span class="small muted">datos del {{ r.snap.started_at.strftime('%d/%m/%Y %H:%M') }}</span>{% endif %}</td>
+  <td>{{ r.user.ultimo_acceso.strftime('%d/%m/%Y') if r.user and r.user.ultimo_acceso else '—' }}</td>
+  <td class="decl-proc"><b>{{ d.responsible }}</b><div class="small muted clamp2" title="{{ d.procedure }}">{{ d.procedure }}</div>
+    <div class="small muted">declarado por {{ d.created_by }} el {{ d.created_at.strftime('%d/%m/%Y') }}{% if d.updated_at %} · modificado por {{ d.updated_by }} el {{ d.updated_at.strftime('%d/%m/%Y') }}{% endif %}</div></td>
+  <td class="nowrap">{{ d.review_by.strftime('%d/%m/%Y') }}<br><span class="small {{ 'muted' if r.dias > 30 else '' }}">{% if r.dias < 0 %}venció hace {{ -r.dias }} día{{ '' if r.dias == -1 else 's' }}{% elif r.dias == 0 %}vence hoy{% else %}faltan {{ r.dias }} día{{ '' if r.dias == 1 else 's' }}{% endif %}</span></td>
+  {% if user.can('hallazgos_gestionar') %}<td class="decl-actions">{% if d.id not in seen.ids %}{% set _ = seen.ids.append(d.id) %}
+    <form method="post" action="/emergencia/{{ d.id }}/renovar"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="date" name="revisar" value="{{ default_review }}" min="{{ today }}" max="{{ max_review }}" aria-label="Nueva fecha de revisión"><button class="btn ghost small">Renovar</button></form>
+    <form method="post" action="/emergencia/{{ d.id }}/quitar" data-confirm="¿Quitar la declaración de {{ d.username }}{{ ' (todos los sistemas)' if general else '' }}? Sus alertas vuelven a figurar como pendientes."><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Quitar declaración</button></form>
+  {% endif %}</td>{% endif %}
+</tr>
+{% endfor %}
+</table></div>
+{% else %}<p class="muted">Todavía no hay usuarios de emergencia declarados.</p>{% endif %}
+
+<details class="card"><summary>Cómo funciona</summary>
+<ul>
+  <li><b>Bloqueado</b> (o fuera de su período de validez) y con la declaración vigente: sus alertas quedan <b>controladas</b> y no figuran como pendientes en cada extracción.</li>
+  <li><b>Desbloqueado</b>: la tarea «Mantener bloqueados los usuarios de emergencia» queda pendiente hasta que se vuelva a bloquear (o alguien registre que hay una emergencia en curso).</li>
+  <li><b>Declaración vencida</b>: vuelve a ser pendiente hasta que alguien la renueve o la quite. La fecha de revisión es como máximo de un año.</li>
+  <li>Las decisiones tomadas por una persona (excepción, falso positivo, control mitigante) no se modifican. La aplicación no bloquea ni desbloquea nada en SAP: lee el estado de bloqueo y la validez del usuario (USR02) en cada extracción.</li>
+  <li>Cada declaración, renovación o baja queda en la auditoría de la aplicación.</li>
+</ul>
+</details>
+
+{% if candidates %}
+<h2>Usuarios con SAP_ALL sin declarar ({{ candidates|length }})</h2>
+<p class="muted small">Si alguno es un usuario de emergencia, declararlo; si no, no debería tener SAP_ALL (ver la tarea «Quitar el perfil SAP_ALL» de ese sistema).</p>
+<div class="tbl-wrap"><table class="tbl compact">
+<tr><th>Usuario</th><th>Sistema</th><th>Estado</th><th>Último acceso</th>{% if user.can('hallazgos_gestionar') %}<th></th>{% endif %}</tr>
+{% for c in candidates %}
+<tr><td><a href="/usuarios/{{ c.username }}?sistema={{ c.conn.id }}">{{ c.username }}</a></td><td>{{ c.conn.system.label }} · {{ c.conn.system.sid }}/{{ c.conn.client }}</td>
+<td>{% if c.bloqueado %}<span class="chip good">bloqueado</span>{% else %}<span class="chip bad">desbloqueado</span>{% endif %}</td>
+<td>{{ c.ultimo_acceso.strftime('%d/%m/%Y') if c.ultimo_acceso else '—' }}</td>
+{% if user.can('hallazgos_gestionar') %}<td><a class="btn ghost small" href="/emergencia?usuario={{ c.username }}&conexion={{ c.conn.id }}#declarar">Declarar</a></td>{% endif %}</tr>
+{% endfor %}
+</table></div>
+{% endif %}
+
+{% if user.can('hallazgos_gestionar') %}
+<h2 id="declarar">Declarar un usuario de emergencia</h2>
+<form class="card" method="post" action="/emergencia">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="form-grid">
+    <label>Sistema *<select name="conexion">
+      {% for c in conns %}<option value="{{ c.id }}" {% if pre_conn == c.id %}selected{% endif %}>{{ c.label }}</option>{% endfor %}
+      <option value="todos" {% if not pre_conn %}selected{% endif %}>Todos los sistemas (mismo usuario en todos)</option>
+    </select></label>
+    <label>Usuario SAP *<input name="usuario" maxlength="12" required value="{{ pre_user }}" placeholder="ej. FF_BASIS" autocomplete="off"></label>
+    <label>Responsable *<input name="responsable" maxlength="100" required placeholder="Quién aprueba que se use"></label>
+    <label>Revisar antes de *<input type="date" name="revisar" required value="{{ default_review }}" min="{{ today }}" max="{{ max_review }}"></label>
+    <label class="wide">Procedimiento *<textarea name="procedimiento" rows="3" required minlength="10" maxlength="2000" placeholder="Cuándo se desbloquea, quién lo aprueba, por cuánto tiempo y cómo se revisa lo que se hizo (p. ej. registro de auditoría de seguridad)."></textarea></label>
+  </div>
+  <p><button class="btn">Declarar</button></p>
+  <p class="small muted">Si el usuario ya estaba declarado para el mismo sistema, se actualizan sus datos. Una declaración de un sistema tiene prioridad sobre la de «todos los sistemas».</p>
+</form>
+{% endif %}
+{% endblock %}

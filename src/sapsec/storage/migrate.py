@@ -7,6 +7,7 @@ Se ejecutan al iniciar (``init_db``) y actualizan bases creadas con versiones an
 3. ``sap_connection.fingerprint``: huella del sistema real.
 4. ``app_user.last_failed_at``: bloqueo temporal tras intentos fallidos.
 5. ``sap_system.landscape``: grupo de sistemas que comparten transportes (DEV → QA → PRD).
+6. ``finding.auto_status``: estado fijado automáticamente (usuarios de emergencia declarados).
 """
 
 from __future__ import annotations
@@ -55,6 +56,10 @@ def migrate(engine: Engine) -> None:
         with engine.begin() as c:
             c.exec_driver_sql("ALTER TABLE sap_system ADD COLUMN landscape VARCHAR(100) DEFAULT '' NOT NULL")
         log.info("Migración: agregada sap_system.landscape")
+    if "finding" in tables and "auto_status" not in _columns(engine, "finding"):
+        with engine.begin() as c:
+            c.exec_driver_sql("ALTER TABLE finding ADD COLUMN auto_status VARCHAR(20) DEFAULT '' NOT NULL")
+        log.info("Migración: agregada finding.auto_status")
     if "app_user" in tables and "last_failed_at" not in _columns(engine, "app_user"):
         with engine.begin() as c:
             c.exec_driver_sql("ALTER TABLE app_user ADD COLUMN last_failed_at TIMESTAMP NULL")

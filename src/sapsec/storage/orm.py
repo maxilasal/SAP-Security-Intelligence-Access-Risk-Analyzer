@@ -8,9 +8,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import (JSON, Boolean, Column, DateTime, Float, ForeignKey, Index, Integer,
+from sqlalchemy import (JSON, Boolean, Column, Date, DateTime, Float, ForeignKey, Index, Integer,
                         MetaData, String, Table, Text, UniqueConstraint)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -139,6 +139,9 @@ class Finding(Base):
     exception_justification: Mapped[str | None] = mapped_column(Text, nullable=True)
     exception_expires: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     mitigation_id: Mapped[int | None] = mapped_column(ForeignKey("mitigation.id"), nullable=True)
+    # Quién fijó el estado: "" = una persona (o el valor inicial); "emergencia" = la declaración de usuario de
+    # emergencia (se recalcula en cada análisis y se revierte sola si el usuario se desbloquea o la declaración vence).
+    auto_status: Mapped[str] = mapped_column(String(20), default="")
 
 
 class Mitigation(Base):
@@ -156,6 +159,26 @@ class Mitigation(Base):
     valid_from: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     valid_to: Mapped[datetime] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class EmergencyUser(Base):
+    """Usuario de emergencia declarado: tiene permisos amplios (p. ej. SAP_ALL) a propósito y se mantiene BLOQUEADO
+    salvo durante una emergencia. Mientras esté bloqueado y la declaración vigente, sus alertas quedan controladas
+    (no pendientes); si se desbloquea o la declaración vence, vuelven a ser pendientes."""
+
+    __tablename__ = "emergency_user"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    connection_id: Mapped[int | None] = mapped_column(ForeignKey("sap_connection.id"), nullable=True)  # None = todos
+    username: Mapped[str] = mapped_column(String(12), index=True)
+    responsible: Mapped[str] = mapped_column(String(100))          # quién aprueba su uso
+    procedure: Mapped[str] = mapped_column(Text)                   # cuándo y cómo se usa
+    review_by: Mapped[date] = mapped_column(Date)                  # fecha de revisión (vence la declaración)
+    created_by: Mapped[str] = mapped_column(String(50), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_by: Mapped[str] = mapped_column(String(50), default="")
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    connection: Mapped["SapConnection | None"] = relationship()
+    __table_args__ = (UniqueConstraint("connection_id", "username", name="uq_emergency_user"),)
 
 
 class Simulation(Base):

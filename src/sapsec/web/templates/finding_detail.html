@@ -15,7 +15,7 @@
     <dt>Riesgo inherente / residual</dt><dd>{{ f.inherent_score }} / {{ f.residual_score }}</dd>
     <dt>Detectado</dt><dd>{{ f.detected_at.strftime('%Y-%m-%d %H:%M') }}</dd>
     <dt>Última validación</dt><dd>{{ f.last_validated_at.strftime('%Y-%m-%d %H:%M') }}</dd>
-    <dt>Estado</dt><dd>{{ f.status }}</dd>
+    <dt>Estado</dt><dd>{{ f.status }}{% if f.auto_status == 'emergencia' %} <span class="chip good">automático: usuario de emergencia declarado y bloqueado</span> <a href="/emergencia" class="small">ver declaración ›</a>{% endif %}</dd>
     <dt>Responsable de revisión</dt><dd>{{ f.owner or '—' }}</dd>
     <dt>Justificación de excepción</dt><dd>{{ f.exception_justification or '—' }}</dd>
     <dt>Vencimiento de excepción</dt><dd>{{ f.exception_expires or '—' }}</dd>

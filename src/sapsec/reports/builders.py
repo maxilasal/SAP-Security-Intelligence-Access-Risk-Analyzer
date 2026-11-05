@@ -144,3 +144,63 @@ def plan_report(snap: Snapshot, tasks: list, advice_for) -> ReportDoc:  # type: 
                                          "usuarios afectados. Las columnas Responsable, Fecha compromiso y "
                                          "Observaciones son para completar al repartir el trabajo."],
                               Table(cols, rows))])
+
+
+def changes_report(x: dict, adv) -> ReportDoc:  # type: ignore[no-untyped-def]
+    """Qué cambió entre dos extracciones del mismo sistema (evidencia de revisión periódica de cambios)."""
+    a, b = x["a"], x["b"]
+    sev = {"critico": "Crítico", "alto": "Alto", "medio": "Medio", "bajo": "Bajo", "informativo": "Informativo"}
+
+    def fdate(v) -> str:  # type: ignore[no-untyped-def]
+        return v.strftime("%Y-%m-%d") if v else ""
+
+    def alerts(rows: list[dict]) -> Table:
+        return Table(["Gravedad", "Alerta", "Usuario", "Rol", "Tipo", "Regla", "Estado", "Nota"],
+                     [[sev.get(r["severity"], r["severity"]), r["title"], r["user"], r["role"], r["kind"], r["rule_id"],
+                       r["status"], r["note"]] for r in rows])
+
+    changes: list[list] = []
+    for r in x["assign_added"]:
+        changes.append(["Rol asignado", r["user"], r["role"], f"modificado en SAP el {fdate(r['changed'])}" if r["changed"] else ""])
+    for r in x["assign_removed"]:
+        changes.append(["Rol quitado", r["user"], r["role"], ""])
+    for r in x["assign_validity"]:
+        changes.append(["Vigencia de rol modificada", r["user"], r["role"], f"{fdate(r['before'])} → {fdate(r['after'])}"])
+    for r in x["profiles_added"]:
+        changes.append(["Perfil asignado a mano", r["user"], r["profile"], "superusuario" if r["super"] else ""])
+    for r in x["profiles_removed"]:
+        changes.append(["Perfil a mano quitado", r["user"], r["profile"], ""])
+    for r in x["users_new"]:
+        changes.append(["Usuario nuevo", r["user"], r["name"], f"creado {fdate(r['created'])} por {r['creator']}".strip()])
+    for r in x["users_deleted"]:
+        changes.append(["Usuario borrado", r["user"], r["name"], ""])
+    for r in x["users_locked"]:
+        changes.append(["Usuario bloqueado", r["user"], r["name"], ""])
+    for r in x["users_unlocked"]:
+        changes.append(["Usuario desbloqueado", r["user"], r["name"], ""])
+    for r in x["users_validity"]:
+        changes.append(["Validez del usuario modificada", r["user"], r["name"], f"{fdate(r['before']) or 'sin límite'} → {fdate(r['after']) or 'sin límite'}"])
+    for r in x["roles_new"]:
+        changes.append(["Rol nuevo", r["role"], "", f"creado {fdate(r['created'])} por {r['created_by']}".strip()])
+    for r in x["roles_deleted"]:
+        changes.append(["Rol borrado", r["role"], "", ""])
+    for r in x["roles_changed"]:
+        changes.append(["Rol modificado", r["role"], "", f"última modificación {fdate(r['changed'])} por {r['changed_by']}; "
+                        f"valores {r['n_values_before']} → {r['n_values']}"])
+    meta = snapshot_meta(b, f"Cambios entre el snapshot #{a.id} ({a.started_at:%Y-%m-%d %H:%M}) y el #{b.id} "
+                            f"({b.started_at:%Y-%m-%d %H:%M})")
+    lims = _limitations(b) + [
+        "Los cambios se reconstruyen comparando dos extracciones: un cambio hecho y deshecho entre ambas no se ve, y "
+        "no se sabe quién asignó cada rol (ver los documentos de modificación en SAP: SUIM, RSUSR100N / RSSCD100_PFCG).",
+        "Un rol se informa como modificado si cambió su fecha o usuario de última modificación (AGR_DEFINE) o la "
+        "cantidad de valores de autorización (AGR_1251)."]
+    return ReportDoc("Qué cambió en el sistema", meta, lims, [
+        Section("Resumen", [adv.headline, adv.why, adv.impact]),
+        Section("Alertas nuevas", [f"{len(x['new'])} alertas"], alerts(x["new"])),
+        Section("Alertas resueltas", [f"{len(x['resolved'])} alertas (ya no están en SAP)"], alerts(x["resolved"])),
+        Section("Cambios en SAP", [f"{len(changes)} cambios"], Table(["Cambio", "Usuario / rol", "Detalle", "Nota"], changes)),
+        Section("Decisiones registradas en la aplicación", [f"{len(x['decisions'])} registros"],
+                Table(["Fecha (UTC)", "Usuario", "Acción", "Sobre"],
+                      [[d["ts"].strftime("%Y-%m-%d %H:%M"), d["user"], d["action"], d["target"]] for d in x["decisions"]])),
+    ])
+

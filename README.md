@@ -11,7 +11,7 @@ evidencia técnica, y **simula asignaciones de roles antes de realizarlas en SAP
 
 Documentación: [diseño de la Fase 1](docs/01_fase1_diseno.md) · [conectividad RFC](docs/02_conectividad_rfc.md) ·
 [usuario técnico](docs/03_usuario_tecnico_rfc.md) · [extractor Z opcional](docs/04_extractor_z_opcional.md) ·
-[pruebas y validación](docs/05_validacion.md) · [acceso desde otras PC](docs/06_acceso_desde_otras_pc.md) · [S/4HANA, Fiori y DEV](docs/07_s4hana_fiori_y_desarrollo.md) · [versionado y actualización](docs/08_versionado_y_actualizacion.md) · [cambios](CHANGELOG.md)
+[pruebas y validación](docs/05_validacion.md) · [acceso desde otras PC](docs/06_acceso_desde_otras_pc.md) · [S/4HANA, Fiori y DEV](docs/07_s4hana_fiori_y_desarrollo.md) · [versionado y actualización](docs/08_versionado_y_actualizacion.md) · [usuarios de emergencia y qué cambió](docs/09_emergencia_y_cambios.md) · [cambios](CHANGELOG.md)
 
 ## Uso diario (en 3 pasos)
 
@@ -28,6 +28,14 @@ Documentación: [diseño de la Fase 1](docs/01_fase1_diseno.md) · [conectividad
 carácter, y varios criterios separados por coma (`Z_FI*, Z_MM*`).
 
 **SAP_ALL:** una sola alerta por persona; los riesgos que existen solo por ese perfil se ven dentro de ella.
+
+**Usuarios de emergencia** (Seguimiento › Usuarios de emergencia): los que tienen SAP_ALL a propósito se declaran
+con responsable, procedimiento y fecha de revisión. Mientras estén bloqueados no aparecen como pendientes en cada
+extracción; si alguno se desbloquea o la declaración vence, vuelve a aparecer como tarea.
+
+**Qué cambió** (Seguimiento › Qué cambió, o el enlace del inicio): entre dos extracciones del mismo sistema, las
+alertas nuevas y resueltas y qué cambió en SAP (roles asignados o quitados, perfiles a mano, usuarios, roles
+modificados). Se descarga en Excel o PDF.
 
 Las fichas de **usuario** y de **rol** y el **simulador** tienen el mismo recuadro: qué hacer con ese usuario,
 con ese rol, o si se puede asignar el rol pedido («No asignar Z_FI_PAGOS a USUARIO_TEST» / «Se puede asignar…»),
@@ -66,10 +74,11 @@ powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red
 
 ## S/4HANA con Fiori y sistemas de desarrollo
 
-* **S/4HANA**: se registra igual que un ECC. La aplicación detecta el producto (CVERS), traduce los servicios Fiori/OData
-  de `S_SERVICE` a su nombre real (USOBHASH) y detecta conflictos hechos **desde apps Fiori** aunque la persona no tenga
-  la transacción, usando la SU24 de los servicios del propio sistema. Si el Fiori está en un servidor aparte (hub),
-  registrarlo también.
+* **S/4HANA**: se registra igual que un ECC, **una sola vez** (un S/4 con Fiori embebido es un único sistema: no hace
+  falta registrarlo como «S/4» y como «Fiori»). La aplicación detecta el producto (CVERS), traduce los servicios
+  Fiori/OData de `S_SERVICE` a su nombre real (USOBHASH) y detecta conflictos hechos **desde apps Fiori** aunque la
+  persona no tenga la transacción, usando la SU24 de los servicios del propio sistema. Solo si el Fiori está en un
+  servidor front-end aparte (hub, con otro SID) se registra ese servidor como un sistema más.
 * **DEV y QA tienen otros controles**: desarrollar o liberar transportes es normal en DEV y no se marca; los conflictos de
   negocio (pagos, compras, ventas) solo aplican en PRD; SAP_ALL, usuarios estándar, RFC y sistema operativo se siguen
   revisando. Cada regla muestra su gravedad en PRD / QA / DEV (página Reglas, `by_environment` en los YAML).
@@ -158,7 +167,7 @@ $env:SAPSEC_DATABASE_URL = "postgresql+psycopg://sapsec@dbserver/sapsec"
 
 | Probado con un SAP real (ECC 7.31, QAS) | Probado solo con datos ficticios (pruebas automatizadas) |
 |---|---|
-| Conexión con el SAP NW RFC SDK 7.50, extracción completa (usuarios, roles, perfiles, autorizaciones), análisis y tareas de corrección | Modo red con HTTPS (verificado con un servidor real y OpenSSL, no en la red de su empresa), scripts de firewall e inicio con Windows (no ejecutados en Windows aquí), recomendaciones por pantalla, simulador, reportes; S/4HANA: detección de producto, servicios Fiori/OData y conflictos vía Fiori (SU24 TYPE HT), controles por ambiente y Desarrollo vs. producción |
+| Conexión con el SAP NW RFC SDK 7.50, extracción completa (usuarios, roles, perfiles, autorizaciones), análisis y tareas de corrección | Modo red con HTTPS (verificado con un servidor real y OpenSSL, no en la red de su empresa), scripts de firewall e inicio con Windows (no ejecutados en Windows aquí), recomendaciones por pantalla, simulador, reportes; S/4HANA: detección de producto, servicios Fiori/OData y conflictos vía Fiori (SU24 TYPE HT), controles por ambiente y Desarrollo vs. producción; usuarios de emergencia declarados y «Qué cambió» entre dos extracciones |
 
 Las reglas incluidas están en estado **ejemplo**: no son la matriz oficial de SAP GRC y deben
 validarse y aprobarse antes de usarse como criterio de auditoría.

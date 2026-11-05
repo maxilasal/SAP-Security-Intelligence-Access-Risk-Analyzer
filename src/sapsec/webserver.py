@@ -98,8 +98,15 @@ def serve(host: str | None = None, port: int | None = None, network: bool = Fals
     print(f"  Para cerrar: Ctrl+C o cerrar esta ventana.\n{line}\n")
 
     import uvicorn
+    uvicorn.run("sapsec.api.app:create_app", factory=True, host=host, port=port, **ssl_kw, **uvicorn_options())
+    return 0
+
+
+def uvicorn_options(windows: bool | None = None) -> dict:
+    """Opciones de uvicorn. En Windows, sin colores: la consola clásica los muestra como «←[32mINFO←[0m»."""
     kw: dict = {"server_header": False}
+    if (os.name == "nt") if windows is None else windows:
+        kw["use_colors"] = False
     if sys.stdout is None or sys.stderr is None:  # pythonw (inicio automático sin ventana): log solo a archivo
         kw["log_config"] = None
-    uvicorn.run("sapsec.api.app:create_app", factory=True, host=host, port=port, **ssl_kw, **kw)
-    return 0
+    return kw

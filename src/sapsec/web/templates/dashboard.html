@@ -15,12 +15,15 @@
 <div class="warnbox"><b>{{ cu|length }} desarrollador{{ '' if cu|length == 1 else 'es' }} de DEV {{ 'tiene' if cu|length == 1 else 'tienen' }} permisos críticos en este sistema</b> ({{ cu[:5]|join(', ') }}{% if cu|length > 5 %}…{% endif %}). <a href="/entre-sistemas">Ver detalle y qué hacer ›</a></div>{% endif %}
 {{ reco_box(reco, "Recomendación de hoy") }}
 <p class="howto"><b>Cómo se usa:</b> se corrige en SAP lo que dice cada tarea y se vuelve a extraer; lo corregido pasa a «resuelto» solo.</p>
+{% if delta is not none %}<p class="howto"><b>Desde la extracción anterior</b> ({{ prev.started_at.strftime('%d/%m %H:%M') }}):
+  {% if delta.nuevas or delta.resueltas %}{{ delta.nuevas }} alerta{{ '' if delta.nuevas == 1 else 's' }} nueva{{ '' if delta.nuevas == 1 else 's' }}{% if delta.nuevas_criticas %} (<b>{{ delta.nuevas_criticas }} crítica{{ '' if delta.nuevas_criticas == 1 else 's' }}</b>){% endif %} · {{ delta.resueltas }} resuelta{{ '' if delta.resueltas == 1 else 's' }}{% else %}sin alertas nuevas ni resueltas{% endif %}
+  · <a href="/cambios?desde={{ prev.id }}&hasta={{ snap.id }}">Ver qué cambió ›</a></p>{% endif %}
 
 <div class="kpis">
   <a class="kpi-s" href="/acciones"><div class="v">{{ summ.tareas }}</div><div class="l">tareas pendientes</div></a>
   <a class="kpi-s crit" href="/acciones?gravedad=critico"><div class="v">{{ summ.criticas }}</div><div class="l">tareas críticas</div></a>
   <a class="kpi-s high" href="/acciones"><div class="v">{{ summ.usuarios }}</div><div class="l">usuarios afectados de {{ stats.usuarios }}</div></a>
-  <a class="kpi-s crit" href="/usuarios?perfil=SAP_ALL"><div class="v">{{ stats.sap_all }}</div><div class="l">usuarios con SAP_ALL{% if stats.sap_all_bloqueados %} ({{ stats.sap_all_bloqueados }} bloqueado{{ '' if stats.sap_all_bloqueados == 1 else 's' }}){% endif %}</div></a>
+  <a class="kpi-s crit" href="/usuarios?perfil=SAP_ALL"><div class="v">{{ stats.sap_all }}</div><div class="l">usuarios con SAP_ALL{% if stats.sap_all_bloqueados %} ({{ stats.sap_all_bloqueados }} bloqueado{{ '' if stats.sap_all_bloqueados == 1 else 's' }}{% if stats.sap_all_emergencia %} · {{ stats.sap_all_emergencia }} de emergencia{% endif %}){% endif %}</div></a>
   <a class="kpi-s ok" href="/acciones?estado=resueltas"><div class="v">{{ summ.resueltas }}</div><div class="l">tareas resueltas</div></a>
 </div>
 

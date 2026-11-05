@@ -15,7 +15,7 @@
   <span class="small muted">— ya no tienen este problema en SAP; no figuran como afectados.</span></div>
 {% endif %}
 {% if t.resolved_problems and t.pending %}<p class="small muted">✓ {{ t.resolved_problems|length }} punto{{ '' if t.resolved_problems|length == 1 else 's' }} de esta tarea ya {{ 'está corregido' if t.resolved_problems|length == 1 else 'están corregidos' }}.</p>{% endif %}
-<h2>Puntos a corregir ({{ t.visible_problems|length }})</h2>
+<h2>{% if t.kind == 'emergencia' %}Lo que pueden hacer (lo tienen a propósito){% else %}Puntos a corregir{% endif %} ({{ t.visible_problems|length }})</h2>
 <p class="sevline">{{ sev_counts(t.visible_problems) }}</p>
 {% macro problem_row(p) %}
 <li><details><summary>{{ sev(p.severity) }}<span class="grow"><b>{{ p.title }}</b><br><span class="muted">{{ p.change }}</span></span>
@@ -38,14 +38,24 @@
 <ul class="fixlist">{% for p in vp[first:] %}{{ problem_row(p) }}{% endfor %}</ul></details>
 {% endif %}
 
-{% if users %}
+{% if users and t.kind == 'emergencia' %}
+<div class="section-head"><h2>Usuarios de emergencia ({{ t.n_users }})</h2><a href="/emergencia">Declaraciones ›</a></div>
+<div class="tbl-wrap"><table class="tbl compact sortable">
+<tr><th>Usuario</th><th>Nombre</th><th>Estado</th><th>Último acceso</th><th>Responsable</th><th>Revisar antes de</th></tr>
+{% for u in users %}{% set e = emer.get(u.username, {}) %}
+<tr><td><a href="/usuarios/{{ u.username }}">{{ u.username }}</a></td><td>{{ u.full_name }}</td>
+<td><span class="chip {{ 'good' if e.estado in ('controlado', 'fuera_de_validez') else 'bad' if e.estado == 'desbloqueado' else 'warn' }}">{{ emer_label.get(e.estado, e.estado) }}</span></td>
+<td>{{ u.last_logon or '—' }}</td><td>{{ e.responsable }}</td><td>{{ e.revisar[8:10] ~ '/' ~ e.revisar[5:7] ~ '/' ~ e.revisar[:4] if e.revisar else '' }}</td></tr>
+{% endfor %}
+</table></div>
+{% elif users %}
 <div class="section-head"><h2>Usuarios afectados ({{ t.n_users }})</h2>{% if t.n_users > users|length %}<span class="muted">se muestran {{ users|length }}</span>{% endif %}</div>
 <div class="tbl-wrap"><table class="tbl compact sortable">
 <tr><th>Usuario</th><th>Nombre</th><th>Tipo</th><th>Estado</th><th>Último acceso</th>{% if t.roles %}<th>Roles de esta tarea que tiene</th>{% endif %}<th></th></tr>
 {% for u in users %}
 <tr><td><a href="/usuarios/{{ u.username }}">{{ u.username }}</a></td><td>{{ u.full_name }}</td><td>{{ u.type }}</td><td>{{ u.lock }}</td><td>{{ u.last_logon or '—' }}</td>
 {% if t.roles %}<td>{% for r in u.roles %}<span class="chip">{{ r }}</span> {% endfor %}</td>{% endif %}
-<td class="nowrap">{% if t.kind == 'combinacion' and u.roles %}{% for r in u.roles[:3] %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ r }}">Simular quitar {{ r }}</a> {% endfor %}{% elif t.kind == 'rol' %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ t.roles[0] }}">Simular quitar el rol</a>{% else %}<a class="btn ghost small" href="/usuarios/{{ u.username }}">Ver usuario</a>{% endif %}</td></tr>
+<td class="nowrap">{% if t.kind == 'perfil' and t.profile == 'SAP_ALL' and user.can('hallazgos_gestionar') %}<a class="btn ghost small" href="/emergencia?usuario={{ u.username }}&conexion={{ current_snap.connection_id }}#declarar" title="Si tiene SAP_ALL a propósito para emergencias y se mantiene bloqueado">Es de emergencia</a> {% endif %}{% if t.kind == 'combinacion' and u.roles %}{% for r in u.roles[:3] %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ r }}">Simular quitar {{ r }}</a> {% endfor %}{% elif t.kind == 'rol' %}<a class="btn ghost small" href="/simulador?usuario={{ u.username }}&quitar={{ t.roles[0] }}">Simular quitar el rol</a>{% else %}<a class="btn ghost small" href="/usuarios/{{ u.username }}">Ver usuario</a>{% endif %}</td></tr>
 {% endfor %}
 </table></div>
 {% endif %}
@@ -65,7 +75,7 @@
   <label>Justificación<textarea name="exception_justification" rows="2" placeholder="Obligatoria para excepción o falso positivo"></textarea></label>
   <button class="btn">Guardar decisión</button>
 </form>
-<p class="small muted">Si se corrige en SAP no hace falta registrar nada: la próxima extracción lo marca como resuelto.</p>
+<p class="small muted">{% if t.kind == 'emergencia' %}Si hay una emergencia en curso, se puede registrar «En revisión» con el responsable; al volver a bloquear el usuario, la próxima extracción lo deja controlado solo.{% else %}Si se corrige en SAP no hace falta registrar nada: la próxima extracción lo marca como resuelto.{% endif %}</p>
 </details>
 {% endif %}
 {% endblock %}

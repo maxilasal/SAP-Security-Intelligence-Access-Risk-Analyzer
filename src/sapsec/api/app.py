@@ -6,7 +6,7 @@ import logging
 import os
 import secrets
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
@@ -25,7 +25,8 @@ from ..engine.incompat import forbidden_for_user, incompatible_with_role, role_f
 from ..engine.recommend import redundant_roles as _redundant_roles
 from ..actions import (KIND_LABEL, build_tasks, get_task, role_fix_items, summary as tasks_summary,
                        user_fix_items, _key as task_key)
-from ..advice import home_advice, role_advice, simulation_advice, task_advice, user_advice
+from .. import changes, emergency
+from ..advice import emergency_user_advice, home_advice, role_advice, simulation_advice, task_advice, user_advice
 from ..search import filter_values, has_wildcards, matches
 from ..engine.rule_check import check_rules, summarize
 from ..engine.simulator import LABELS, Scenario, ValueOverride, simulate
@@ -40,7 +41,8 @@ from ..services import (ANALYZING, analyze_snapshot, cross_system, delete_connec
                         reset_sap_data, system_overview, context_for, dashboard_stats, data_for, get_rules, run_extraction,
                         snapshot_meta, test_connection)
 from ..storage.db import get_session, init_db
-from ..storage.orm import AppUser, AuditLog, Finding, Mitigation, SapConnection, SapSystem, Snapshot, utcnow
+from ..storage.orm import (AppUser, AuditLog, EmergencyUser, Finding, Mitigation, SapConnection, SapSystem, Snapshot,
+                           utcnow)
 from .deps import LoginRequired, CurrentUser, check_csrf, current_snapshot, current_user, render, require
 
 log = logging.getLogger(__name__)
@@ -269,9 +271,11 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         reco = home_advice(top[0] if top else None, None, _env(snap))
         cross = _safe(lambda: cross_system(db, prd_snapshot_id=snap.id), {"rows": []}, "control entre sistemas") \
             if _env(snap) == "PRD" else {"rows": []}
+        prev = changes.previous_of(db, snap)
+        delta = _safe(lambda: changes.alert_delta(db, prev, snap), None, "cambios") if prev is not None else None
         return render(request, "dashboard.html", user, db, active="dashboard", snap=snap, stats=stats, top=top,
                       first=top[0] if top else None, nxt=top[1:], reco=reco, summ=tasks_summary(tasks),
-                      meta=snapshot_meta(snap), cross=cross)
+                      meta=snapshot_meta(snap), cross=cross, prev=prev, delta=delta)
 
     # ------------------------------------------------------------------ plan de acción
     @app.get("/acciones", response_class=HTMLResponse)
@@ -308,9 +312,10 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
             users.append({"username": uname, "full_name": u.full_name, "type": u.type_label, "lock": u.lock_label,
                           "last_logon": u.last_logon, "roles": mine, "locked": u.is_locked})
         users.sort(key=lambda x: (x["locked"], x["username"]))  # primero quienes hoy pueden ingresar
+        emer = emergency.record_for(db, snap)
         audit(db, user.username, "consulta_tarea", t.title)
-        return render(request, "task.html", user, db, active="plan", t=t, users=users,
-                      reco=task_advice(t, data, _env(snap)))
+        return render(request, "task.html", user, db, active="plan", t=t, users=users, emer=emer,
+                      emer_label=emergency.STATE_LABEL, reco=task_advice(t, data, _env(snap)))
 
     @app.post("/acciones/{key}/gestionar")
     async def task_manage(key: str, request: Request, user: CurrentUser = Depends(require("hallazgos_gestionar")),
@@ -697,11 +702,19 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         fixes = user_fix_items(ctx.rules, a)
         su = a.eff.user
         idle = (ctx.as_of - su.last_logon).days if getattr(su, "last_logon", None) else None
-        reco = user_advice(username, su, fixes, sorted(getattr(a.eff, "_direct", set()) or []), idle,
-                           get_settings().analysis.inactivity_days)
+        emer = emergency.record_for(db, snap).get(username)
+        if emer:  # usuario de emergencia declarado: todo lo suyo se gestiona en su propia tarea
+            for f in fixes:
+                f["task"] = task_key("emergencia")
+                f["change"] = "lo tiene a propósito: se controla manteniéndolo bloqueado"
+            reco = emergency_user_advice(username, emer)
+        else:
+            reco = user_advice(username, su, fixes, sorted(getattr(a.eff, "_direct", set()) or []), idle,
+                               get_settings().analysis.inactivity_days)
         return render(request, "user_detail.html", user, db, active="usuarios", a=a, objects=objects,
                       expiring=expiring, redundant=redundant, data=data, snap=snap, as_of=ctx.as_of,
-                      forbidden=forbidden, fixes=fixes, reco=reco, fiori_services=_fiori_services(a.eff, data))
+                      forbidden=forbidden, fixes=fixes, reco=reco, fiori_services=_fiori_services(a.eff, data),
+                      emer=emer, emer_label=emergency.STATE_LABEL)
 
     # ------------------------------------------------------------------ roles
     @app.get("/roles", response_class=HTMLResponse)
@@ -895,6 +908,7 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
             raise HTTPException(400, "Una excepción requiere fecha de vencimiento")
         before = {"status": f.status, "owner": f.owner}
         f.status, f.owner = status, str(form.get("owner") or f.owner or "") or None
+        f.auto_status = ""  # la decisión de una persona prevalece sobre la automática
         f.exception_justification = just or f.exception_justification
         f.exception_expires = datetime.fromisoformat(exp) if exp else f.exception_expires
         mid = form.get("mitigation_id")
@@ -971,6 +985,119 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         doc = simulation_report(snap, result, sim.created_at.strftime("%Y-%m-%d %H:%M"), executive=tipo == "ejecutivo")  # type: ignore[arg-type]
         audit(db, user.username, "reporte_simulacion", str(sim_id), {"formato": formato})
         return _download(doc, formato, f"simulacion_{sim.username}_{sim_id}_{tipo}")
+
+    # ------------------------------------------------------------------ qué cambió entre dos fechas
+    def _changes_pair(request: Request, db: Session, desde: int | None, hasta: int | None):  # type: ignore[no-untyped-def]
+        b = db.get(Snapshot, hasta) if hasta else _need_snap(request, db)
+        if b is None:
+            raise HTTPException(404, "La extracción indicada no existe (puede haberse borrado por la retención).")
+        a = db.get(Snapshot, desde) if desde else changes.previous_of(db, b)
+        if desde and a is None:
+            raise HTTPException(404, "La extracción indicada no existe (puede haberse borrado por la retención).")
+        if a is not None:
+            if a.analyzed_at is None or b.analyzed_at is None:
+                raise HTTPException(409, "Una de las dos extracciones todavía no se analizó: vuelva en unos minutos.")
+            try:
+                a, b = changes.ordered(a, b)
+            except changes.ChangesError as exc:
+                raise HTTPException(400, str(exc)) from exc
+        return a, b
+
+    @app.get("/cambios", response_class=HTMLResponse)
+    def changes_page(request: Request, desde: int | None = None, hasta: int | None = None,
+                     user: CurrentUser = Depends(require("ver")), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        from ..advice import changes_advice
+        a, b = _changes_pair(request, db, desde, hasta)
+        snaps = db.scalars(select(Snapshot).where(Snapshot.connection_id == b.connection_id,
+                                                  Snapshot.analyzed_at.is_not(None),
+                                                  Snapshot.status.in_(["completo", "incompleto"]))
+                           .order_by(Snapshot.id.desc())).all()
+        x = changes.compare(db, a, b) if a is not None and a.id != b.id else None
+        audit(db, user.username, "consulta_cambios", f"{b.connection.label}: #{a.id if a else '-'} → #{b.id}")
+        return render(request, "changes.html", user, db, active="cambios", snap=b, a=a, b=b, x=x, snaps_all=snaps,
+                      reco=changes_advice(x) if x else None, keep=get_settings().snapshots_to_keep)
+
+    @app.get("/cambios/descargar")
+    def changes_download(request: Request, desde: int | None = None, hasta: int | None = None, formato: str = "xlsx",
+                         user: CurrentUser = Depends(require("reportes")), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        from ..advice import changes_advice
+        from ..reports.builders import changes_report
+        if formato not in EXPORTERS:
+            raise HTTPException(400, "Formato inválido")
+        a, b = _changes_pair(request, db, desde, hasta)
+        if a is None or a.id == b.id:
+            raise HTTPException(400, "Hacen falta dos extracciones distintas del mismo sistema.")
+        x = changes.compare(db, a, b)
+        audit(db, user.username, "reporte", f"cambios #{a.id} → #{b.id}", {"formato": formato})
+        return _download(changes_report(x, changes_advice(x)), formato,
+                         f"cambios_{b.sid}_{b.client}_{a.started_at:%Y%m%d}_{b.started_at:%Y%m%d}")
+
+    # ------------------------------------------------------------------ usuarios de emergencia
+    @app.get("/emergencia", response_class=HTMLResponse)
+    def emergency_page(request: Request, usuario: str = "", conexion: str = "", ok: str = "",
+                       user: CurrentUser = Depends(require("ver")), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        from ..advice import emergency_page_advice
+        rows = emergency.overview(db)
+        conns = db.scalars(select(SapConnection).order_by(SapConnection.id)).all()
+        snap = current_snapshot(request, db)
+        pre_conn = int(conexion) if conexion.isdigit() else (snap.connection_id if snap else None)
+        candidates = emergency.sap_all_candidates(db)
+        return render(request, "emergency.html", user, db, active="emergencia", rows=rows, conns=conns,
+                      candidates=candidates, labels=emergency.STATE_LABEL, reco=emergency_page_advice(rows, candidates),
+                      pre_user=usuario.strip().upper()[:12], pre_conn=pre_conn, ok=ok,
+                      default_review=(date.today() + timedelta(days=emergency.DEFAULT_REVIEW_DAYS)).isoformat(),
+                      max_review=(date.today() + timedelta(days=emergency.MAX_REVIEW_DAYS)).isoformat(),
+                      today=date.today().isoformat(), task_key=task_key("emergencia"))
+
+    @app.post("/emergencia")
+    async def emergency_declare(request: Request, user: CurrentUser = Depends(require("hallazgos_gestionar")),
+                                db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        await check_csrf(request)
+        f = await request.form()
+        scope = str(f.get("conexion") or "")
+        cid = int(scope) if scope.isdigit() else None
+        if cid is not None and db.get(SapConnection, cid) is None:
+            raise HTTPException(400, "El sistema elegido no existe.")
+        try:
+            name = emergency.normalize_user(str(f.get("usuario") or ""))
+            review = emergency.parse_review(str(f.get("revisar") or ""))
+            d, created = emergency.declare(db, cid, name, str(f.get("responsable") or ""),
+                                           str(f.get("procedimiento") or ""), review, user.username)
+        except emergency.DeclarationError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        where = d.connection.label if d.connection is not None else "todos los sistemas"
+        audit(db, user.username, "emergencia_declarada" if created else "emergencia_modificada", f"{name} en {where}",
+              {"responsable": d.responsible, "revisar": review.isoformat()}, ip=_ip(request))
+        emergency.apply_latest(db, cid)
+        return RedirectResponse(f"/emergencia?ok={'declarado' if created else 'modificado'}", status_code=303)
+
+    @app.post("/emergencia/{eid}/{accion}")
+    async def emergency_change(eid: int, accion: str, request: Request,
+                               user: CurrentUser = Depends(require("hallazgos_gestionar")),
+                               db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        await check_csrf(request)
+        f = await request.form()
+        d = db.get(EmergencyUser, eid) or _404()
+        cid, name = d.connection_id, d.username
+        where = d.connection.label if d.connection is not None else "todos los sistemas"
+        if accion == "renovar":
+            try:
+                review = emergency.parse_review(str(f.get("revisar") or ""))
+            except emergency.DeclarationError as exc:
+                raise HTTPException(400, str(exc)) from exc
+            before = d.review_by.isoformat()
+            d.review_by, d.updated_by, d.updated_at = review, user.username, utcnow()
+            db.commit()
+            audit(db, user.username, "emergencia_renovada", f"{name} en {where}",
+                  {"antes": before, "despues": review.isoformat()}, ip=_ip(request))
+        elif accion == "quitar":
+            db.delete(d)
+            db.commit()
+            audit(db, user.username, "emergencia_quitada", f"{name} en {where}", ip=_ip(request))
+        else:
+            raise HTTPException(400, "Acción desconocida")
+        emergency.apply_latest(db, cid)
+        return RedirectResponse(f"/emergencia?ok={'renovado' if accion == 'renovar' else 'quitado'}", status_code=303)
 
     # ------------------------------------------------------------------ comparadores
     @app.get("/comparador-roles", response_class=HTMLResponse)

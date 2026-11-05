@@ -14,7 +14,7 @@
 <td>{{ s.started_by }}</td><td class="right">{{ counts.get(s.id, 0) }}</td>
 <td class="nowrap">
   {% if s.status in ('completo', 'incompleto') %}<a class="btn ghost small" href="/?snap={{ s.id }}">Ver</a>{% endif %}
-  {% if latest and s.id != latest.id and s.status in ('completo', 'incompleto') %}<a class="btn ghost small" href="/comparador-sistemas?snap_a={{ s.id }}&snap_b={{ latest.id }}">Qué cambió hasta el último</a>{% endif %}
+  {% if latest and s.id != latest.id and s.analyzed_at and s.status in ('completo', 'incompleto') %}<a class="btn ghost small" href="/cambios?desde={{ s.id }}&hasta={{ latest.id }}">Qué cambió hasta el último</a>{% endif %}
   <a class="btn ghost small" href="/snapshots/{{ s.id }}">Detalle técnico</a>
   {% if user.can('conexiones') %}<form class="inline" method="post" action="/snapshots/{{ s.id }}/eliminar" data-confirm="¿Eliminar el snapshot #{{ s.id }} de {{ conn.label }}?"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn ghost small danger">Eliminar</button></form>{% endif %}
 </td></tr>

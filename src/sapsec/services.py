@@ -22,7 +22,7 @@ from .extraction.extractor import Extractor
 from .extraction.sources import DATASETS
 from .security.secrets import get_password
 from .storage.db import get_engine
-from .storage.orm import Finding, Mitigation, SapConnection, SapSystem, Snapshot, utcnow
+from .storage.orm import EmergencyUser, Finding, Mitigation, SapConnection, SapSystem, Snapshot, utcnow
 from .storage.snapshot_data import SnapshotData, get_snapshot_data
 from .engine import incompat as _incompat
 
@@ -196,6 +196,8 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
         fp = fingerprint(snap.sid, snap.client, kind, rule_id, user or "", role or "")
         seen.add(fp)
         prev = previous.get(fp)
+        # El estado lo hereda solo si lo decidió una persona; el automático (usuarios de emergencia) se recalcula.
+        inherit = prev is not None and prev.status != "corregido" and not prev.auto_status
         count += 1
         db.add(Finding(
             code=prev.code if prev else f"H-{snap.sid}-{snap.client}-{fp[:8].upper()}", fingerprint=fp,
@@ -203,7 +205,7 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
             severity=severity, title=title, description=desc, recommendation=rec, certainty=certainty,
             sid=snap.sid, client=snap.client, subject_user=user, subject_role=role, roles_responsible=roles,
             evidence=evidence, inherent_score=inherent, residual_score=residual,
-            status=prev.status if prev and prev.status != "corregido" else "abierto",
+            status=prev.status if inherit else "abierto",
             owner=prev.owner if prev else None, detected_at=prev.detected_at if prev else utcnow(),
             last_validated_at=utcnow(),
             exception_justification=prev.exception_justification if prev else None,
@@ -271,6 +273,8 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
     snap.analyzed_at = utcnow()
     snap.ruleset_hash = ctx.rules.hash
     db.commit()
+    from .emergency import apply as apply_emergency
+    apply_emergency(db, snap)  # usuarios de emergencia declarados: bloqueados = controlados
     return count
 
 
@@ -302,9 +306,12 @@ def dashboard_stats(db: Session, snap: Snapshot) -> dict[str, Any]:
             Finding.snapshot_id == h.id, Finding.status.not_in(["corregido", "falso_positivo"]))
             .group_by(Finding.severity)).all()
         evolution.append({"snapshot": h.id, "fecha": h.started_at.strftime("%d/%m %H:%M"), **dict(rows)})
+    emer = (snap.stats or {}).get("emergencia") or {}
     return {
         "usuarios": n_users, "privilegiados": len(privileged), "sap_all": len(sap_all),
         "sap_all_bloqueados": len(sap_all_locked),
+        "sap_all_emergencia": sum(1 for u in sap_all if (emer.get(u) or {}).get("estado") in ("controlado",
+                                                                                              "fuera_de_validez")),
         "roles": n_roles, "roles_criticos": len(crit_roles),
         "sod": sum(1 for x in open_f if x.kind == "sod"),
         "criticos": sum(1 for x in open_f if x.severity == "critico"),
@@ -443,6 +450,7 @@ def delete_connection(db: Session, connection_id: int) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001 - no impedir el borrado; se informa
         log.warning("No se pudo eliminar la credencial guardada de %s: %s", name, exc)
     system_id = conn.system_id  # type: ignore[union-attr]
+    db.execute(sql_delete(EmergencyUser).where(EmergencyUser.connection_id == connection_id))
     db.delete(conn)
     db.commit()
     system_deleted = False
@@ -471,6 +479,7 @@ def reset_sap_data(db: Session) -> dict[str, Any]:
         result["snapshots_huerfanos"] += 1
     db.execute(sql_delete(Simulation))
     db.execute(sql_delete(Mitigation))
+    db.execute(sql_delete(EmergencyUser))
     db.execute(sql_delete(SapSystem))
     db.commit()
     compact_database()

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% from "_macros.html" import sev, reco_box %}
+{% block title %}Qué cambió{% endblock %}
+{% block content %}
+<h1>Qué cambió en {{ b.connection.system.label }}</h1>
+<p class="subtitle">{{ b.sid }} / mandante {{ b.client }}{% if x %} · del {{ a.started_at.strftime('%d/%m/%Y %H:%M') }} al {{ b.started_at.strftime('%d/%m/%Y %H:%M') }}{% if x.days %} ({{ x.days }} día{{ '' if x.days == 1 else 's' }}){% endif %}{% endif %}</p>
+
+<form class="card form-grid" method="get" action="/cambios">
+  <label>Desde (extracción anterior)<select name="desde">{% for s in snaps_all %}<option value="{{ s.id }}" {% if a and a.id == s.id %}selected{% endif %}>{{ s.started_at.strftime('%d/%m/%Y %H:%M') }} · #{{ s.id }}</option>{% endfor %}</select></label>
+  <label>Hasta<select name="hasta">{% for s in snaps_all %}<option value="{{ s.id }}" {% if b.id == s.id %}selected{% endif %}>{{ s.started_at.strftime('%d/%m/%Y %H:%M') }} · #{{ s.id }}{% if loop.first %} (la última){% endif %}</option>{% endfor %}</select></label>
+  <button class="btn">Ver qué cambió</button>
+</form>
+
+{% if not x %}
+<div class="note">{% if snaps_all|length < 2 %}Hace falta al menos dos extracciones analizadas de este sistema para ver qué cambió. La próxima extracción (manual o programada) ya permite compararla con esta.{% else %}Elija dos fechas distintas.{% endif %}
+Se conservan las últimas {{ keep or 'todas las' }} extracciones de cada sistema.</div>
+{% else %}
+{{ reco_box(reco, "Resumen") }}
+
+<div class="kpis">
+  <a class="kpi-s {{ 'crit' if x.new else 'ok' }}" href="#nuevas"><div class="v">{{ x.new|length }}</div><div class="l">alertas nuevas{% set nc = x.new|selectattr('severity', 'equalto', 'critico')|list|length %}{% if nc %} ({{ nc }} crítica{{ '' if nc == 1 else 's' }}){% endif %}</div></a>
+  <a class="kpi-s ok" href="#resueltas"><div class="v">{{ x.resolved|length }}</div><div class="l">alertas resueltas</div></a>
+  <div class="kpi-s"><div class="v">{{ x.open.b }}</div><div class="l">alertas vigentes (antes {{ x.open.a }})</div></div>
+  <a class="kpi-s high" href="#sap"><div class="v">{{ x.n_sap_changes }}</div><div class="l">cambios en SAP</div></a>
+</div>
+
+{% macro alert_table(rows, empty) -%}
+{% if rows %}
+<div class="tbl-wrap"><table class="tbl compact sortable">
+<tr><th>Gravedad</th><th>Alerta</th><th>Usuario / rol</th><th>Tipo</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ sev(r.severity) }}</td><td>{{ r.title }}{% if r.note %}<br><span class="small muted">{{ r.note }}</span>{% endif %}</td>
+<td>{% if r.user %}<a href="/usuarios/{{ r.user }}?snap={{ b.id }}">{{ r.user }}</a>{% elif r.role %}<a href="/roles/{{ r.role }}?snap={{ b.id }}">{{ r.role }}</a>{% endif %}</td>
+<td class="small">{{ r.kind }}</td><td><a class="small" href="/hallazgos/{{ r.id }}">evidencia ›</a></td></tr>{% endfor %}
+</table></div>
+{% else %}<p class="muted">{{ empty }}</p>{% endif %}
+{%- endmacro %}
+
+<h2 id="nuevas">Alertas nuevas ({{ x.new|length }})</h2>
+{{ alert_table(x.new, "No aparecieron alertas nuevas.") }}
+<h2 id="resueltas">Alertas resueltas ({{ x.resolved|length }})</h2>
+<p class="small muted">Estaban en la extracción anterior y ya no están en SAP.</p>
+{{ alert_table(x.resolved, "Ninguna.") }}
+{% if x.grouped %}<details class="more-items"><summary>{{ x.grouped|length }} alerta{{ '' if x.grouped|length == 1 else 's' }} que no se resolvieron: ahora van dentro de la alerta de SAP_ALL del usuario</summary>{{ alert_table(x.grouped, "") }}</details>{% endif %}
+
+<h2 id="sap">Cambios en SAP</h2>
+<p class="small muted">Reconstruidos comparando las dos extracciones. Para saber quién hizo cada cambio: SUIM › Documentos de modificación (usuarios: RSUSR100N; roles: RSSCD100_PFCG).</p>
+<div class="chg-grid">
+  <div class="card"><h3>Roles asignados ({{ x.assign_added|length }})</h3>
+    {% if x.assign_added %}<ul class="chg-list">{% for r in x.assign_added[:60] %}<li><a href="/usuarios/{{ r.user }}?snap={{ b.id }}">{{ r.user }}</a> ← <a href="/roles/{{ r.role }}?snap={{ b.id }}">{{ r.role }}</a>{% if r.to and r.to.year < 9999 %} <span class="small muted">hasta {{ r.to.strftime('%d/%m/%Y') }}</span>{% endif %}</li>{% endfor %}</ul>{% if x.assign_added|length > 60 %}<p class="small muted">…y {{ x.assign_added|length - 60 }} más (completo en el Excel).</p>{% endif %}{% else %}<p class="muted">Ninguno.</p>{% endif %}
+    {% if x.assign_inherited.added %}<p class="small muted">Además, {{ x.assign_inherited.added }} asignación{{ '' if x.assign_inherited.added == 1 else 'es' }} heredada{{ '' if x.assign_inherited.added == 1 else 's' }} de roles compuestos.</p>{% endif %}</div>
+  <div class="card"><h3>Roles quitados ({{ x.assign_removed|length }})</h3>
+    {% if x.assign_removed %}<ul class="chg-list">{% for r in x.assign_removed[:60] %}<li>{{ r.user }} ✕ {{ r.role }}</li>{% endfor %}</ul>{% if x.assign_removed|length > 60 %}<p class="small muted">…y {{ x.assign_removed|length - 60 }} más.</p>{% endif %}{% else %}<p class="muted">Ninguno.</p>{% endif %}
+    {% if x.assign_validity %}<p class="small"><b>Vigencia modificada:</b> {% for r in x.assign_validity[:20] %}{{ r.user }} / {{ r.role }} ({{ r.before.strftime('%d/%m/%Y') if r.before else '—' }} → {{ r.after.strftime('%d/%m/%Y') if r.after else '—' }}){{ ', ' if not loop.last }}{% endfor %}</p>{% endif %}</div>
+  <div class="card"><h3>Perfiles asignados a mano</h3>
+    {% if x.profiles_added or x.profiles_removed %}<ul class="chg-list">
+    {% for r in x.profiles_added %}<li>{% if r.super %}<span class="chip bad">{{ r.profile }}</span>{% else %}<b>{{ r.profile }}</b>{% endif %} asignado a <a href="/usuarios/{{ r.user }}?snap={{ b.id }}">{{ r.user }}</a></li>{% endfor %}
+    {% for r in x.profiles_removed %}<li>{{ r.profile }} quitado a {{ r.user }}</li>{% endfor %}
+    </ul>{% else %}<p class="muted">Sin cambios (no cuenta los perfiles generados de roles).</p>{% endif %}</div>
+  <div class="card"><h3>Usuarios</h3>
+    {% if x.users_new or x.users_deleted or x.users_locked or x.users_unlocked or x.users_validity %}<ul class="chg-list">
+    {% for r in x.users_new %}<li>Nuevo: <a href="/usuarios/{{ r.user }}?snap={{ b.id }}">{{ r.user }}</a> {{ r.name }}{% if r.creator %} <span class="small muted">creado{% if r.created %} el {{ r.created.strftime('%d/%m/%Y') }}{% endif %} por {{ r.creator }}</span>{% endif %}</li>{% endfor %}
+    {% for r in x.users_deleted %}<li>Borrado: {{ r.user }} {{ r.name }}</li>{% endfor %}
+    {% for r in x.users_unlocked %}<li><span class="chip bad">desbloqueado</span> <a href="/usuarios/{{ r.user }}?snap={{ b.id }}">{{ r.user }}</a> {{ r.name }}</li>{% endfor %}
+    {% for r in x.users_locked %}<li><span class="chip good">bloqueado</span> {{ r.user }} {{ r.name }}</li>{% endfor %}
+    {% for r in x.users_validity %}<li>Validez de {{ r.user }}: {{ r.before.strftime('%d/%m/%Y') if r.before else 'sin límite' }} → {{ r.after.strftime('%d/%m/%Y') if r.after else 'sin límite' }}</li>{% endfor %}
+    </ul>{% else %}<p class="muted">Sin cambios.</p>{% endif %}</div>
+  <div class="card"><h3>Roles</h3>
+    {% if x.roles_new or x.roles_deleted or x.roles_changed %}<ul class="chg-list">
+    {% for r in x.roles_new %}<li>Nuevo: <a href="/roles/{{ r.role }}?snap={{ b.id }}">{{ r.role }}</a>{% if r.created_by %} <span class="small muted">creado por {{ r.created_by }}</span>{% endif %} · {{ r.users }} usuario{{ '' if r.users == 1 else 's' }}</li>{% endfor %}
+    {% for r in x.roles_deleted %}<li>Borrado: {{ r.role }}</li>{% endfor %}
+    {% for r in x.roles_changed %}<li>Modificado: <a href="/roles/{{ r.role }}?snap={{ b.id }}">{{ r.role }}</a>{% if r.changed %} <span class="small muted">el {{ r.changed.strftime('%d/%m/%Y') }}{% if r.changed_by %} por {{ r.changed_by }}{% endif %}</span>{% endif %}{% if r.n_values != r.n_values_before %} · valores de autorización {{ r.n_values_before }} → {{ r.n_values }}{% endif %} · {{ r.users }} usuario{{ '' if r.users == 1 else 's' }} · <a class="small" href="/comparador-roles?a={{ r.role }}&b={{ r.role }}&snap_a={{ a.id }}&snap_b={{ b.id }}">ver diferencias ›</a></li>{% endfor %}
+    </ul>{% else %}<p class="muted">Sin cambios.</p>{% endif %}</div>
+</div>
+
+<h2>Decisiones registradas en la aplicación ({{ x.decisions|length }})</h2>
+{% if x.decisions %}
+<div class="tbl-wrap"><table class="tbl compact">
+<tr><th>Fecha</th><th>Quién</th><th>Qué</th><th>Sobre</th></tr>
+{% for d in x.decisions %}<tr><td class="nowrap">{{ d.ts.strftime('%d/%m/%Y %H:%M') }} UTC</td><td>{{ d.user }}</td><td>{{ d.action }}</td><td>{{ d.target }}</td></tr>{% endfor %}
+</table></div>
+{% else %}<p class="muted">Nadie registró decisiones (excepciones, controles, usuarios de emergencia…) en ese período.</p>{% endif %}
+
+<p>
+  <a class="btn ghost small" href="/cambios/descargar?desde={{ a.id }}&hasta={{ b.id }}&formato=xlsx">Descargar en Excel</a>
+  <a class="btn ghost small" href="/cambios/descargar?desde={{ a.id }}&hasta={{ b.id }}&formato=pdf">PDF</a>
+</p>
+<p class="note small">Cómo se calcula: se comparan las dos extracciones del mismo sistema y mandante. Una alerta es «nueva» si no estaba en la anterior y «resuelta» si estaba y ya no está en SAP. Un cambio hecho y deshecho entre las dos extracciones no se ve. Un rol figura como modificado si cambió su fecha o usuario de última modificación (AGR_DEFINE) o la cantidad de valores de autorización (AGR_1251).</p>
+{% endif %}
+{% endblock %}

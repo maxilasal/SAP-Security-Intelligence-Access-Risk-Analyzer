@@ -10,13 +10,15 @@
   <span class="{{ 'chip bad' if u.is_locked else '' }}">{{ u.lock_label }}</span>
   <span>último acceso <b>{{ u.last_logon or 'sin dato' }}</b></span>
   <span><b>{{ a.eff.valid_roles()|length }}</b> roles vigentes</span>
-  {% if 'SAP_ALL' in a.eff.profiles %}<span class="chip bad">SAP_ALL</span>{% endif %}
+  {% if 'SAP_ALL' in a.eff.profiles %}<span class="chip {{ 'good' if emer and emer.estado in ('controlado', 'fuera_de_validez') else 'bad' }}">SAP_ALL</span>{% endif %}
+  {% if emer %}<a class="chip {{ 'good' if emer.estado in ('controlado', 'fuera_de_validez') else 'bad' if emer.estado == 'desbloqueado' else 'warn' }}" href="/emergencia">usuario de emergencia · {{ emer_label.get(emer.estado, emer.estado)|lower }}</a>{% endif %}
   {% if a.critical|selectattr('rule_id', 'equalto', 'INFO-DEV-001')|list %}<span class="chip">desarrollador ABAP</span>{% endif %}
   {% if fiori_services %}<span class="chip">{{ fiori_services|length }} servicio{{ '' if fiori_services|length == 1 else 's' }} Fiori/OData</span>{% endif %}
   {% if a.eff._direct %}<span class="chip warn">perfiles directos: {{ a.eff._direct|sort|join(', ') }}</span>{% endif %}
 </div>
 <p>
   <a class="btn ghost small" href="/simulador?usuario={{ a.username }}">Simular un cambio de roles</a>
+  {% if not emer and 'SAP_ALL' in a.eff.profiles and user.can('hallazgos_gestionar') %}<a class="btn ghost small" href="/emergencia?usuario={{ a.username }}&conexion={{ snap.connection_id }}#declarar">Declarar como usuario de emergencia</a>{% endif %}
   <a class="btn ghost small" href="/reportes/descargar?tipo=usuario&usuario={{ a.username }}&formato=pdf">PDF</a>
   <a class="btn ghost small" href="/reportes/descargar?tipo=usuario&usuario={{ a.username }}&formato=xlsx">Excel</a>
 </p>
@@ -24,7 +26,12 @@
 {{ reco_box(reco, "Recomendación", "riesgo del usuario: " ~ a.risk.inherent_level.label|lower) }}
 {% if a.risk.notes %}<p class="small muted">{% for n in a.risk.notes %}{{ n }} {% endfor %}</p>{% endif %}
 
-{% if fixes %}
+{% if fixes and emer %}
+<h2>Lo que puede hacer ({{ fixes|length }})</h2>
+<p class="muted small">Es un usuario de emergencia declarado: estos puntos se controlan manteniéndolo bloqueado fuera de una emergencia, no quitándole los permisos.</p>
+<p class="sevline">{{ sev_counts(fixes) }}</p>
+{{ fix_list(fixes, 6) }}
+{% elif fixes %}
 <h2>Qué corregir ({{ fixes|length }})</h2>
 <p class="sevline">{{ sev_counts(fixes) }}</p>
 {{ fix_list(fixes, 6) }}

@@ -6,6 +6,32 @@ la base o en las reglas; MENOR = funciones nuevas; PARCHE = correcciones).
 
 ## [Sin publicar]
 
+## [0.3.0] - 2026-11-05
+
+### Agregado
+- **Usuarios de emergencia declarados** (Seguimiento › Usuarios de emergencia): se declara el usuario con su
+  responsable, procedimiento de uso y fecha de revisión (máximo un año), para un sistema o para todos. Mientras
+  esté **bloqueado** (o fuera de su validez) y la declaración vigente, sus alertas quedan controladas y **no
+  aparecen como pendientes en cada extracción**. Si se **desbloquea**, aparece la tarea «Mantener bloqueados los
+  usuarios de emergencia» con la recomendación «Bloquear … si no hay una emergencia en curso»; si la declaración
+  **vence**, vuelve a ser pendiente hasta renovarla. Las decisiones tomadas por una persona (excepción, falso
+  positivo, control mitigante) nunca se modifican, y cada alta, renovación o baja queda en la auditoría.
+  Se declara desde la tarea de SAP_ALL («Es de emergencia»), desde la ficha del usuario o desde la página, que
+  además lista los usuarios con SAP_ALL todavía sin declarar.
+- **Qué cambió entre dos fechas** (Seguimiento › Qué cambió): elige dos extracciones del mismo sistema y muestra
+  las alertas nuevas y resueltas y los cambios en SAP que las explican (roles asignados o quitados, perfiles
+  asignados a mano —SAP_ALL resaltado—, usuarios nuevos, borrados, bloqueados o desbloqueados, roles nuevos,
+  borrados o modificados), más las decisiones registradas en la aplicación en ese período. Con recomendación
+  («Revisar por qué se asignó SAP_ALL a …») y descarga en Excel o PDF.
+- Inicio: «Desde la extracción anterior: N alertas nuevas (M críticas) · K resueltas › Ver qué cambió», y el
+  indicador de SAP_ALL informa cuántos son usuarios de emergencia. El historial de cada sistema enlaza a
+  «Qué cambió hasta el último».
+
+### Cambiado
+- La recomendación de la tarea de SAP_ALL sugiere declarar como usuario de emergencia a quien lo tiene a propósito,
+  en lugar de registrar una excepción.
+- En Windows, la consola de la aplicación ya no muestra códigos de color («←[32mINFO←[0m»).
+
 ## [0.2.0] - 2026-11-05
 
 ### Cambiado
@@ -67,6 +93,7 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
 - `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
 
-[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.2.0...HEAD
+[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/releases/tag/v0.1.0
