@@ -133,11 +133,12 @@ def test_background_extraction_with_progress(client):
     tok = csrf(client, "/simulador")
     r = client.post("/conexiones/1/extraer", data={"csrf": tok}, follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"] == "/conexiones/1/progreso"
-    for _ in range(100):
+    end = time.time() + 180  # la extracción corre en otro proceso; en Windows puede tardar en arrancar
+    while time.time() < end:
         page = client.get("/conexiones/1/progreso").text
         if "Terminada" in page or "Error" in page:
             break
-        time.sleep(0.1)
+        time.sleep(0.2)
     assert "Terminada" in page and "Ver qué corregir en este sistema" in page
 
 
@@ -271,7 +272,7 @@ def test_full_reset_from_ui_starts_clean(client):
     assert "datos_sap_borrados" in client.get("/auditoria").text  # la auditoría se conserva
 
 
-def _wait_idle(client, timeout: float = 60.0) -> str:  # type: ignore[no-untyped-def]
+def _wait_idle(client, timeout: float = 240.0) -> str:  # type: ignore[no-untyped-def]
     import time
     end = time.time() + timeout
     page = ""
@@ -317,7 +318,13 @@ def test_multi_system_flow(client):
     tok = csrf(client, "/sistemas")
     client.post(f"/conexiones/{ids['PRD Uruguay']}/extraer", data={"csrf": tok})
     _wait_idle(client)
-    pinned = client.get(f"/?snap={old}").text
+    import time
+    end = time.time() + 120
+    while True:  # el snapshot nuevo pasa a ser «el último» cuando termina su análisis
+        pinned = client.get(f"/?snap={old}").text
+        if f"snapshot anterior #{old}" in pinned or time.time() > end:
+            break
+        time.sleep(0.5)
     assert f"snapshot anterior #{old}" in pinned and "ver el último" in pinned
     assert "snapshot anterior" not in client.get(f"/?sistema={ids['PRD Uruguay']}").text
 

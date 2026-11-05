@@ -27,5 +27,6 @@ def notes(version: str) -> str:
 
 
 if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
+    for stream in (sys.stdout, sys.stderr):  # en Windows la consola no siempre es UTF-8
+        stream.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
     print(notes(sys.argv[1] if len(sys.argv) > 1 else project_version()), end="")
