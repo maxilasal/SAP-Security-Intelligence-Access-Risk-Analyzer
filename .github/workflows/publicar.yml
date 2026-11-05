@@ -1,0 +1,46 @@
+name: Publicar versión
+
+# Cuando las pruebas de main pasan y la versión de pyproject.toml todavía no tiene su tag,
+# se crea el tag vX.Y.Z y la Release con las notas del CHANGELOG. Así cada versión queda
+# publicada sola, solo desde código probado.
+on:
+  workflow_run:
+    workflows: [Pruebas]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Versión a publicar
+        id: v
+        run: |
+          v=$(python -c "import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then
+            echo "La versión v$v ya está publicada: no hay nada que hacer."
+            echo "publicar=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=si" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Crear tag y Release
+        if: steps.v.outputs.publicar == 'si'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          python scripts/notas_version.py "$VERSION" > notas.md
+          gh release create "v$VERSION" --target "${{ github.event.workflow_run.head_sha }}" \
+            --title "v$VERSION" --notes-file notas.md

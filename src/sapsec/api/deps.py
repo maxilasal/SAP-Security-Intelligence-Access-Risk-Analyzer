@@ -23,6 +23,9 @@ TEMPLATES.env.globals["SEV_LABEL"] = SEV_LABEL
 from ..actions import KIND_LABEL  # noqa: E402
 
 TEMPLATES.env.globals["KIND_LABEL"] = KIND_LABEL
+from .. import __version__  # noqa: E402
+
+TEMPLATES.env.globals["APP_VERSION"] = __version__
 TEMPLATES.env.filters["sev"] = lambda v: SEV_LABEL.get(getattr(v, "value", v), v)
 
 

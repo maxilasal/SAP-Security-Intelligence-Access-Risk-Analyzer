@@ -11,15 +11,22 @@ Cada instalación (servidor) es un clon; los datos de cada instalación **no** v
 
 Las contraseñas SAP no están en ningún archivo: quedan en el Administrador de credenciales de Windows.
 
-## Ramas, versiones y cambios
+## Cómo se trabaja
 
-* `main`: versión estable, la que se instala en los servidores.
-* Cambios nuevos en una rama (`feature/descripcion` o `fix/descripcion`) y se integran a `main` cuando pasan las
-  pruebas (GitHub Actions ejecuta `pytest` en Windows y Linux en cada push y pull request).
-* Cada versión publicada lleva un tag `vMAYOR.MENOR.PARCHE` (por ejemplo `v0.2.0`) y su detalle en `CHANGELOG.md`.
-  La versión también figura en `pyproject.toml` y en `src/sapsec/__init__.py`.
-* Las reglas (`config/rules/*.yaml`) se versionan con su campo `version`; cada análisis guarda el hash de las reglas
-  usadas, así se puede saber con qué criterio se generó cada hallazgo.
+1. Cada cambio se hace en una rama (`feature/descripcion`, `fix/descripcion` o `chore/descripcion`).
+2. Al subirla, GitHub Actions ejecuta todas las pruebas en Windows y Linux (workflow **Pruebas**).
+3. Con las pruebas en verde, la rama se integra a `main` (la versión estable, la que se instala).
+4. Cuando el cambio merece una versión nueva, en el mismo cambio se sube el número en `pyproject.toml` y
+   `src/sapsec/__init__.py`, y se agrega su sección en `CHANGELOG.md`.
+5. Al llegar a `main` con las pruebas en verde, el workflow **Publicar versión** crea solo el tag `vX.Y.Z` y la
+   Release con las notas del CHANGELOG. Si la versión ya existe, no hace nada.
+6. En cada servidor: `scripts\actualizar.ps1` (o `-Version vX.Y.Z` para una versión puntual).
+
+Versiones con formato `MAYOR.MENOR.PARCHE`: MAYOR = cambio incompatible (por ejemplo, en la base o en las reglas),
+MENOR = funciones nuevas, PARCHE = correcciones. La versión instalada figura en el menú lateral de la aplicación.
+
+Las reglas (`config/rules/*.yaml`) tienen además su propio campo `version`; cada análisis guarda el hash de las
+reglas usadas, así se sabe con qué criterio se generó cada hallazgo.
 
 ## Instalar en un servidor nuevo
 

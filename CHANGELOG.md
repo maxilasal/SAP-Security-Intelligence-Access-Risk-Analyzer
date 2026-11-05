@@ -41,5 +41,11 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   desarrollar o liberar transportes no se marca.
 - «Desarrollo vs. producción»: desarrolladores de DEV con permisos críticos en el PRD del mismo landscape.
 
+### Repositorio y versiones
+- Pruebas automáticas (GitHub Actions) en Windows y Linux en cada cambio.
+- Publicación automática: al subir a `main` una versión nueva con las pruebas en verde, se crean el tag y la
+  Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
+- `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
+
 [Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/releases/tag/v0.1.0
