@@ -88,8 +88,10 @@ def test_simulator_flow_and_reports(client):
         d = client.get(f"/simulaciones/{sim}/reporte?formato={fmt}&tipo=tecnico")
         assert d.status_code == 200 and d.content.startswith(magic), fmt
     assert b"DATOS FICTICIOS" in client.get(f"/simulaciones/{sim}/reporte?formato=html&tipo=ejecutivo").content
-    for tipo in ["ejecutivo", "auditor", "criticos", "sap_all", "sod_usuario", "sod_rol", "admin"]:
+    for tipo in ["ejecutivo", "auditor", "criticos", "sap_all", "sod_usuario", "sod_rol", "admin", "plan"]:
         assert client.get(f"/reportes/descargar?tipo={tipo}&formato=xlsx").status_code == 200
+    plan_csv = client.get("/reportes/descargar?tipo=plan&formato=csv").content.decode("utf-8-sig")
+    assert "Responsable" in plan_csv and "Quitar el perfil SAP_ALL a ADMIN_BASIS" in plan_csv
     assert client.get("/reportes/descargar?tipo=usuario&usuario=SEG_ADMIN&formato=pdf").content.startswith(b"%PDF")
 
 
@@ -147,7 +149,8 @@ def test_action_plan_groups_by_cause(client):
     home = client.get("/").text
     assert "Qué corregir primero" in home and "Recomendación de hoy" in home and "Ver cómo hacerlo" in home
     plan = client.get("/acciones").text
-    assert "Quitar el perfil SAP_ALL" in plan
+    # (la alerta de SAP_ALL tiene una excepción registrada en una prueba anterior: figura entre todas las tareas)
+    assert "Quitar el perfil SAP_ALL" in client.get("/acciones?estado=todas").text
     assert "Corregir el rol Z_BC_ADMIN_TOTAL" in plan
     assert "Separar los roles Z_FI_PAGOS y Z_FI_PROVEEDORES" in plan
     key = re.search(r'href="/acciones/([0-9a-f]{12})"[^>]*>\s*<div class="t-main">\s*<div class="t-title"><span class="kind">Separar roles</span>Separar los roles Z_FI_PAGOS', plan)
@@ -247,6 +250,34 @@ def test_app_user_management_lockout_and_own_password(client):
         admin_id = db.scalars(select(AppUser).where(AppUser.username == "admin")).one().id
     assert client.post(f"/configuracion/usuarios/{admin_id}/desactivar", data={"csrf": tok}).status_code == 400
     assert "usuario_app_desactivar" in client.get("/auditoria").text
+
+
+def test_sap_style_wildcard_searches(client):
+    """Comodines como en SAP: Z* empieza con Z, *X termina en X, + un carácter, varios separados por coma."""
+    login(client)
+
+    def users(qs):  # type: ignore[no-untyped-def]
+        return set(re.findall(r'<tr><td><a href="/usuarios/([^"]+)">', client.get(f"/usuarios?{qs}").text))
+
+    assert users("q=ADMIN_*") == {"ADMIN_BASIS", "ADMIN_EQUIV"}            # empieza con
+    assert "SEG_ADMIN" in users("q=ADMIN*")  # el patrón vale para el usuario o el nombre («Administrador de…»)
+    assert users("q=*ADMIN") == {"SEG_ADMIN"}                              # termina con
+    assert users("q=ADMIN") >= {"ADMIN_BASIS", "ADMIN_EQUIV", "SEG_ADMIN"}  # sin comodines: contiene
+    assert users("q=DEV_USE%2B") == {"DEV_USER"}                           # + = un carácter
+    assert users("q=CONTADOR1,ALMACEN1") == {"CONTADOR1", "ALMACEN1"}      # varios criterios
+    assert users("perfil=SAP_ALL") == {"ADMIN_BASIS"}
+    assert "chip bad\">SAP_ALL" in client.get("/usuarios?perfil=SAP_ALL").text
+    fi = users("rol=Z_FI*")
+    assert {"USUARIO_TEST", "CONTADOR1"} <= fi and "SEG_ADMIN" not in fi
+    roles = set(re.findall(r'<tr><td><a href="/roles/([^"]+)">', client.get("/roles?q=Z_FI*").text))
+    assert "Z_FI_PAGOS" in roles and not any(r.startswith("Z_MM") for r in roles)
+    rev = client.get("/objetos?objeto=S_TABU*&campo=ACTVT&valor=02").text
+    assert "ADMIN_EQUIV" in rev and "S_TABU_DIS" in rev
+    assert "DEV_USER" in client.get("/objetos?tcode=SE3*").text
+    plan = client.get("/acciones?q=Z_FI*").text
+    assert "Z_FI_PAGOS" in plan and "Corregir el rol Z_BC_ADMIN_TOTAL" not in plan
+    found = client.get("/hallazgos?q=SOD-*").text
+    assert "SOD-" in found and "CRIT-PRF-001" not in found
 
 
 def test_delete_requires_admin_and_confirmation(client):

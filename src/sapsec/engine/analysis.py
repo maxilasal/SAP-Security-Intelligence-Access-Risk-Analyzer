@@ -51,14 +51,70 @@ def _findings_for_scoring(critical: list[RuleHit], sod: list[SodHit], subject: s
     return out
 
 
+def _superuser_profiles(ctx: AnalysisContext, data: SnapshotData, eff: EffectiveAuthorizations,
+                        crit: list[RuleHit]) -> set[str]:
+    """Perfiles del maestro del usuario que contienen un perfil de las reglas «profile» (SAP_ALL, SAP_NEW…)."""
+    names = {p for h in crit for r in [ctx.rules.critical_by_id(h.rule_id)] if r is not None and r.type == "profile"
+             for p in r.profiles}
+    return {top for top in eff.profiles if names & set(data.profile_tree(top))} if names else set()
+
+
+def _without_profiles(eff: EffectiveAuthorizations, tops: set[str]) -> EffectiveAuthorizations:
+    """Las mismas autorizaciones, sin lo que aportan solo esos perfiles (como si se los quitaran)."""
+    from .effective import EffectiveInstance
+    kept: dict = {}
+    for key, e in eff.instances.items():
+        src = [s for s in e.sources if s.profile not in tops]
+        if src:
+            kept[key] = EffectiveInstance(e.instance, src, e.certainty)
+    return EffectiveAuthorizations(eff.username, eff.as_of, eff.user, eff.assignments,
+                                   [p for p in eff.profiles if p not in tops], kept, list(eff.issues))
+
+
 def analyze_effective(ctx: AnalysisContext, data: SnapshotData, eff: EffectiveAuthorizations,
                       subject: str | None = None) -> UserAnalysis:
     crit = evaluate_critical(ctx.rules, data, eff, ctx.environment, ctx.as_of, ctx.sap_all_threshold,
                              ctx.inactivity_days)
     sod = evaluate_sod(ctx.rules, data, eff, ctx.environment, subject)
+    tops = _superuser_profiles(ctx, data, eff, crit)
+    if tops:
+        # Con SAP_ALL (o SAP_NEW, S_A.SYSTEM) casi todas las reglas se cumplen: una sola alerta por el perfil,
+        # con sus consecuencias adentro. Lo que la persona igual tendría sin ese perfil sigue como alerta propia.
+        crit, sod = _fold_into_profile(ctx, data, eff, tops, crit, sod, subject)
     risk = ctx.scorer.score(_findings_for_scoring(crit, sod, eff.username), eff.user, ctx.system_factor,
                             ctx.as_of, ctx.mitigations)
     return UserAnalysis(eff.username, eff, crit, sod, risk, list(eff.issues))
+
+
+def _fold_into_profile(ctx: AnalysisContext, data: SnapshotData, eff: EffectiveAuthorizations, tops: set[str],
+                       crit: list[RuleHit], sod: list[SodHit], subject: str | None
+                       ) -> tuple[list[RuleHit], list[SodHit]]:
+    reduced = _without_profiles(eff, tops)
+    crit_r = evaluate_critical(ctx.rules, data, reduced, ctx.environment, ctx.as_of, ctx.sap_all_threshold,
+                               ctx.inactivity_days)
+    sod_r = evaluate_sod(ctx.rules, data, reduced, ctx.environment, subject)
+    keep_c, keep_s = {h.rule_id for h in crit_r}, {h.risk_id for h in sod_r}
+
+    def is_profile(h: RuleHit) -> bool:
+        r = ctx.rules.critical_by_id(h.rule_id)
+        return r is not None and r.type == "profile"
+
+    profile_hits = [h for h in crit if is_profile(h)]
+    consequences = [{"regla": h.rule_id, "titulo": h.title, "gravedad": h.severity.value, "tipo": "critica"}
+                    for h in crit if not is_profile(h) and h.rule_id not in keep_c and h.severity.rank > 0]
+    consequences += [{"regla": h.risk_id, "titulo": h.title, "gravedad": h.severity.value, "tipo": "sod"}
+                     for h in sod if h.risk_id not in keep_s]
+    consequences.sort(key=lambda c: (-Severity(c["gravedad"]).rank, c["titulo"]))
+    if profile_hits and consequences:
+        main = max(profile_hits, key=lambda h: h.severity.rank)
+        main.metrics["consecuencias"] = consequences
+        n, nc = len(consequences), sum(1 for c in consequences if c["gravedad"] == "critico")
+        main.notes.append(f"Además le permite {n} riesgo{'' if n == 1 else 's'} que "
+                          f"{'desaparece' if n == 1 else 'desaparecen'} al quitarlo"
+                          + (f" ({nc} crítico{'' if nc == 1 else 's'})." if nc else "."))
+    # Lo informativo (p. ej. «desarrollador» en DEV) es un dato, no un riesgo: se conserva tal cual.
+    info = [h for h in crit if h.severity.rank == 0 and h.rule_id not in keep_c]
+    return profile_hits + [h for h in crit_r if not is_profile(h)] + info, sod_r
 
 
 def analyze_user(ctx: AnalysisContext, data: SnapshotData, username: str) -> UserAnalysis:

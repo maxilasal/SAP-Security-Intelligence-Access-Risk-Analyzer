@@ -6,6 +6,7 @@
 {% if 'sod' in kinds %}<p class="note">Las reglas SoD de ejemplo no constituyen una matriz oficial. Un conflicto sin solapamiento organizativo se muestra igualmente, marcado para verificación.</p>{% endif %}
 {% if active == 'auditorias' %}<p><a href="/auditoria">Ver historial de snapshots, simulaciones y registro de auditoría de la aplicación →</a></p>{% endif %}
 <form class="form-grid card" method="get">
+  <label>Usuario, rol o regla<input name="q" value="{{ q }}" placeholder="JPEREZ, Z_FI*, SOD-*"></label>
   <label>Gravedad<select name="gravedad"><option value="">Todas</option>{% for k in ["critico","alto","medio","bajo","informativo"] %}<option value="{{ k }}" {% if sev==k %}selected{% endif %}>{{ SEV_LABEL[k] }}</option>{% endfor %}</select></label>
   <label>Estado<select name="estado"><option value="">Todos</option>{% for k in ["abierto","en_revision","mitigado","excepcion","corregido","falso_positivo"] %}<option {% if st==k %}selected{% endif %}>{{ k }}</option>{% endfor %}</select></label>
   <button class="btn">Filtrar</button>

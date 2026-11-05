@@ -206,3 +206,6 @@ a.chip:hover{text-decoration:none;background:#e2eaf4}
 .sysedit{display:inline-flex;gap:8px;align-items:center;margin:0 0 6px;flex-wrap:wrap}
 .sysedit label{display:inline-flex;gap:4px;align-items:center}
 .sysedit input{width:170px;padding:3px 6px}.sysedit select{padding:3px 6px}
+.hint{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.cons-row{display:flex;gap:10px;align-items:baseline;padding:8px 12px;font-size:13.5px}
+.cons-row .grow{flex:1;min-width:0}.cons-row .muted{font-size:12.5px}

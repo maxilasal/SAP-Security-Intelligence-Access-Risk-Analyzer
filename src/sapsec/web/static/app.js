@@ -7,15 +7,32 @@
     s.addEventListener("change", function () { s.form.submit(); });
   });
 
-  // Filtro de tablas
+  // Filtro de tablas. Sin comodines: «contiene» en toda la fila. Con * o + (como en SAP): el patrón se aplica
+  // a cada columna completa (Z* = una columna que empieza con Z). Varios criterios separados por coma.
+  function sapPattern(term) {
+    var rx = term.replace(/[.^$|?(){}\[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\+/g, ".");
+    return new RegExp("^" + rx + "$", "i");
+  }
+  function rowMatches(tr, terms) {
+    if (!terms.length) return true;
+    var text = tr.textContent.toLowerCase();
+    var cells = Array.prototype.map.call(tr.children, function (c) { return c.textContent.trim(); });
+    return terms.some(function (t) {
+      if (t.indexOf("*") < 0 && t.indexOf("+") < 0) return text.indexOf(t.toLowerCase()) >= 0;
+      var rx = sapPattern(t);
+      return cells.some(function (c) {
+        return rx.test(c) || c.split(/\s+/).some(function (w) { return rx.test(w); });
+      });
+    });
+  }
   document.querySelectorAll("input.table-filter").forEach(function (inp) {
     inp.addEventListener("input", function () {
       var t = document.getElementById(inp.dataset.target);
       if (!t) return;
-      var q = inp.value.toLowerCase();
+      var terms = inp.value.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
       t.querySelectorAll("tr").forEach(function (tr, i) {
         if (i === 0 && tr.querySelector("th")) return;
-        tr.style.display = tr.textContent.toLowerCase().indexOf(q) >= 0 ? "" : "none";
+        tr.style.display = rowMatches(tr, terms) ? "" : "none";
       });
     });
   });

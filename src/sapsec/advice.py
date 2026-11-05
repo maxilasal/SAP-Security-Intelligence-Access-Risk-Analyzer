@@ -81,7 +81,8 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
         who = f"a {first_user}" if one and first_user else f"a estos {n_users} usuarios"
         adv.headline = (f"Quitar el perfil {prof} {who} y {'asignarle' if one else 'asignarles'} solo los roles "
                         f"que {'necesita' if one else 'necesitan'}.")
-        others = len(vp) - 1
+        cons = len(mp.consequences) if getattr(mp, "consequences", None) else 0
+        others = cons or (len(vp) - 1)
         if others > 0:
             rest = "el otro riesgo de la lista" if others == 1 else f"los otros {others} riesgos de la lista"
             adv.why = (mp.why + f" Al quitarlo desaparece también {rest}." if others == 1 else
@@ -96,6 +97,11 @@ def task_advice(t: Task, data: Any = None, env: str = "") -> Advice:
                        f"/simulador?usuario={first_user}" if first_user else "/simulador", "Simular"),
                   _resync()]
         adv.steps = steps
+        locked = [u for u in t.users if data is not None and data.users.get(u) is not None and data.users[u].is_locked]
+        if locked:
+            adv.note = (f"{len(locked)} de {n_users} {'está bloqueado' if len(locked) == 1 else 'están bloqueados'}: hoy no "
+                        "pueden ingresar. Si son usuarios de emergencia, registrar la decisión (control mitigante con "
+                        "vencimiento) en lugar de dejarlos pendientes; igual conviene quitarles el perfil.")
     elif t.kind == "rol":
         r = t.roles[0] if t.roles else ""
         parent = (data.role_parent.get(r, "") if data is not None else "") or ""
@@ -243,8 +249,11 @@ def user_advice(username: str, user: Any, fixes: list[dict[str, Any]], profiles:
             return f.get("change") or f["title"]
 
         top = ordered[0]
-        adv = Advice(_level(top["f"]["severity"]), f"{sentence(top)}.",
-                     why=top["f"].get("why", ""),
+        why = top["f"].get("why", "")
+        cons = top["f"].get("consequences") or []
+        if cons:
+            why = (why + f" Al quitarlo desaparecen también {_n(len(cons), 'riesgo')} que hoy le da ese perfil.").strip()
+        adv = Advice(_level(top["f"]["severity"]), f"{sentence(top)}.", why=why,
                      impact=f"{_n(len(fixes), 'punto', 'puntos')} a corregir en {_n(len(ordered), 'cambio', 'cambios')}")
         adv.steps = [Step(f"{sentence(g)}.", f"/acciones/{g['f']['task']}" if g["f"].get("task") else "",
                           "Ver cómo") for g in ordered[:4]]

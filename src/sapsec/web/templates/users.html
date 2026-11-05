@@ -4,16 +4,20 @@
 {% block content %}
 <h1>Usuarios</h1>
 <form class="form-grid card" method="get">
-  <label>Buscar<input name="q" value="{{ q }}" placeholder="Usuario o nombre"></label>
+  <label>Usuario o nombre<input name="q" value="{{ q }}" placeholder="JPEREZ, Z*, *GARCIA*"></label>
+  <label>Con el rol<input name="rol" value="{{ rol }}" placeholder="Z_FI*"></label>
+  <label>Con el perfil<input name="perfil" value="{{ perfil }}" placeholder="SAP_ALL"></label>
   <label>Tipo<select name="tipo"><option value="">Todos</option>{% for k,v in [("A","Diálogo"),("B","Sistema"),("C","Comunicación"),("S","Servicio"),("L","Referencia")] %}<option value="{{ k }}" {% if tipo==k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></label>
-  <label>Estado<select name="estado"><option value="">Todos</option><option value="activo" {% if estado=='activo' %}selected{% endif %}>Desbloqueados</option><option value="bloqueado" {% if estado=='bloqueado' %}selected{% endif %}>Bloqueados</option></select></label>
+  <label>Estado<select name="estado"><option value="">Todos</option><option value="activo" {% if estado=='activo' %}selected{% endif %}>Desbloqueados</option><option value="bloqueado" {% if estado=='bloqueado' %}selected{% endif %}>Bloqueados</option><option value="inactivo" {% if estado=='inactivo' %}selected{% endif %}>Sin actividad (desbloqueados)</option></select></label>
+  <label>Riesgo mínimo<select name="riesgo"><option value="">Cualquiera</option>{% for k in ["critico","alto","medio","bajo"] %}<option value="{{ k }}" {% if riesgo==k %}selected{% endif %}>{{ SEV_LABEL[k] }}</option>{% endfor %}</select></label>
   <button class="btn">Filtrar</button>
 </form>
+<p class="hint">{{ SEARCH_HINT }}. Atajos: <a href="?perfil=SAP_ALL">con SAP_ALL</a> · <a href="?riesgo=critico">riesgo crítico</a> · <a href="?estado=inactivo">sin actividad</a> · <a href="?estado=bloqueado">bloqueados</a> · <a href="?q=Z*,Y*">usuarios que empiezan con Z o Y</a></p>
 <p></p>{{ filter("tusers") }} <span class="muted">{{ rows|length }} usuarios</span>
 <div class="tbl-wrap"><table class="tbl sortable" id="tusers">
 <tr><th>Usuario</th><th>Nombre</th><th>Tipo</th><th>Grupo</th><th>Estado</th><th>Último acceso</th><th>Roles vigentes</th><th>Vencidos</th><th>Perfiles</th><th>Nivel máx.</th></tr>
 {% for r in rows %}
-<tr><td><a href="/usuarios/{{ r.u.username }}">{{ r.u.username }}</a></td><td>{{ r.u.full_name }}</td><td>{{ r.u.type_label }}</td><td>{{ r.u.user_group }}</td>
+<tr><td><a href="/usuarios/{{ r.u.username }}">{{ r.u.username }}</a>{% if r.sap_all %} <span class="chip bad">SAP_ALL</span>{% endif %}</td><td>{{ r.u.full_name }}</td><td>{{ r.u.type_label }}</td><td>{{ r.u.user_group }}</td>
 <td>{{ r.u.lock_label }}</td><td>{{ r.u.last_logon or '—' }}{% if r.inactivo %} <span class="pill">inactivo</span>{% endif %}</td>
 <td class="right">{{ r.roles }}</td><td class="right">{{ r.vencidos }}</td><td class="right">{{ r.perfiles }}</td><td>{{ sev(r.nivel) }}</td></tr>
 {% endfor %}

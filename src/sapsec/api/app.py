@@ -26,6 +26,7 @@ from ..engine.recommend import redundant_roles as _redundant_roles
 from ..actions import (KIND_LABEL, build_tasks, get_task, role_fix_items, summary as tasks_summary,
                        user_fix_items, _key as task_key)
 from ..advice import home_advice, role_advice, simulation_advice, task_advice, user_advice
+from ..search import filter_values, has_wildcards, matches
 from ..engine.rule_check import check_rules, summarize
 from ..engine.simulator import LABELS, Scenario, ValueOverride, simulate
 from ..reports.builders import executive_report, findings_report, simulation_report, user_report
@@ -278,12 +279,11 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
              limite: int = 100, user: CurrentUser = Depends(require("ver")), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
         snap = _need_snap(request, db)
         tasks = build_tasks(db, snap, get_rules())
-        qq = q.strip().upper()
         sel = [t for t in tasks
                if (estado == "todas" or (estado == "resueltas") != t.pending)
                and (not gravedad or t.severity == gravedad) and (not tipo or t.kind == tipo)
-               and (not qq or qq in t.title.upper() or qq in t.subtitle.upper() or any(qq in r for r in t.roles)
-                    or qq in " ".join(t.users) or any(qq in p.title.upper() for p in t.problems))]
+               and (not q.strip() or matches(q, t.title, t.subtitle, *t.roles, *t.users,
+                                             *[p.title for p in t.problems]))]
         from urllib.parse import urlencode
         more = urlencode({"q": q, "gravedad": gravedad, "tipo": tipo, "estado": estado, "limite": limite + 200})
         return render(request, "plan.html", user, db, active="plan", shown=sel[:limite], total=len(sel),
@@ -306,7 +306,8 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
                 continue
             mine = sorted({a.role for a in data.user_assignments(uname) if a.state(today) == "vigente"} & set(t.roles))
             users.append({"username": uname, "full_name": u.full_name, "type": u.type_label, "lock": u.lock_label,
-                          "last_logon": u.last_logon, "roles": mine})
+                          "last_logon": u.last_logon, "roles": mine, "locked": u.is_locked})
+        users.sort(key=lambda x: (x["locked"], x["username"]))  # primero quienes hoy pueden ingresar
         audit(db, user.username, "consulta_tarea", t.title)
         return render(request, "task.html", user, db, active="plan", t=t, users=users,
                       reco=task_advice(t, data, _env(snap)))
@@ -634,7 +635,8 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
 
     # ------------------------------------------------------------------ usuarios
     @app.get("/usuarios", response_class=HTMLResponse)
-    def users(request: Request, q: str = "", tipo: str = "", estado: str = "", user: CurrentUser = Depends(require("ver")),
+    def users(request: Request, q: str = "", tipo: str = "", estado: str = "", rol: str = "", perfil: str = "",
+              riesgo: str = "", user: CurrentUser = Depends(require("ver")),
               db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
         snap = _need_snap(request, db)
         data = data_for(snap)
@@ -644,21 +646,32 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
                                                   Finding.status.not_in(["corregido", "falso_positivo"]))):
             if SEV_ORDER[f.severity] > SEV_ORDER.get(levels.get(f.subject_user, "informativo"), 0):
                 levels[f.subject_user] = f.severity  # type: ignore[index]
+        inactivity = get_settings().analysis.inactivity_days
         rows = []
         for u in sorted(data.users.values(), key=lambda x: x.username):
-            if q and q.upper() not in u.username and q.lower() not in u.full_name.lower():
+            if q and not matches(q, u.username, u.full_name):
                 continue
             if tipo and u.user_type != tipo:
                 continue
-            if estado == "bloqueado" and not u.is_locked or estado == "activo" and u.is_locked:
+            inactive = u.last_logon is None or (today - u.last_logon).days > inactivity
+            if (estado == "bloqueado" and not u.is_locked or estado == "activo" and u.is_locked
+                    or estado == "inactivo" and not (inactive and not u.is_locked)):
+                continue
+            nivel = levels.get(u.username, "informativo")
+            if riesgo and SEV_ORDER.get(nivel, 0) < SEV_ORDER.get(riesgo, 0):
                 continue
             roles = [a for a in data.user_assignments(u.username)]
-            rows.append({"u": u, "roles": sum(1 for a in roles if a.state(today) == "vigente"),
-                         "vencidos": sum(1 for a in roles if a.state(today) == "vencida"),
-                         "perfiles": len(data.user_profiles.get(u.username, [])),
-                         "nivel": levels.get(u.username, "informativo"),
-                         "inactivo": u.last_logon is None or (today - u.last_logon).days > 90})
-        return render(request, "users.html", user, db, active="usuarios", rows=rows, q=q, tipo=tipo, estado=estado)
+            vig = [a.role for a in roles if a.state(today) == "vigente"]
+            profs = data.user_profiles.get(u.username, [])
+            if rol and not matches(rol, *vig):
+                continue
+            if perfil and not matches(perfil, *profs):
+                continue
+            rows.append({"u": u, "roles": len(vig), "vencidos": sum(1 for a in roles if a.state(today) == "vencida"),
+                         "perfiles": len(profs), "nivel": nivel, "inactivo": inactive,
+                         "sap_all": any("SAP_ALL" in data.profile_tree(p) for p in profs)})
+        return render(request, "users.html", user, db, active="usuarios", rows=rows, q=q, tipo=tipo, estado=estado,
+                      rol=rol, perfil=perfil, riesgo=riesgo)
 
     @app.get("/usuarios/{username}", response_class=HTMLResponse)
     def user_detail(username: str, request: Request, user: CurrentUser = Depends(require("ver")),
@@ -701,7 +714,7 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
             flagged.setdefault(f.subject_role, []).append(f.rule_id)  # type: ignore[arg-type]
         rows = []
         for r in sorted(data.role_names):
-            if q and q.upper() not in r and q.lower() not in data.role_text.get(r, "").lower():
+            if q and not matches(q, r, data.role_text.get(r, "")):
                 continue
             rt = data.role_type(r)
             if tipo and rt != tipo:
@@ -758,17 +771,21 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
                                                           Finding.subject_user.is_not(None))):
                     sev_users[f.subject_user] = max(sev_users.get(f.subject_user, -1), SEV_ORDER[f.severity])  # type: ignore[index]
             cache = _eff_cache(data, ctx)
+            # Comodines como en SAP: S_TABU* = todos los objetos que empiezan así; SE* = esas transacciones
+            objs = filter_values(objeto, sorted(data.object_fields), exact_without_wildcards=True) if objeto else []
+            tcodes = (filter_values(tcode.strip(), sorted(data.tcode_program), exact_without_wildcards=True)[:50]
+                      if tcode and has_wildcards(tcode) else [tcode.strip().upper()] if tcode else [])
             for uname in sorted(data.users):
                 if gravedad and sev_users.get(uname, -1) < SEV_ORDER[gravedad]:
                     continue
-                if perfil and perfil.upper() not in data.user_profiles.get(uname, []):
+                if perfil and not matches(perfil, *data.user_profiles.get(uname, [])):
                     continue
                 eff = cache.get(uname) or cache.setdefault(uname, compute_effective(data, uname, ctx.as_of))
-                if rol and rol.upper() not in eff.valid_roles():
+                if rol and not matches(rol, *eff.valid_roles()):
                     continue
                 evidence = []
                 if objeto:
-                    for e in eff.by_object(objeto):
+                    for e in [x for o in objs for x in eff.by_object(o)]:
                         if campo:
                             if comodin and not e.instance.field_is_full_wildcard(campo):
                                 continue
@@ -780,14 +797,14 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
                     if not evidence:
                         continue
                 if tcode:
-                    ok, ev, _ = tcode_executable(eff, data, tcode.strip().upper())
-                    if not ok:
+                    found = next(((t, ev) for t in tcodes for ok, ev, _ in [tcode_executable(eff, data, t)] if ok), None)
+                    if found is None:
                         continue
-                    evidence += ev
+                    evidence += found[1]
                 results.append({"user": data.users[uname], "evidence": evidence[:5]})
             audit(db, user.username, "busqueda_inversa", f"{snap.sid}/{snap.client}",
                   {"objeto": objeto, "campo": campo, "valor": valor, "tcode": tcode})
-        fields = data.object_fields.get(objeto.upper(), []) if objeto else []
+        fields = data.object_fields.get(objeto.upper(), []) if objeto and not has_wildcards(objeto) else []
         return render(request, "reverse.html", user, db, active="objetos", results=results, searched=searched,
                       p={"objeto": objeto, "campo": campo, "valor": valor, "comodin": comodin, "tcode": tcode,
                          "rol": rol, "perfil": perfil, "gravedad": gravedad}, fields=fields,
@@ -800,13 +817,16 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         sev = request.query_params.get("gravedad", "")
         st = request.query_params.get("estado", "")
         regla = request.query_params.get("regla", "")
+        q = request.query_params.get("q", "")
         stmt = select(Finding).where(Finding.snapshot_id == snap.id, Finding.kind.in_(kinds))
         if regla:
             stmt = stmt.where(Finding.rule_id == regla)
-        rows = [f for f in db.scalars(stmt) if (not sev or f.severity == sev) and (not st or f.status == st)]
+        rows = [f for f in db.scalars(stmt) if (not sev or f.severity == sev) and (not st or f.status == st)
+                and (not q.strip() or matches(q, f.subject_user, f.subject_role, f.rule_id, f.title,
+                                              *(f.roles_responsible or [])))]
         rows.sort(key=lambda f: (-SEV_ORDER[f.severity], f.rule_id, f.subject_user or "", f.subject_role or ""))
         return render(request, template, user, db, active=active, rows=rows, title=title, sev=sev, st=st,
-                      kinds=kinds)
+                      kinds=kinds, q=q)
 
     def _grouped_page(request: Request, user: CurrentUser, db: Session, kinds: list[str], active: str,
                       title: str, intro: str):  # type: ignore[no-untyped-def]
@@ -1024,6 +1044,12 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
             doc = findings_report(snap, fs, "Informe técnico detallado para auditores", "Todos los hallazgos")
         elif tipo == "ejecutivo":
             doc = executive_report(snap, dashboard_stats(db, snap), fs[:25])
+        elif tipo == "plan":
+            from ..reports.builders import plan_report
+            tasks = build_tasks(db, snap, get_rules())
+            env = _env(snap)
+            doc = plan_report(snap, [t for t in tasks if t.pending] + [t for t in tasks if not t.pending],
+                              lambda t: task_advice(t, ctx_data, env))
         elif tipo == "usuario" and usuario:
             doc = user_report(snap, analyze_user(context_for(db, snap), ctx_data, usuario.upper()))
         else:

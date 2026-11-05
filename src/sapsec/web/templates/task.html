@@ -26,8 +26,14 @@
 {% endmacro %}
 {% set vp = t.visible_problems %}
 {% set first = 1 if t.kind == 'perfil' else 8 %}
+{% set cons = vp[0].consequence_list if t.kind == 'perfil' and vp else [] %}
 <ul class="fixlist">{% for p in vp[:first] %}{{ problem_row(p) }}{% endfor %}</ul>
-{% if vp|length > first %}
+{% if cons %}
+{% set ncrit = cons|selectattr('gravedad', 'equalto', 'critico')|list|length %}
+<details class="more-items"><summary>Ver los {{ cons|length }} riesgos que hoy existen solo por este perfil y desaparecen al quitarlo{% if ncrit %} ({{ ncrit }} crítico{{ '' if ncrit == 1 else 's' }}){% endif %}</summary>
+<p class="small muted">No se cuentan como alertas aparte: se resuelven todos con este mismo cambio. Lo que la persona igual tendría sin el perfil (por sus roles) figura en su ficha como alerta propia.</p>
+<ul class="fixlist">{% for c in cons %}<li><div class="cons-row">{{ sev(c.gravedad) }}<span class="grow"><b>{{ c.titulo }}</b><br><span class="muted">{{ 'Conflicto de funciones' if c.tipo == 'sod' else 'Permiso crítico' }} · regla <code>{{ c.regla }}</code></span></span><span class="muted nowrap">{{ c.n_users }} usuario{{ '' if c.n_users == 1 else 's' }}</span></div></li>{% endfor %}</ul></details>
+{% elif vp|length > first %}
 <details class="more-items"><summary>{% if t.kind == 'perfil' %}Ver los {{ vp|length - 1 }} riesgos que desaparecen al quitarlo{% else %}Ver los otros {{ vp|length - first }} puntos{% endif %} ({{ sev_counts(vp[first:]) }})</summary>
 <ul class="fixlist">{% for p in vp[first:] %}{{ problem_row(p) }}{% endfor %}</ul></details>
 {% endif %}

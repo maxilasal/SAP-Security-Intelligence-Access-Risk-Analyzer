@@ -20,7 +20,7 @@
   <a class="kpi-s" href="/acciones"><div class="v">{{ summ.tareas }}</div><div class="l">tareas pendientes</div></a>
   <a class="kpi-s crit" href="/acciones?gravedad=critico"><div class="v">{{ summ.criticas }}</div><div class="l">tareas críticas</div></a>
   <a class="kpi-s high" href="/acciones"><div class="v">{{ summ.usuarios }}</div><div class="l">usuarios afectados de {{ stats.usuarios }}</div></a>
-  <a class="kpi-s crit" href="/objetos?perfil=SAP_ALL"><div class="v">{{ stats.sap_all }}</div><div class="l">usuarios con SAP_ALL</div></a>
+  <a class="kpi-s crit" href="/usuarios?perfil=SAP_ALL"><div class="v">{{ stats.sap_all }}</div><div class="l">usuarios con SAP_ALL{% if stats.sap_all_bloqueados %} ({{ stats.sap_all_bloqueados }} bloqueado{{ '' if stats.sap_all_bloqueados == 1 else 's' }}){% endif %}</div></a>
   <a class="kpi-s ok" href="/acciones?estado=resueltas"><div class="v">{{ summ.resueltas }}</div><div class="l">tareas resueltas</div></a>
 </div>
 

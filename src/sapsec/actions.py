@@ -49,6 +49,15 @@ class Problem:
     users: set[str] = field(default_factory=set)            # usuarios que HOY tienen el problema
     fixed_users: set[str] = field(default_factory=set)      # usuarios corregidos desde la extracción anterior
     resolved: bool = False                                  # todos sus hallazgos están corregidos
+    # Perfiles de superusuario (SAP_ALL…): riesgos que hoy existen SOLO por el perfil y desaparecen al quitarlo.
+    consequences: dict[str, dict[str, Any]] = field(default_factory=dict)  # regla → título, gravedad, usuarios
+
+    @property
+    def consequence_list(self) -> list[dict[str, Any]]:
+        """Consecuencias ordenadas: primero las más graves y las que alcanzan a más usuarios."""
+        out = [{"regla": k, "titulo": v["titulo"], "gravedad": v["gravedad"], "tipo": v.get("tipo", ""),
+                "n_users": len(v["usuarios"])} for k, v in self.consequences.items()]
+        return sorted(out, key=lambda c: (-SEV_RANK.get(c["gravedad"], 0), -c["n_users"], c["titulo"]))
 
 
 @dataclass
@@ -200,7 +209,7 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
 
     rows = list(db.execute(select(
         Finding.id, Finding.kind, Finding.rule_id, Finding.severity, Finding.subject_user, Finding.subject_role,
-        Finding.roles_responsible, Finding.title, Finding.status).where(
+        Finding.roles_responsible, Finding.title, Finding.status, Finding.evidence).where(
         Finding.snapshot_id == snap.id, Finding.kind.in_(["critica", "calidad", "sod_rol"]),
         Finding.severity != "informativo")))  # lo informativo (p. ej. quién desarrolla en DEV) no es una tarea
 
@@ -209,7 +218,7 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
     #    hallazgos vigentes; sí agrupa sus consecuencias también corregidas.
     profile_open: dict[str, str] = {}
     profile_any: dict[str, str] = {}
-    for (fid, kind, rid, sev, user, role, roles, title, st) in rows:
+    for (fid, kind, rid, sev, user, role, roles, title, st, ev) in rows:
         rule = rules.critical_by_id(rid) if kind == "critica" else None
         if rule is not None and rule.type == "profile" and user:
             prof = ", ".join(rule.profiles)
@@ -219,6 +228,17 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
                         change=f"Quitar el perfil {prof} del usuario", why=_sentence(rule.description))
             p.finding_ids.append(fid)
             p.fid_user[fid] = user
+            ev = ev if isinstance(ev, dict) else {}
+            if "consecuencias" in ev:
+                # Análisis actual: las consecuencias del perfil vienen DENTRO de su hallazgo; lo que queda
+                # aparte no se resuelve quitando el perfil.
+                if st != "corregido":
+                    for c in ev.get("consecuencias") or []:
+                        e = p.consequences.setdefault(c["regla"], {"titulo": c["titulo"], "gravedad": c["gravedad"],
+                                                                   "tipo": c.get("tipo", ""), "usuarios": set()})
+                        e["usuarios"].add(user)
+                continue
+            # Snapshots analizados antes: las consecuencias son hallazgos sueltos que se agrupan acá.
             profile_any.setdefault(user, k)
             if st != "corregido":
                 profile_open.setdefault(user, k)
@@ -227,7 +247,7 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
         m = profile_any if st == "corregido" else profile_open
         return m.get(user or "") or _key("perfil_otro")
 
-    for (fid, kind, rid, sev, user, role, roles, title, st) in rows:
+    for (fid, kind, rid, sev, user, role, roles, title, st, _ev) in rows:
         roles = tuple(sorted(roles or []))
         if kind == "calidad":
             t = task(_key("calidad"), "calidad")
@@ -324,7 +344,7 @@ def _group(db: Session, snap: Snapshot, rules: RuleSet) -> list[Task]:
     out.sort(key=lambda x: (-SEV_RANK.get(x.severity, 0),
                             -len({u for p in x.problems for u in p.fid_user.values()} |
                                  {u for p in x.problems for u in p.static_users}),
-                            -len(x.problems), x.title))
+                            -(len(x.problems) + sum(len(p.consequences) for p in x.problems)), x.title))
     return out
 
 
@@ -404,11 +424,9 @@ def _crit_change(rule: Any) -> str:
 def user_fix_items(rules: RuleSet, a: Any) -> list[dict[str, Any]]:
     """Lista corta de qué corregir en un usuario, con enlace a la tarea del plan que lo resuelve."""
     items: list[dict[str, Any]] = []
+    # El análisis ya dejó dentro del perfil (SAP_ALL…) lo que desaparece al quitarlo: lo que sigue sin rol
+    # proviene de otros perfiles asignados a mano.
     profile_key = None
-    for h in a.critical:
-        rule = rules.critical_by_id(h.rule_id)
-        if rule is not None and rule.type == "profile":
-            profile_key = profile_key or _key("perfil", ", ".join(rule.profiles))
     for h in a.critical:
         if h.severity.value == "informativo":
             continue  # dato, no algo a corregir
@@ -433,7 +451,7 @@ def user_fix_items(rules: RuleSet, a: Any) -> list[dict[str, Any]]:
             cause = "combinacion"
         items.append({"severity": h.severity.value, "title": h.title, "origin": origin, "change": change,
                       "why": _sentence(h.description), "evidence": h.evidence, "task": key, "cause": cause,
-                      "roles": roles, "profile": profile})
+                      "roles": roles, "profile": profile, "consequences": h.metrics.get("consecuencias", [])})
     for h in a.sod:
         names = [m.title for m in h.functions]
         change = "Separar «" + "» de «".join(names) + "»"

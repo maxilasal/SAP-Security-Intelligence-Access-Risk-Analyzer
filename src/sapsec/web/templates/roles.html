@@ -4,11 +4,11 @@
 {% block content %}
 <h1>Roles</h1>
 <form class="form-grid card" method="get">
-  <label>Buscar<input name="q" value="{{ q }}" placeholder="Nombre o descripción"></label>
+  <label>Nombre o descripción<input name="q" value="{{ q }}" placeholder="Z_FI*, *PAGOS*, compras"></label>
   <label>Tipo<select name="tipo"><option value="">Todos</option>{% for t in ["simple","compuesto","derivado","padre"] %}<option {% if tipo==t %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>
   <button class="btn">Filtrar</button>
 </form>
-<p></p>{{ filter("troles") }} <span class="muted">{{ rows|length }} roles</span>
+<p class="hint">{{ SEARCH_HINT }}.</p>{{ filter("troles") }} <span class="muted">{{ rows|length }} roles</span>
 <div class="tbl-wrap"><table class="tbl sortable" id="troles">
 <tr><th>Rol</th><th>Descripción</th><th>Tipo</th><th>Origen</th><th>Usuarios</th><th>Perfil</th><th>Hallazgos de rol</th></tr>
 {% for r in rows %}

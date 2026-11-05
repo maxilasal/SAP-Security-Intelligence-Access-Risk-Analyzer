@@ -54,8 +54,16 @@ def test_sod_between_roles_identifies_contributing_roles(ctx, data):
 def test_sod_intra_role_and_direct_profile(ctx, data):
     _, sod = ids(analyze_user(ctx, data, "ALMACEN1"))
     assert sod["SOD-MM-004"].scope.startswith("intra-rol")
-    _, sod2 = ids(analyze_user(ctx, data, "ADMIN_BASIS"))
-    assert sod2["SOD-FI-001"].scope == "incluye perfil directo"
+    a = analyze_user(ctx, data, "ADMIN_BASIS")
+    _, sod2 = ids(a)
+    # Con SAP_ALL el conflicto no es una alerta aparte: va dentro de la alerta del perfil (desaparece al quitarlo)
+    assert "SOD-FI-001" not in sod2
+    prf = next(h for h in a.critical if h.rule_id == "CRIT-PRF-001")
+    assert any(c["regla"] == "SOD-FI-001" for c in prf.metrics["consecuencias"])
+    # El motor SoD por sí solo sigue informando que el conflicto proviene de un perfil directo
+    from sapsec.engine.sod import evaluate_sod
+    raw = {h.risk_id: h for h in evaluate_sod(ctx.rules, data, a.eff, "PRD")}
+    assert raw["SOD-FI-001"].scope == "incluye perfil directo"
 
 
 def test_apparent_org_restriction_is_not_trusted(ctx, data):

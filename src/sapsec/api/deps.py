@@ -26,6 +26,9 @@ TEMPLATES.env.globals["KIND_LABEL"] = KIND_LABEL
 from .. import __version__  # noqa: E402
 
 TEMPLATES.env.globals["APP_VERSION"] = __version__
+from ..search import HINT as _SEARCH_HINT  # noqa: E402
+
+TEMPLATES.env.globals["SEARCH_HINT"] = _SEARCH_HINT
 TEMPLATES.env.filters["sev"] = lambda v: SEV_LABEL.get(getattr(v, "value", v), v)
 
 

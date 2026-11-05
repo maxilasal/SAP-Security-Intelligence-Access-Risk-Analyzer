@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sapsec"
-version = "0.1.0"
+version = "0.2.0"
 description = "SAP Security Intelligence & Access Risk Analyzer (solo lectura)"
 readme = "README.md"
 requires-python = ">=3.11"

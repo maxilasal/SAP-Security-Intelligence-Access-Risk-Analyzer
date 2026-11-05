@@ -187,6 +187,7 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
     db.commit()
     count = 0
     seen: set[str] = set()
+    folded: set[str] = set()
 
     def add(kind: str, rule_id: str, version: str, status: str, severity: str, title: str, desc: str,
             rec: str, certainty: str, user: str | None, role: str | None, roles: list[str], evidence: dict,
@@ -217,12 +218,17 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
             progress(msg)
             db.commit()  # liberar la base periódicamente (SQLite: un solo escritor)
         a = analyze_user(ctx, data, username)
+        for h in a.critical:  # riesgos que ahora van dentro de la alerta de SAP_ALL (no se corrigieron)
+            for c in h.metrics.get("consecuencias", []):
+                folded.add(fingerprint(snap.sid, snap.client, "critica" if c["tipo"] == "critica" else "sod",
+                                       c["regla"], username, ""))
         scores = {i.ref: i for i in a.risk.items}
         for h in a.critical:
             sc = scores.get(f"{h.rule_id}|{username}")
             add("critica", h.rule_id, h.rule_version, h.rule_status, h.severity.value, h.title, h.description,
                 h.recommendation, h.certainty.value, username, None, h.roles,
-                {"evidencia": [vars(e) for e in h.evidence], "notas": h.notes},
+                {"evidencia": [vars(e) for e in h.evidence], "notas": h.notes,
+                 "consecuencias": h.metrics.get("consecuencias", [])},
                 sc.inherent if sc else 0, sc.residual if sc else 0)
         for h in a.sod:
             sc = scores.get(f"{h.risk_id}|{username}")
@@ -253,7 +259,7 @@ def _analyze_snapshot(db: Session, snapshot_id: int, as_of: date | None,
                  "solo_en_perfil": ra.consistency.only_in_profile[:50]}, 0, 0)
     # Hallazgos que desaparecieron → se registran como corregidos en el nuevo snapshot
     for fp, prev in previous.items():
-        if fp not in seen and prev.status not in ("corregido",):
+        if fp not in seen and fp not in folded and prev.status not in ("corregido",):
             count += 1
             db.add(Finding(code=prev.code, fingerprint=fp, snapshot_id=snap.id, kind=prev.kind, rule_id=prev.rule_id,
                            rule_version=prev.rule_version, rule_status=prev.rule_status, severity=prev.severity,
@@ -281,6 +287,8 @@ def dashboard_stats(db: Session, snap: Snapshot) -> dict[str, Any]:
     n_users = db.scalar(select(func.count()).select_from(t_u).where(t_u.c.snapshot_id == snap.id)) or 0
     n_roles = db.scalar(select(func.count()).select_from(t_r).where(t_r.c.snapshot_id == snap.id)) or 0
     sap_all = set(db.scalars(select(t_p.c.bname).where(t_p.c.snapshot_id == snap.id, t_p.c.profile == "SAP_ALL")))
+    sap_all_locked = set(db.scalars(select(t_u.c.bname).where(
+        t_u.c.snapshot_id == snap.id, t_u.c.bname.in_(sap_all), t_u.c.uflag.not_in(["", "0"])))) if sap_all else set()
     f = db.scalars(select(Finding).where(Finding.snapshot_id == snap.id)).all()
     open_f = [x for x in f if x.status not in ("corregido", "falso_positivo")]
     privileged = {x.subject_user for x in open_f if x.kind == "critica" and x.severity in ("critico", "alto")}
@@ -296,6 +304,7 @@ def dashboard_stats(db: Session, snap: Snapshot) -> dict[str, Any]:
         evolution.append({"snapshot": h.id, "fecha": h.started_at.strftime("%d/%m %H:%M"), **dict(rows)})
     return {
         "usuarios": n_users, "privilegiados": len(privileged), "sap_all": len(sap_all),
+        "sap_all_bloqueados": len(sap_all_locked),
         "roles": n_roles, "roles_criticos": len(crit_roles),
         "sod": sum(1 for x in open_f if x.kind == "sod"),
         "criticos": sum(1 for x in open_f if x.severity == "critico"),

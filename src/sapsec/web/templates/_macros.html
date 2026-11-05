@@ -13,7 +13,7 @@
 {%- endmacro %}
 
 {% macro filter(target) -%}
-<input class="table-filter" data-target="{{ target }}" placeholder="Filtrar tabla…" type="search">
+<input class="table-filter" data-target="{{ target }}" placeholder="Filtrar tabla… (admite Z*, *PAGO*)" title="Sin comodines: contiene. Con * o +: como en SAP, sobre cada columna." type="search">
 {%- endmacro %}
 
 {% macro evidence_table(items) -%}
@@ -47,6 +47,8 @@
   {% if it.users is defined and it.users %}<span class="muted nowrap">{{ it.users }} usuario{{ '' if it.users == 1 else 's' }}</span>{% endif %}
   <span class="more">ver detalle ▸</span></summary>
   {% if it.why %}<p><b>Por qué no debe seguir así:</b> {{ it.why }}</p>{% endif %}
+  {% if it.consequences %}<p><b>Al quitarlo desaparecen también {{ it.consequences|length }} riesgos</b> que hoy existen solo por este perfil:</p>
+  <div class="chips">{% for c in it.consequences %}<span class="chip {{ 'bad' if c.gravedad == 'critico' else '' }}" title="{{ c.regla }}">{{ c.titulo }}</span>{% endfor %}</div>{% endif %}
   {% if it.evidence %}{{ evidence_table(it.evidence) }}{% endif %}
   {% if it.task %}<p><a class="btn small" href="/acciones/{{ it.task }}">Ver cómo corregirlo ›</a></p>{% endif %}
 </details></li>

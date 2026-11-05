@@ -121,3 +121,26 @@ def executive_report(snap: Snapshot, stats: dict, top: list[Finding]) -> ReportD
                                                         f.recommendation] for f in top]))]
     return ReportDoc("Informe ejecutivo de seguridad SAP", snapshot_meta(snap, "Todos los usuarios y roles del snapshot"),
                      _limitations(snap), secs)
+
+
+def plan_report(snap: Snapshot, tasks: list, advice_for) -> ReportDoc:  # type: ignore[no-untyped-def]
+    """Plan de acción para repartir el trabajo: una fila por tarea, con columnas para responsable y fecha."""
+    sev = {"critico": "Crítico", "alto": "Alto", "medio": "Medio", "bajo": "Bajo", "informativo": "Informativo"}
+    rows = []
+    for i, t in enumerate(tasks, start=1):
+        adv = advice_for(t)
+        users = t.users
+        rows.append([i, sev.get(t.severity, t.severity), t.title, adv.headline,
+                     " / ".join(f"{n}. {s.text}" for n, s in enumerate(adv.steps, start=1)), adv.where,
+                     len(users), ", ".join(users[:40]) + (f" (+{len(users) - 40})" if len(users) > 40 else ""),
+                     ", ".join(t.roles), len(t.visible_problems), "Pendiente" if t.pending else "Resuelta o aceptada",
+                     "", "", ""])
+    cols = ["Prioridad", "Gravedad", "Tarea", "Recomendación", "Pasos", "Dónde, en SAP", "Usuarios afectados",
+            "Usuarios", "Roles", "Puntos", "Estado", "Responsable", "Fecha compromiso", "Observaciones"]
+    pend = sum(1 for t in tasks if t.pending)
+    return ReportDoc("Plan de acción de seguridad SAP", snapshot_meta(snap, "Tareas de corrección agrupadas por causa"),
+                     _limitations(snap),
+                     [Section("Tareas", [f"{pend} tareas pendientes de {len(tasks)}. Ordenadas por gravedad y "
+                                         "usuarios afectados. Las columnas Responsable, Fecha compromiso y "
+                                         "Observaciones son para completar al repartir el trabajo."],
+                              Table(cols, rows))])

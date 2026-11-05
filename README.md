@@ -24,6 +24,11 @@ Documentación: [diseño de la Fase 1](docs/01_fase1_diseno.md) · [conectividad
 3. **Corregir en SAP y volver a extraer**: lo corregido pasa a «resuelto» solo. Si un riesgo se acepta, se
    registra la decisión (excepción con vencimiento, control mitigante o falso positivo) para toda la tarea.
 
+**Búsquedas como en SAP:** en todos los campos de búsqueda, `Z*` = empieza con Z, `*PAGO*` = contiene, `+` = un
+carácter, y varios criterios separados por coma (`Z_FI*, Z_MM*`).
+
+**SAP_ALL:** una sola alerta por persona; los riesgos que existen solo por ese perfil se ven dentro de ella.
+
 Las fichas de **usuario** y de **rol** y el **simulador** tienen el mismo recuadro: qué hacer con ese usuario,
 con ese rol, o si se puede asignar el rol pedido («No asignar Z_FI_PAGOS a USUARIO_TEST» / «Se puede asignar…»),
 con una alternativa cuando existe.
