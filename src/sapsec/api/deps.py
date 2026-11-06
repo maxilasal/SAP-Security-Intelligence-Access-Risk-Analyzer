@@ -32,6 +32,7 @@ TEMPLATES.env.globals["SEARCH_HINT"] = _SEARCH_HINT
 from .. import themes as _themes  # noqa: E402
 
 TEMPLATES.env.globals["THEMES"] = _themes.THEMES
+TEMPLATES.env.globals["MODES"] = _themes.MODES
 TEMPLATES.env.globals["LOGO"] = {"shield": _themes.SHIELD, "shine": _themes.SHINE, "hole": _themes.HOLE_C,
                                  "stem": _themes.HOLE_STEM}
 TEMPLATES.env.filters["sev"] = lambda v: SEV_LABEL.get(getattr(v, "value", v), v)
@@ -58,6 +59,7 @@ class CurrentUser:
     username: str
     role: str
     theme: str = ""
+    mode: str = ""
 
     def can(self, perm: str) -> bool:
         return has_permission(self.role, perm)
@@ -71,7 +73,7 @@ def current_user(request: Request, db: Session = Depends(get_session)) -> Curren
     if not u or not u.active:
         request.session.clear()
         raise LoginRequired()
-    return CurrentUser(u.username, u.role, u.theme or "")
+    return CurrentUser(u.username, u.role, u.theme or "", u.ui_mode or "")
 
 
 def require(perm: str):  # type: ignore[no-untyped-def]
@@ -176,7 +178,10 @@ def render(request: Request, template: str, user: CurrentUser | None, db: Sessio
             pending_snap = newest  # extracción más nueva fallida o aún en análisis: se avisa
     from .. import themes
     chosen = user.theme if user is not None and themes.valid(user.theme) else request.cookies.get(themes.COOKIE)
+    mode = user.mode if user is not None and themes.valid_mode(user.mode) else request.cookies.get(themes.MODE_COOKIE)
+    back = request.url.path + (f"?{request.url.query}" if request.url.query else "")
     base = {"request": request, "user": user, "csrf": csrf_token(request), "tema": themes.get(chosen).key,
+            "modo": themes.get_mode(mode), "volver": back,
             "systems": systems_menu(db) if user else [], "current_snap": cur, "newer_snap": pinned,
             "pending_snap": pending_snap,
             "active": ctx.pop("active", "")}

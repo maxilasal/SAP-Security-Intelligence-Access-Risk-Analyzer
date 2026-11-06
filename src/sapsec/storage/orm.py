@@ -205,6 +205,7 @@ class AppUser(Base):
     failed_logins: Mapped[int] = mapped_column(Integer, default=0)
     last_failed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     theme: Mapped[str] = mapped_column(String(20), default="")   # tema de colores elegido ("" = el predeterminado)
+    ui_mode: Mapped[str] = mapped_column(String(10), default="")  # claro | oscuro | auto ("" = claro)
 
 
 class ExtractionSchedule(Base):

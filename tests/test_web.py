@@ -518,3 +518,25 @@ def test_logo_and_color_themes(client):
     login(client)
     tok = csrf(client, "/mi-cuenta")
     client.post("/mi-cuenta/tema", data={"csrf": tok, "tema": "azul"})
+
+
+def test_dark_mode_toggle_and_program_title(client):
+    """Modo oscuro desde «Mi cuenta» o con el botón de arriba; la pestaña dice solo el nombre del programa."""
+    login(client)
+    page = client.get("/usuarios").text
+    assert "<title>SAP Security Intelligence</title>" in page and 'data-modo="claro"' in page
+    assert 'class="mode-toggle" name="modo" value="oscuro"' in page
+    tok = csrf(client, "/usuarios")
+    assert client.post("/mi-cuenta/modo", data={"csrf": tok, "modo": "negro"}).status_code == 400
+    r = client.post("/mi-cuenta/modo", data={"csrf": tok, "modo": "oscuro", "volver": "/usuarios?q=Z*"},
+                    follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/usuarios?q=Z*"  # vuelve a la misma pantalla
+    assert "sapsec_modo=oscuro" in r.headers["set-cookie"]
+    page = client.get("/usuarios").text
+    assert 'data-modo="oscuro"' in page and 'value="claro"' in page and 'content="dark"' in page
+    r = client.post("/mi-cuenta/modo", data={"csrf": tok, "modo": "auto", "volver": "//otro-sitio.com/x"},
+                    follow_redirects=False)
+    assert r.headers["location"] == "/mi-cuenta?tema=1#tema"  # nunca redirige a otro sitio
+    page = client.get("/mi-cuenta").text
+    assert 'data-modo="auto"' in page and "Automático (como Windows) ✓" in page and "mode-toggle" not in page
+    client.post("/mi-cuenta/modo", data={"csrf": tok, "modo": "claro"})

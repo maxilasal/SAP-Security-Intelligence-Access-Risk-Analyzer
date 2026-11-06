@@ -9,6 +9,7 @@ Se ejecutan al iniciar (``init_db``) y actualizan bases creadas con versiones an
 5. ``sap_system.landscape``: grupo de sistemas que comparten transportes (DEV → QA → PRD).
 6. ``finding.auto_status``: estado fijado automáticamente (usuarios de emergencia declarados).
 7. ``app_user.theme``: tema de colores elegido por cada persona.
+8. ``app_user.ui_mode``: modo claro, oscuro o automático elegido por cada persona.
 """
 
 from __future__ import annotations
@@ -65,6 +66,10 @@ def migrate(engine: Engine) -> None:
         with engine.begin() as c:
             c.exec_driver_sql("ALTER TABLE app_user ADD COLUMN theme VARCHAR(20) DEFAULT '' NOT NULL")
         log.info("Migración: agregada app_user.theme")
+    if "app_user" in tables and "ui_mode" not in _columns(engine, "app_user"):
+        with engine.begin() as c:
+            c.exec_driver_sql("ALTER TABLE app_user ADD COLUMN ui_mode VARCHAR(10) DEFAULT '' NOT NULL")
+        log.info("Migración: agregada app_user.ui_mode")
     if "app_user" in tables and "last_failed_at" not in _columns(engine, "app_user"):
         with engine.begin() as c:
             c.exec_driver_sql("ALTER TABLE app_user ADD COLUMN last_failed_at TIMESTAMP NULL")

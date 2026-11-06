@@ -33,3 +33,21 @@ def test_css_and_icon_come_from_the_same_colors():
         assert t.brand2 in themes.icon_svg(t.key)
     assert themes.get("no-existe").key == themes.DEFAULT and not themes.valid("no-existe")
     assert themes.icon_svg().startswith("<svg") and themes.THEMES[themes.DEFAULT].brand2 in themes.icon_svg("x")
+
+
+def test_dark_mode_is_readable_with_every_theme():
+    d = themes.DARK_VARS
+    assert _contrast(d["--ink"], d["--panel"]) >= 7 and _contrast(d["--ink"], d["--bg"]) >= 7
+    for k in ("--muted", "--crit", "--high", "--med", "--low", "--info"):
+        assert _contrast(d[k], d["--panel"]) >= 4.5, k
+        assert _contrast(d[k], d["--soft"]) >= 4.5, k
+    for t in themes.THEMES.values():  # en oscuro los enlaces usan el color claro del tema
+        assert _contrast(t.hi, d["--panel"]) >= 4.5 and _contrast(t.hi, d["--bg"]) >= 4.5, t.key
+
+
+def test_dark_mode_rules_for_chosen_and_automatic_mode():
+    css = themes.css()
+    assert "§" not in css and 'html[data-modo="oscuro"]{color-scheme:dark' in css
+    auto = css[css.index("@media (prefers-color-scheme: dark)"):]
+    assert 'html[data-modo="auto"]{color-scheme:dark' in auto and 'html[data-modo="auto"] .tbl th' in auto
+    assert themes.get_mode("inventado") == themes.DEFAULT_MODE and themes.valid_mode("auto")

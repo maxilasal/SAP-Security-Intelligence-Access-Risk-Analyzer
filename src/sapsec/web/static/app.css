@@ -236,4 +236,7 @@ a.chip:hover{text-decoration:none;background:#e2eaf4}
 .swatch-btn:hover{border-color:var(--brand2)}
 .swatch-btn.on{border-color:var(--brand2);box-shadow:0 0 0 2px var(--brand2) inset;font-weight:600}
 .swatch-btn .sw{display:block;width:72px;height:34px;border-radius:7px}
+.mode-toggle{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:15px;line-height:1;padding:0}
+.mode-toggle:hover{border-color:var(--brand2)}
+.card>h3:first-of-type{margin-top:0}
 

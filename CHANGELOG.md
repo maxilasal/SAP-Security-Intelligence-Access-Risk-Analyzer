@@ -6,6 +6,17 @@ la base o en las reglas; MENOR = funciones nuevas; PARCHE = correcciones).
 
 ## [Sin publicar]
 
+## [0.6.0] - 2026-11-06
+
+### Agregado
+- **Modo oscuro**: *Mi cuenta › Tema de colores › Modo* (Claro, Oscuro o Automático, que sigue a Windows o al
+  navegador), combinable con cualquiera de los siete colores. También se cambia con el botón ☾ / ☀ de arriba a la
+  derecha, sin salir de la pantalla. Todas las pantallas (tablas, alertas, recomendaciones, formularios, ingreso) tienen
+  su versión oscura, con contraste accesible verificado por pruebas automáticas.
+
+### Cambiado
+- La pestaña del navegador dice solo el nombre del programa: «SAP Security Intelligence».
+
 ## [0.5.0] - 2026-11-06
 
 ### Agregado
@@ -121,7 +132,8 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
 - `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
 
-[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.5.0...HEAD
+[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.2.0...v0.3.0

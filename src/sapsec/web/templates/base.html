@@ -1,10 +1,11 @@
 <!doctype html>
 {% from "_macros.html" import logo %}
-<html lang="es" data-tema="{{ tema }}">
+<html lang="es" data-tema="{{ tema }}" data-modo="{{ modo }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}SAP Security Analyzer{% endblock %} · SAP Security Intelligence</title>
+<meta name="color-scheme" content="{{ 'dark' if modo == 'oscuro' else ('light dark' if modo == 'auto' else 'light') }}">
+<title>SAP Security Intelligence</title>
 <link rel="stylesheet" href="/static/app.css">
 <link rel="stylesheet" href="/temas.css?v={{ APP_VERSION }}">
 <link rel="icon" type="image/svg+xml" href="/icono.svg?tema={{ tema }}">
@@ -54,7 +55,8 @@
       {% if current_snap.status != 'completo' %}<span class="badge warn">Snapshot {{ current_snap.status }}</span>{% endif %}
     {% endif %}
     <div class="spacer"></div>
-    <a class="theme-dot swatch-{{ tema }}" href="/mi-cuenta#tema" title="Tema de colores: {{ THEMES[tema].name }} (cambiar)" aria-label="Cambiar el tema de colores"></a>
+    {% if modo != 'auto' %}<form class="inline" method="post" action="/mi-cuenta/modo"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="volver" value="{{ volver }}"><button class="mode-toggle" name="modo" value="{{ 'claro' if modo == 'oscuro' else 'oscuro' }}" title="{{ 'Pasar a modo claro' if modo == 'oscuro' else 'Pasar a modo oscuro' }}" aria-label="{{ 'Pasar a modo claro' if modo == 'oscuro' else 'Pasar a modo oscuro' }}">{{ '☀' if modo == 'oscuro' else '☾' }}</button></form>{% endif %}
+    <a class="theme-dot swatch-{{ tema }}" href="/mi-cuenta#tema" title="Tema de colores: {{ THEMES[tema].name }} · modo {{ MODES[modo]|lower }} (cambiar)" aria-label="Cambiar el tema de colores"></a>
     <span class="who"><a href="/mi-cuenta" title="Mi cuenta: contraseña y tema de colores">{{ user.username }}</a> · {{ user.role }}</span>
     <a class="btn ghost" href="/logout">Salir</a>
   </header>

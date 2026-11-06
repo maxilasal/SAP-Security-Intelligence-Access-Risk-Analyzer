@@ -37,8 +37,9 @@ extracción; si alguno se desbloquea o la declaración vence, vuelve a aparecer 
 alertas nuevas y resueltas y qué cambió en SAP (roles asignados o quitados, perfiles a mano, usuarios, roles
 modificados). Se descarga en Excel o PDF.
 
-**Tema de colores:** cada persona elige el suyo en *Mi cuenta* (Azul, Petróleo, Verde, Bordó, Violeta, Grafito o
-Cobre), o con el círculo de color junto a su usuario, arriba a la derecha.
+**Tema de colores y modo oscuro:** cada persona elige el suyo en *Mi cuenta* (Azul, Petróleo, Verde, Bordó, Violeta,
+Grafito o Cobre; modo Claro, Oscuro o Automático como Windows). El botón ☾ / ☀ de arriba a la derecha cambia entre
+claro y oscuro.
 
 Las fichas de **usuario** y de **rol** y el **simulador** tienen el mismo recuadro: qué hacer con ese usuario,
 con ese rol, o si se puede asignar el rol pedido («No asignar Z_FI_PAGOS a USUARIO_TEST» / «Se puede asignar…»),

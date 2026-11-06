@@ -219,7 +219,7 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         from ..security.network import serve_info
         uid = request.session.get("uid")
         u = db.get(AppUser, uid) if uid else None
-        cu = CurrentUser(u.username, u.role, u.theme or "") if u and u.active else None
+        cu = CurrentUser(u.username, u.role, u.theme or "", u.ui_mode or "") if u and u.active else None
         return render(request, "certificate.html", cu, db, active="configuracion", net=serve_info())
 
     @app.get("/certificado/ca.crt")
@@ -271,6 +271,26 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         resp = RedirectResponse("/mi-cuenta?tema=1#tema", status_code=303)
         # Para la pantalla de ingreso de este navegador (antes de saber quién es): no es un dato sensible.
         resp.set_cookie(themes.COOKIE, key, max_age=365 * 24 * 3600, httponly=True, samesite="strict",
+                        secure=request.url.scheme == "https")
+        return resp
+
+    @app.post("/mi-cuenta/modo")
+    async def my_mode(request: Request, user: CurrentUser = Depends(current_user), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        from .. import themes
+        await check_csrf(request)
+        form = await request.form()
+        mode = str(form.get("modo") or "").strip().lower()
+        if not themes.valid_mode(mode):
+            raise HTTPException(400, "Modo desconocido.")
+        me = db.scalars(select(AppUser).where(AppUser.username == user.username)).one()
+        me.ui_mode = mode
+        db.commit()
+        back = str(form.get("volver") or "")
+        # Solo rutas de esta aplicación (nunca otro sitio: evita redirecciones abiertas).
+        if not back.startswith("/") or back.startswith("//") or "\\" in back:
+            back = "/mi-cuenta?tema=1#tema"
+        resp = RedirectResponse(back, status_code=303)
+        resp.set_cookie(themes.MODE_COOKIE, mode, max_age=365 * 24 * 3600, httponly=True, samesite="strict",
                         secure=request.url.scheme == "https")
         return resp
 

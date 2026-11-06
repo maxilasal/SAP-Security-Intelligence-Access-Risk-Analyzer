@@ -18,9 +18,20 @@
 <form class="card" method="post" action="/mi-cuenta/tema">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <p class="small muted">Es solo para su usuario. Todos los temas cumplen el contraste mínimo de accesibilidad; los colores de las alertas (crítico, alto, medio…) no cambian.</p>
+  <h3>Color</h3>
   <div class="swatches">
   {% for t in THEMES.values() %}
     <button class="swatch-btn{{ ' on' if tema == t.key else '' }}" type="submit" name="tema" value="{{ t.key }}"{% if tema == t.key %} aria-pressed="true"{% endif %}><span class="sw swatch-{{ t.key }}"></span>{{ t.name }}{% if tema == t.key %} ✓{% endif %}</button>
+  {% endfor %}
+  </div>
+</form>
+<form class="card" method="post" action="/mi-cuenta/modo">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <h3>Modo</h3>
+  <p class="small muted">Oscuro: fondos oscuros en todas las pantallas, con el color elegido. Automático: claro u oscuro según la configuración de Windows (o del navegador). También se cambia con el botón ☾ / ☀ de arriba a la derecha.</p>
+  <div class="swatches">
+  {% for k, label in MODES.items() %}
+    <button class="swatch-btn{{ ' on' if modo == k else '' }}" type="submit" name="modo" value="{{ k }}"{% if modo == k %} aria-pressed="true"{% endif %}><span class="sw swatch-modo-{{ k }}"></span>{{ label }}{% if modo == k %} ✓{% endif %}</button>
   {% endfor %}
   </div>
 </form>
