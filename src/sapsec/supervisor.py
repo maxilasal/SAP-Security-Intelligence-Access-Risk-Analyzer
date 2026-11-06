@@ -223,6 +223,8 @@ class Supervisor:
             if self.stop_event.is_set():
                 return None
             if code is not None:
+                if code > 0x7FFFFFFF:  # Windows informa los códigos como enteros sin signo (0xFFFFFFFF = -1)
+                    code -= 1 << 32
                 return f"se cerró (código {code})"
             if self.probe():
                 if failures:

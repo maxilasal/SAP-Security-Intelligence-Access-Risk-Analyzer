@@ -60,6 +60,6 @@ jobs:
         if: always()
         shell: powershell
         run: |
-          Get-Content data\logs\servicio.log -ErrorAction SilentlyContinue
-          Get-Content data\logs\sapsec.log -Tail 80 -ErrorAction SilentlyContinue
+          Get-Content data\logs\servicio.log -Encoding UTF8 -ErrorAction SilentlyContinue
+          Get-Content data\logs\sapsec.log -Tail 80 -Encoding UTF8 -ErrorAction SilentlyContinue
 

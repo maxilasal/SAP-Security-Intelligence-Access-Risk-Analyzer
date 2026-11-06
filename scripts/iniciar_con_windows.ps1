@@ -31,10 +31,19 @@ $pythonw = Join-Path $root ".venv\Scripts\pythonw.exe"
 $python = Join-Path $root ".venv\Scripts\python.exe"
 
 function Invoke-Sapsec {
-  # Programas externos: lo que escriban en stderr (avisos, registro) no debe cortar el script en PowerShell 5.1.
+  # Programas externos: lo que escriban en stderr (avisos, registro) no debe cortar el script en PowerShell 5.1,
+  # y la salida se lee en UTF-8 para que se vean bien las tildes.
   $anterior = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
-  try { & $python -m sapsec.cli @args | Out-Host } finally { $ErrorActionPreference = $anterior }
+  $codificacion = $null
+  try { $codificacion = [Console]::OutputEncoding; [Console]::OutputEncoding = [Text.Encoding]::UTF8 } catch { }
+  $env:PYTHONIOENCODING = "utf-8"
+  try { & $python -m sapsec.cli @args | Out-Host }
+  finally {
+    if ($codificacion) { try { [Console]::OutputEncoding = $codificacion } catch { } }
+    Remove-Item Env:PYTHONIOENCODING -ErrorAction SilentlyContinue
+    $ErrorActionPreference = $anterior
+  }
   return $LASTEXITCODE
 }
 

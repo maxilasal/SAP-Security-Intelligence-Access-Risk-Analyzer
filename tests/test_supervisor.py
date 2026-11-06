@@ -100,3 +100,17 @@ def test_child_command_and_stale_status(tmp_path: Path):
 def test_windows_job_object_is_created():
     from sapsec.supervisor import _KillOnCloseJob
     assert _KillOnCloseJob().handle
+
+
+def test_windows_exit_codes_are_shown_signed(tmp_path: Path):
+    """Windows informa 0xFFFFFFFF (proceso terminado a la fuerza) como 4294967295: se muestra como -1."""
+    class Fake:
+        pid = 1
+
+        def wait(self, timeout=None):  # type: ignore[no-untyped-def]
+            return 0xFFFFFFFF
+
+        def poll(self):  # type: ignore[no-untyped-def]
+            return 0xFFFFFFFF
+    sup = Supervisor(["x"], lambda: False, FAST, Status(tmp_path / "servicio.json"))
+    assert sup._watch(Fake()) == "se cerró (código -1)"  # type: ignore[arg-type]
