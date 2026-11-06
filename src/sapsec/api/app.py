@@ -1204,9 +1204,12 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         app_users = db.scalars(select(AppUser).order_by(AppUser.username)).all() if user.can("usuarios_app") else []
         s = get_settings()
         locked = {u.id for u in app_users if _is_locked(u, s.security.max_failed_logins, s.security.lockout_minutes)}
+        from ..config import data_dir
+        from ..supervisor import read_status
         return render(request, "config.html", user, db, active="configuracion", settings=s, app_users=app_users,
                       roles=[r.value for r in AppRole], db_url=s.database_url.split("@")[-1], locked=locked,
-                      net=serve_info(), client_ip=_ip(request))
+                      net=serve_info(), client_ip=_ip(request), svc=read_status(data_dir()),
+                      svc_task=_windows_task_state(WEB_TASK_NAME), this_pid=os.getpid())
 
     @app.post("/configuracion/usuarios")
     async def app_user_create(request: Request, user: CurrentUser = Depends(require("usuarios_app")),
@@ -1366,16 +1369,17 @@ def _scheduler_tick() -> None:
 
 
 WIN_TASK_NAME = "SAP Security Analyzer - extracciones programadas"
+WEB_TASK_NAME = "SAP Security Analyzer - servidor web"
 
 
-def _windows_task_state() -> str:
+def _windows_task_state(name: str = WIN_TASK_NAME) -> str:
     """'instalada' | 'no instalada' | 'no aplica' (solo Windows; consulta de solo lectura)."""
     import subprocess
     import sys as _sys
     if _sys.platform != "win32":
         return "no aplica"
     try:
-        r = subprocess.run(["schtasks", "/Query", "/TN", WIN_TASK_NAME], capture_output=True, timeout=10,
+        r = subprocess.run(["schtasks", "/Query", "/TN", name], capture_output=True, timeout=10,
                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         return "instalada" if r.returncode == 0 else "no instalada"
     except (OSError, subprocess.SubprocessError):

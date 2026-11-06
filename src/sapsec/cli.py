@@ -19,6 +19,9 @@ Comandos:
   rfc-selftest               Prueba el backend nwrfc con parámetros de entorno (SAPSEC_RFC_*).
   reset-password U           Nueva contraseña para un usuario de la aplicación (y lo desbloquea).
   serve [--red] [--port N]   Inicia la interfaz web (--red: accesible desde otras PC, con HTTPS).
+  servicio [--red]           Abre la interfaz web y la mantiene funcionando (la reabre si se cae o no responde).
+  estado-servicio            Muestra si el servicio está funcionando, desde cuándo y sus reinicios automáticos.
+  verificar-credenciales     Indica si este usuario de Windows tiene guardada la contraseña de cada conexión SAP.
 """
 
 from __future__ import annotations
@@ -96,6 +99,14 @@ def main(argv: list[str] | None = None) -> int:
     sv.add_argument("--sin-https", action="store_true", help="Solo para pruebas: modo red sin cifrar")
     sv.add_argument("--host", default=None, help="Dirección de escucha (por defecto 127.0.0.1; con --red, todas)")
     sv.add_argument("--port", type=int, default=None, help="Puerto (por defecto 8000; con --red, 8443)")
+    svc = sub.add_parser("servicio", help="Abre la interfaz web y la mantiene funcionando: si se cae o deja de "
+                                          "responder, la vuelve a abrir (lo usa scripts\\iniciar_con_windows.ps1)")
+    svc.add_argument("--red", action="store_true", help="Modo red (HTTPS, puerto 8443) para otras PC de la empresa")
+    svc.add_argument("--sin-https", action="store_true", help="Solo para pruebas: modo red sin cifrar")
+    svc.add_argument("--port", type=int, default=None, help="Puerto (por defecto 8000; con --red, 8443)")
+    sub.add_parser("estado-servicio", help="Muestra si el servicio está funcionando y sus reinicios automáticos")
+    sub.add_parser("verificar-credenciales",
+                   help="Indica si este usuario de Windows tiene guardada la contraseña SAP de cada conexión")
     args = p.parse_args(argv)
     setup_logging()
     from .connectors.base import RfcError
@@ -332,7 +343,49 @@ def _run(args: argparse.Namespace) -> int:
     elif args.cmd == "serve":
         from .webserver import serve
         return serve(host=args.host, port=args.port, network=args.red, https=not args.sin_https)
+    elif args.cmd == "servicio":
+        from .supervisor import run_service
+        return run_service(network=args.red, https=not args.sin_https, port=args.port)
+    elif args.cmd == "estado-servicio":
+        from .config import data_dir
+        from .supervisor import describe_status, read_status
+        active, lines = describe_status(read_status(data_dir()))
+        for line in lines:
+            print("  " + line)
+        return 0 if active else 1
+    elif args.cmd == "verificar-credenciales":
+        return _check_credentials()
     return 0
+
+
+def _check_credentials() -> int:
+    """Para el Programador de tareas: el almacén de credenciales de Windows es por usuario. Sin mostrar secretos,
+    indica qué conexiones SAP no tienen contraseña guardada para el usuario que ejecuta el comando."""
+    from sqlalchemy import select
+
+    from .security.secrets import get_password
+    from .storage.db import session_scope
+    from .storage.orm import SapConnection
+    missing = 0
+    with session_scope() as db:
+        conns = db.scalars(select(SapConnection).order_by(SapConnection.id)).all()
+        for c in conns:
+            if c.backend == "fixture" or (c.snc_mode and not c.credential_ref):
+                print(f"  -  {c.label}: no usa contraseña")
+                continue
+            try:
+                ok = bool(get_password(c.credential_ref))
+            except Exception as exc:  # noqa: BLE001 - se informa sin detener la verificación
+                ok = False
+                print(f"  !  {c.label}: no se pudo leer el almacén de credenciales ({type(exc).__name__})")
+            if ok:
+                print(f"  OK {c.label}: contraseña guardada para este usuario de Windows")
+            else:
+                missing += 1
+                print(f"  X  {c.label}: SIN contraseña para este usuario de Windows")
+    if not conns:
+        print("  Todavía no hay conexiones SAP registradas.")
+    return 5 if missing else 0
 
 
 if __name__ == "__main__":

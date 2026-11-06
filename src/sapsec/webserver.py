@@ -31,13 +31,13 @@ def _port_free(host: str, port: int) -> bool:
             return False
 
 
-def _our_app_at(url: str) -> bool:
+def _our_app_at(url: str, timeout: float = 2.0) -> bool:
     """¿Responde esta misma aplicación en la URL? (sonda local; no envía datos)."""
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE  # es el propio equipo: solo se comprueba si está abierta
     try:
-        with urllib.request.urlopen(url + "/api/v1/salud", timeout=2, context=ctx) as r:  # noqa: S310
+        with urllib.request.urlopen(url + "/api/v1/salud", timeout=timeout, context=ctx) as r:  # noqa: S310
             return json.loads(r.read().decode()).get("estado") == "ok"
     except Exception:  # noqa: BLE001
         return False

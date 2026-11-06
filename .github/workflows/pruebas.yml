@@ -37,3 +37,29 @@ jobs:
           git diff --exit-code -- tests/fixtures/demo_system.json
       - name: Pruebas
         run: python -m pytest -q
+
+  servicio-windows:
+    # Prueba real: tarea programada de Windows con usuario y contraseña, modo red (HTTPS), caída y recuperación.
+    name: servicio continuo · Windows (tarea programada real)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Instalar como en un servidor (.venv)
+        shell: powershell
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --quiet --disable-pip-version-check -e .
+      - name: Instalar como servicio, tirarla, verificar que vuelve, detener, iniciar y quitar
+        shell: powershell
+        run: powershell -ExecutionPolicy Bypass -File tests\windows\prueba_servicio.ps1
+      - name: Registros del servicio y de la aplicación
+        if: always()
+        shell: powershell
+        run: |
+          Get-Content data\logs\servicio.log -ErrorAction SilentlyContinue
+          Get-Content data\logs\sapsec.log -Tail 80 -ErrorAction SilentlyContinue
+

@@ -19,7 +19,7 @@
     <li>En esta PC, <b>una sola vez</b> y como administrador: <code>powershell -ExecutionPolicy Bypass -File scripts\habilitar_acceso_red.ps1</code> (abre el puerto {{ net.network_port }} solo para la red de la empresa).</li>
     <li>Cerrar esta ventana de la aplicación y abrirla en modo red: <code>powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red</code></li>
     <li>En las otras PC: abrir la dirección que muestra la ventana (ej. <code>https://NOMBRE-DE-ESTA-PC:{{ net.network_port }}</code>) e instalar el certificado una vez.</li>
-    <li>Opcional: que arranque sola con Windows: <code>scripts\iniciar_con_windows.ps1</code></li>
+    <li>Para que funcione siempre (también al reiniciar el servidor): ver «Funcionamiento continuo», más abajo.</li>
   </ol>
   {% endif %}
 </div>
@@ -30,6 +30,27 @@
   Si TI necesita publicarla sin VPN, que sea detrás de un proxy con inicio de sesión corporativo y doble factor.</p>
   <p class="small muted">Su dirección actual: <code>{{ client_ip }}</code></p>
 </div>
+</div>
+
+<h2 id="continuo">Funcionamiento continuo</h2>
+<div class="card">
+{% if svc and svc.reciente %}
+  {% if svc.estado == 'otra_instancia' %}
+  <p><span class="status-dot on"></span><b>Vigilada por el servicio</b> desde el {{ svc.inicio|isofecha }}. Ahora está abierta desde una ventana (run.ps1): si esa ventana se cierra, el servicio la vuelve a abrir sola.</p>
+  {% else %}
+  <p><span class="status-dot on"></span><b>Siempre activa</b>: la vigila el servicio desde el {{ svc.inicio|isofecha }}. Si se cae o deja de responder, se vuelve a abrir sola, y arranca sola al encender el servidor.</p>
+  {% endif %}
+  <p class="small">{{ svc.reinicios or 0 }} reinicio{{ '' if svc.reinicios == 1 else 's' }} automático{{ '' if svc.reinicios == 1 else 's' }} desde entonces{% if svc.ultimo_reinicio %} · último: {{ svc.ultimo_reinicio.fecha|isofecha }} ({{ svc.ultimo_reinicio.motivo }}){% endif %}{% if svc.ultima_respuesta %} · última comprobación correcta: {{ svc.ultima_respuesta|isofecha }}{% endif %}.</p>
+  <p class="small muted">Estado desde PowerShell: <code>powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1 -Estado</code> · registro: <code>data\logs\servicio.log</code></p>
+{% elif svc_task == 'instalada' %}
+  <p><span class="status-dot off"></span><b>El servicio está instalado pero no informa actividad</b>{% if svc %} desde el {{ svc.actualizado|isofecha }}{% endif %}. Windows lo vuelve a iniciar en la próxima comprobación (cada 5 minutos), salvo que se haya detenido con <code>-Detener</code>.</p>
+  <p class="small">Ver qué pasa: <code>powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1 -Estado</code> y el registro <code>data\logs\servicio.log</code>.</p>
+{% else %}
+  <p><span class="status-dot off"></span><b>No está configurado</b>: si se cierra la ventana de la aplicación o se reinicia el servidor, queda cerrada hasta que alguien la abra.</p>
+  <p class="small">Para que funcione siempre en modo red —al encender el servidor aunque nadie inicie sesión, y que se vuelva a abrir sola si se cae o deja de responder—, en esta PC, en PowerShell <b>como administrador</b> y con el usuario de Windows que guardó las contraseñas de SAP:</p>
+  <p><code>powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1</code></p>
+  <p class="small muted">Pide la contraseña de Windows de ese usuario: la guarda el Programador de tareas de Windows, no esta aplicación.</p>
+{% endif %}
 </div>
 
 {% if user.can('usuarios_app') %}

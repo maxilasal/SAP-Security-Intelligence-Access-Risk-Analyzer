@@ -32,6 +32,18 @@ TEMPLATES.env.globals["SEARCH_HINT"] = _SEARCH_HINT
 TEMPLATES.env.filters["sev"] = lambda v: SEV_LABEL.get(getattr(v, "value", v), v)
 
 
+def _isofecha(value: str | None) -> str:
+    """«2026-11-06T14:05:59» → «06/11/2026 14:05» (hora local del servidor)."""
+    from datetime import datetime
+    try:
+        return datetime.fromisoformat(value or "").strftime("%d/%m/%Y %H:%M")
+    except ValueError:
+        return value or ""
+
+
+TEMPLATES.env.filters["isofecha"] = _isofecha
+
+
 class LoginRequired(Exception):
     pass
 
