@@ -6,6 +6,24 @@ la base o en las reglas; MENOR = funciones nuevas; PARCHE = correcciones).
 
 ## [Sin publicar]
 
+## [0.4.0] - 2026-11-06
+
+### Agregado
+- **Funcionamiento continuo** (`scripts\iniciar_con_windows.ps1`, como administrador): la aplicación queda siempre
+  activa en modo red. Arranca sola al encender o reiniciar el servidor aunque nadie inicie sesión; si se cae, se
+  vuelve a abrir en segundos; si deja de responder (unos 2 minutos), se cierra y se vuelve a abrir; y cada 5 minutos
+  Windows comprueba que el vigilante siga activo. Opciones `-Estado`, `-Detener`, `-Iniciar` y `-Quitar`.
+- `sapsec servicio`: el vigilante (una sola copia por instalación; en Windows la aplicación se cierra con él y no
+  quedan procesos huérfanos). Registro en `data\logs\servicio.log` y estado en Configuración y acceso.
+- `sapsec estado-servicio` y `sapsec verificar-credenciales` (qué conexiones SAP tienen la contraseña guardada para
+  el usuario de Windows que ejecutará el servicio; el instalador lo revisa antes de instalar).
+
+### Cambiado
+- `scripts\actualizar.ps1` detiene el servicio sin que se reabra a mitad de la actualización, no actualiza si hay
+  una extracción en curso o una ventana de la aplicación abierta, y lo vuelve a iniciar también si algo falló.
+- Pruebas automáticas: además, una prueba real en Windows que instala la tarea programada con usuario y contraseña,
+  tira la aplicación y verifica que vuelve sola.
+
 ## [0.3.0] - 2026-11-05
 
 ### Agregado
@@ -93,7 +111,8 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
 - `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
 
-[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...HEAD
+[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/releases/tag/v0.1.0

@@ -182,7 +182,7 @@ $env:SAPSEC_DATABASE_URL = "postgresql+psycopg://sapsec@dbserver/sapsec"
 
 | Probado con un SAP real (ECC 7.31, QAS) | Probado solo con datos ficticios (pruebas automatizadas) |
 |---|---|
-| Conexión con el SAP NW RFC SDK 7.50, extracción completa (usuarios, roles, perfiles, autorizaciones), análisis y tareas de corrección | Modo red con HTTPS (verificado con un servidor real y OpenSSL, no en la red de su empresa), scripts de firewall e inicio con Windows (no ejecutados en Windows aquí), recomendaciones por pantalla, simulador, reportes; S/4HANA: detección de producto, servicios Fiori/OData y conflictos vía Fiori (SU24 TYPE HT), controles por ambiente y Desarrollo vs. producción; usuarios de emergencia declarados y «Qué cambió» entre dos extracciones |
+| Conexión con el SAP NW RFC SDK 7.50, extracción completa (usuarios, roles, perfiles, autorizaciones), análisis y tareas de corrección | Funcionamiento continuo: probado en un Windows real de GitHub Actions (tarea con usuario y contraseña, caída y recuperación, detener e iniciar), salvo el reinicio del servidor (se verifica el disparador); modo red con HTTPS (verificado con un servidor real y OpenSSL, no en la red de su empresa), script de firewall (no ejecutado en Windows aquí), recomendaciones por pantalla, simulador, reportes; S/4HANA: detección de producto, servicios Fiori/OData y conflictos vía Fiori (SU24 TYPE HT), controles por ambiente y Desarrollo vs. producción; usuarios de emergencia declarados y «Qué cambió» entre dos extracciones |
 
 Las reglas incluidas están en estado **ejemplo**: no son la matriz oficial de SAP GRC y deben
 validarse y aprobarse antes de usarse como criterio de auditoría.
