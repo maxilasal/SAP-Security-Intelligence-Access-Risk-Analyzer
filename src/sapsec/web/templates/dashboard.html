@@ -55,7 +55,7 @@
   <svg class="chart" viewBox="0 0 420 150" width="100%" role="img" aria-label="Evolución">
     {% for e in stats.evolucion %}
       {% set h = (totals[loop.index0] / mt * 95)|round(0,'floor') %}
-      <rect x="{{ 10 + loop.index0*34 }}" y="{{ 120 - h }}" width="24" height="{{ [h,1]|max }}" fill="#2d5b8f" rx="2"></rect>
+      <rect x="{{ 10 + loop.index0*34 }}" y="{{ 120 - h }}" width="24" height="{{ [h,1]|max }}" class="bar" rx="2"></rect>
       <text x="{{ 10 + loop.index0*34 }}" y="{{ 115 - h }}">{{ totals[loop.index0] }}</text>
       <text x="{{ 8 + loop.index0*34 }}" y="138">#{{ e.snapshot }}</text>
     {% endfor %}

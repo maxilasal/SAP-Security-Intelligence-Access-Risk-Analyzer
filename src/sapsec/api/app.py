@@ -46,6 +46,7 @@ from ..storage.orm import (AppUser, AuditLog, EmergencyUser, Finding, Mitigation
 from .deps import LoginRequired, CurrentUser, check_csrf, current_snapshot, current_user, render, require
 
 log = logging.getLogger(__name__)
+STATIC_DIR = Path(__file__).resolve().parents[1] / "web" / "static"
 SEV_ORDER = {"critico": 4, "alto": 3, "medio": 2, "bajo": 1, "informativo": 0}
 
 
@@ -83,8 +84,7 @@ def create_app() -> FastAPI:
     secure_cookie = https if network_mode else (settings.security.secure_cookies or https)
     app.add_middleware(SessionMiddleware, secret_key=secret, same_site="strict", https_only=secure_cookie,
                        max_age=settings.security.session_max_age_minutes * 60)
-    app.mount("/static", StaticFiles(directory=str(Path(__file__).resolve().parents[1] / "web" / "static")),
-              name="static")
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
     init_db()
 
     @app.exception_handler(LoginRequired)
@@ -219,7 +219,7 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         from ..security.network import serve_info
         uid = request.session.get("uid")
         u = db.get(AppUser, uid) if uid else None
-        cu = CurrentUser(u.username, u.role) if u and u.active else None
+        cu = CurrentUser(u.username, u.role, u.theme or "") if u and u.active else None
         return render(request, "certificate.html", cu, db, active="configuracion", net=serve_info())
 
     @app.get("/certificado/ca.crt")
@@ -231,11 +231,48 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         return Response(ca.read_bytes(), media_type="application/x-x509-ca-cert",
                         headers={"Content-Disposition": 'attachment; filename="SAP-Security-Analyzer-CA.crt"'})
 
+    # ------------------------------------------------------------------ logo y temas de colores (públicos: los usa el ingreso)
+    @app.get("/temas.css")
+    def themes_css():  # type: ignore[no-untyped-def]
+        from .. import themes
+        return Response(themes.css(), media_type="text/css; charset=utf-8",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
+    @app.get("/icono.svg")
+    def theme_icon(tema: str = ""):  # type: ignore[no-untyped-def]
+        from .. import themes
+        return Response(themes.icon_svg(tema), media_type="image/svg+xml",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
+    @app.get("/favicon.ico")
+    def favicon():  # type: ignore[no-untyped-def]
+        from fastapi.responses import FileResponse
+        return FileResponse(STATIC_DIR / "favicon.ico", media_type="image/x-icon",
+                            headers={"Cache-Control": "public, max-age=86400"})
+
     # ------------------------------------------------------------------ mi cuenta
     @app.get("/mi-cuenta", response_class=HTMLResponse)
     def my_account(request: Request, user: CurrentUser = Depends(current_user), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
         me = db.scalars(select(AppUser).where(AppUser.username == user.username)).one()
-        return render(request, "account.html", user, db, active="", me=me, ok=request.query_params.get("ok"))
+        return render(request, "account.html", user, db, active="", me=me, ok=request.query_params.get("ok"),
+                      theme_ok=request.query_params.get("tema"))
+
+    @app.post("/mi-cuenta/tema")
+    async def my_theme(request: Request, user: CurrentUser = Depends(current_user), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]
+        from .. import themes
+        await check_csrf(request)
+        form = await request.form()
+        key = str(form.get("tema") or "").strip().lower()
+        if not themes.valid(key):
+            raise HTTPException(400, "Tema desconocido.")
+        me = db.scalars(select(AppUser).where(AppUser.username == user.username)).one()
+        me.theme = key
+        db.commit()
+        resp = RedirectResponse("/mi-cuenta?tema=1#tema", status_code=303)
+        # Para la pantalla de ingreso de este navegador (antes de saber quién es): no es un dato sensible.
+        resp.set_cookie(themes.COOKIE, key, max_age=365 * 24 * 3600, httponly=True, samesite="strict",
+                        secure=request.url.scheme == "https")
+        return resp
 
     @app.post("/mi-cuenta/contrasena")
     async def my_password(request: Request, user: CurrentUser = Depends(current_user), db: Session = Depends(get_session)):  # type: ignore[no-untyped-def]

@@ -1,16 +1,20 @@
 <!doctype html>
-<html lang="es">
+{% from "_macros.html" import logo %}
+<html lang="es" data-tema="{{ tema }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}SAP Security Analyzer{% endblock %} · SAP Security Intelligence</title>
 <link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="/temas.css?v={{ APP_VERSION }}">
+<link rel="icon" type="image/svg+xml" href="/icono.svg?tema={{ tema }}">
+<link rel="alternate icon" href="/favicon.ico">
 <script src="/static/app.js" defer></script>
 </head>
 <body>
 {% if user %}
 <aside class="sidebar">
-  <div class="brand"><span class="logo">◆</span> SAP Security<br><small>Intelligence &amp; Access Risk</small></div>
+  <div class="brand">{{ logo("brand-logo") }}<div>SAP Security<br><small>Intelligence &amp; Access Risk</small></div></div>
   {% set groups = [
     ("", [("sistemas","/sistemas","Todos los sistemas"), ("dashboard","/","Qué corregir primero"), ("plan","/acciones","Todas las tareas")]),
     ("Antes de asignar un rol", [("simulador","/simulador","Simular una asignación")]),
@@ -50,7 +54,8 @@
       {% if current_snap.status != 'completo' %}<span class="badge warn">Snapshot {{ current_snap.status }}</span>{% endif %}
     {% endif %}
     <div class="spacer"></div>
-    <span class="who"><a href="/mi-cuenta" title="Cambiar mi contraseña">{{ user.username }}</a> · {{ user.role }}</span>
+    <a class="theme-dot swatch-{{ tema }}" href="/mi-cuenta#tema" title="Tema de colores: {{ THEMES[tema].name }} (cambiar)" aria-label="Cambiar el tema de colores"></a>
+    <span class="who"><a href="/mi-cuenta" title="Mi cuenta: contraseña y tema de colores">{{ user.username }}</a> · {{ user.role }}</span>
     <a class="btn ghost" href="/logout">Salir</a>
   </header>
   <main class="content">

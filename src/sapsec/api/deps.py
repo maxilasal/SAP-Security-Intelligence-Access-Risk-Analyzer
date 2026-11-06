@@ -29,6 +29,11 @@ TEMPLATES.env.globals["APP_VERSION"] = __version__
 from ..search import HINT as _SEARCH_HINT  # noqa: E402
 
 TEMPLATES.env.globals["SEARCH_HINT"] = _SEARCH_HINT
+from .. import themes as _themes  # noqa: E402
+
+TEMPLATES.env.globals["THEMES"] = _themes.THEMES
+TEMPLATES.env.globals["LOGO"] = {"shield": _themes.SHIELD, "shine": _themes.SHINE, "hole": _themes.HOLE_C,
+                                 "stem": _themes.HOLE_STEM}
 TEMPLATES.env.filters["sev"] = lambda v: SEV_LABEL.get(getattr(v, "value", v), v)
 
 
@@ -52,6 +57,7 @@ class LoginRequired(Exception):
 class CurrentUser:
     username: str
     role: str
+    theme: str = ""
 
     def can(self, perm: str) -> bool:
         return has_permission(self.role, perm)
@@ -65,7 +71,7 @@ def current_user(request: Request, db: Session = Depends(get_session)) -> Curren
     if not u or not u.active:
         request.session.clear()
         raise LoginRequired()
-    return CurrentUser(u.username, u.role)
+    return CurrentUser(u.username, u.role, u.theme or "")
 
 
 def require(perm: str):  # type: ignore[no-untyped-def]
@@ -168,7 +174,9 @@ def render(request: Request, template: str, user: CurrentUser | None, db: Sessio
                             .order_by(Snapshot.id.desc())).first()
         if newest is not None and newest.id > cur.id and (newest.analyzed_at is None or newest.status == "error"):
             pending_snap = newest  # extracción más nueva fallida o aún en análisis: se avisa
-    base = {"request": request, "user": user, "csrf": csrf_token(request),
+    from .. import themes
+    chosen = user.theme if user is not None and themes.valid(user.theme) else request.cookies.get(themes.COOKIE)
+    base = {"request": request, "user": user, "csrf": csrf_token(request), "tema": themes.get(chosen).key,
             "systems": systems_menu(db) if user else [], "current_snap": cur, "newer_snap": pinned,
             "pending_snap": pending_snap,
             "active": ctx.pop("active", "")}

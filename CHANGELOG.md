@@ -6,6 +6,16 @@ la base o en las reglas; MENOR = funciones nuevas; PARCHE = correcciones).
 
 ## [Sin publicar]
 
+## [0.5.0] - 2026-11-06
+
+### Agregado
+- **Logo propio** (un escudo con cerradura): en la pestaña del navegador, en el menú lateral y en la pantalla de
+  ingreso. El ícono de la pestaña toma el color del tema elegido y se ve en pestañas claras y oscuras.
+- **Temas de colores**: Azul (el de siempre), Petróleo, Verde, Bordó, Violeta, Grafito y Cobre. Cada persona elige el
+  suyo en *Mi cuenta* (o con el círculo de color junto a su usuario, arriba a la derecha); se guarda en su usuario y,
+  en ese navegador, también se usa en la pantalla de ingreso. Todos cumplen el contraste mínimo de accesibilidad
+  (WCAG AA, verificado por una prueba automática); los colores de las alertas no cambian.
+
 ## [0.4.0] - 2026-11-06
 
 ### Agregado
@@ -111,7 +121,8 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
 - `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
 
-[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.4.0...HEAD
+[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.1.0...v0.2.0

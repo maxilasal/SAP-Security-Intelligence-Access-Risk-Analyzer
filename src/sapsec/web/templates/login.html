@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% from "_macros.html" import logo %}
 {% block title %}Ingreso{% endblock %}
 {% block public %}
 <div class="login-wrap">
   <form class="login" method="post" action="/login">
+    {{ logo("login-logo") }}
     <h1>SAP Security Intelligence</h1>
     <p class="muted">Access Risk Analyzer · acceso autenticado</p>
     {% if error %}<div class="errbox">{{ error }}</div>{% endif %}

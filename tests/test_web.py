@@ -490,3 +490,31 @@ def test_what_changed_page_and_download(client):
     assert r.status_code == 200 and r.content.startswith(b"PK")
     r = client.get(f"/cambios?desde={other}&hasta={ids[0]}")
     assert r.status_code == 400 and "mismo sistema" in r.text
+
+
+def test_logo_and_color_themes(client):
+    """Ícono en la pestaña, logo y tema de colores elegido por cada persona (también en la pantalla de ingreso)."""
+    login(client)
+    css = client.get("/temas.css")
+    assert css.status_code == 200 and css.headers["content-type"].startswith("text/css")
+    assert 'html[data-tema="bordo"]' in css.text and ".swatch-violeta" in css.text
+    icon = client.get("/icono.svg?tema=bordo")
+    assert icon.headers["content-type"].startswith("image/svg+xml") and "#7a2840" in icon.text
+    assert client.get("/favicon.ico").content[:4] == b"\x00\x00\x01\x00"  # formato ICO
+    home = client.get("/").text
+    assert 'data-tema="azul"' in home and 'href="/icono.svg?tema=azul"' in home and 'class="brand-logo"' in home
+    page = client.get("/mi-cuenta").text
+    assert 'value="violeta"' in page and "Azul ✓" in page
+    tok = csrf(client, "/mi-cuenta")
+    assert client.post("/mi-cuenta/tema", data={"csrf": tok, "tema": "inventado"}).status_code == 400
+    r = client.post("/mi-cuenta/tema", data={"csrf": tok, "tema": "violeta"}, follow_redirects=False)
+    assert r.status_code == 303 and "sapsec_tema=violeta" in r.headers["set-cookie"]
+    home = client.get("/").text
+    assert 'data-tema="violeta"' in home and 'href="/icono.svg?tema=violeta"' in home and "swatch-violeta" in home
+    assert "Tema guardado" in client.get("/mi-cuenta?tema=1").text
+    client.get("/logout")
+    login_page = client.get("/login").text  # el navegador recuerda el tema para la pantalla de ingreso
+    assert 'data-tema="violeta"' in login_page and 'class="login-logo"' in login_page
+    login(client)
+    tok = csrf(client, "/mi-cuenta")
+    client.post("/mi-cuenta/tema", data={"csrf": tok, "tema": "azul"})

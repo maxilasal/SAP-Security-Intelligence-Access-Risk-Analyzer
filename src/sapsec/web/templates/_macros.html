@@ -100,3 +100,8 @@ objetos de negocio del backend. El nombre sale de la tabla USOBHASH del propio s
 {% for x in items %}<tr><td>{{ x.name or '— sin nombre en USOBHASH —' }}</td><td class="mono small">{{ x.hash }}</td><td>{{ x.roles|join(', ') or 'perfil' }}</td></tr>{% endfor %}
 </table>
 {%- endmacro %}
+
+{% macro logo(cls) -%}
+<svg class="{{ cls }}" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path class="shield" d="{{ LOGO.shield }}"/><path class="shine" d="{{ LOGO.shine }}"/><circle class="hole" cx="{{ LOGO.hole[0] }}" cy="{{ LOGO.hole[1] }}" r="{{ LOGO.hole[2] }}"/><path class="hole" d="{{ LOGO.stem }}"/></svg>
+{%- endmacro %}
+
