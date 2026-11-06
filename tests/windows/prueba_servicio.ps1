@@ -34,11 +34,13 @@ function Instalador {
 # Usuario de Windows de prueba: en un servidor real es el que guardó las contraseñas de SAP.
 $pw = "Sp-" + [guid]::NewGuid().ToString("N").Substring(0, 20) + "!9a"
 Write-Host "::add-mask::$pw"
-& net user sapsecci $pw /add | Out-Null
-& net localgroup Administrators sapsecci /add | Out-Null
+$secreto = ConvertTo-SecureString $pw -AsPlainText -Force
+New-LocalUser -Name "sapsecci" -Password $secreto -PasswordNeverExpires -AccountNeverExpires `
+  -Description "Prueba del servicio de SAP Security Analyzer" | Out-Null
+Add-LocalGroupMember -SID "S-1-5-32-544" -Member "sapsecci"   # Administradores: tiene «iniciar sesión por lotes»
 & icacls $root /grant "sapsecci:(OI)(CI)M" /T /Q | Out-Null
-$cred = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\sapsecci",
-  (ConvertTo-SecureString $pw -AsPlainText -Force))
+if ($LASTEXITCODE -ne 0) { Fallar "no se pudieron dar permisos sobre la carpeta a sapsecci" }
+$cred = New-Object System.Management.Automation.PSCredential("$env:COMPUTERNAME\sapsecci", $secreto)
 try {
   # 1) Instalación
   Instalador -Credencial $cred
@@ -81,6 +83,6 @@ try {
   Ok "-Quitar elimina la tarea y cierra la aplicación"
 } finally {
   Unregister-ScheduledTask -TaskName $nombre -Confirm:$false -ErrorAction SilentlyContinue
-  & net user sapsecci /delete | Out-Null
+  Remove-LocalUser -Name "sapsecci" -ErrorAction SilentlyContinue
 }
 Write-Host "Prueba del servicio en Windows: todo correcto." -ForegroundColor Green

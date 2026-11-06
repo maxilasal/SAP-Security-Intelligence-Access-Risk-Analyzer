@@ -11,7 +11,7 @@ evidencia técnica, y **simula asignaciones de roles antes de realizarlas en SAP
 
 Documentación: [diseño de la Fase 1](docs/01_fase1_diseno.md) · [conectividad RFC](docs/02_conectividad_rfc.md) ·
 [usuario técnico](docs/03_usuario_tecnico_rfc.md) · [extractor Z opcional](docs/04_extractor_z_opcional.md) ·
-[pruebas y validación](docs/05_validacion.md) · [acceso desde otras PC](docs/06_acceso_desde_otras_pc.md) · [S/4HANA, Fiori y DEV](docs/07_s4hana_fiori_y_desarrollo.md) · [versionado y actualización](docs/08_versionado_y_actualizacion.md) · [usuarios de emergencia y qué cambió](docs/09_emergencia_y_cambios.md) · [cambios](CHANGELOG.md)
+[pruebas y validación](docs/05_validacion.md) · [acceso desde otras PC](docs/06_acceso_desde_otras_pc.md) · [S/4HANA, Fiori y DEV](docs/07_s4hana_fiori_y_desarrollo.md) · [versionado y actualización](docs/08_versionado_y_actualizacion.md) · [usuarios de emergencia y qué cambió](docs/09_emergencia_y_cambios.md) · [funcionamiento continuo](docs/10_funcionamiento_continuo.md) · [cambios](CHANGELOG.md)
 
 ## Uso diario (en 3 pasos)
 
@@ -61,7 +61,7 @@ powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red
    avanzada › Continuar*) e **instalar el certificado** desde el enlace de la pantalla de ingreso (o que TI lo
    distribuya por GPO); desde entonces no vuelve a avisar. Cada persona entra con su propio usuario
    (Configuración y acceso › Usuarios de la aplicación).
-4. Opcional, para que quede siempre disponible: `scripts\iniciar_con_windows.ps1` (se abre sola, sin ventana).
+4. **Para que funcione siempre** (recomendado en un servidor): ver *Funcionamiento continuo*, más abajo.
 
 * **Desde fuera de la oficina: por la VPN de la empresa.** No abra el puerto en el router: la aplicación
   rechaza las direcciones de internet (`network.allowed_networks` en `settings.yaml`) aunque alguien lo abriera.
@@ -71,6 +71,20 @@ powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red
 * Tras 5 intentos fallidos, el usuario se bloquea 15 minutos; un administrador puede desbloquearlo o
   restablecer la contraseña. Recuperación por consola: `sapsec reset-password USUARIO`.
 * Conviene instalarla en un servidor o VM siempre encendido, no en una notebook.
+
+## Funcionamiento continuo
+
+Para que la aplicación funcione **siempre en modo red**, arranque sola al encender o reiniciar el servidor (aunque
+nadie inicie sesión) y se vuelva a abrir sola si se cae o deja de responder: en el servidor, en PowerShell **como
+administrador** y con el usuario de Windows que guardó las contraseñas de SAP (cerrar antes la ventana de `run.ps1`):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1
+```
+
+Pide la contraseña de Windows de ese usuario (la guarda el Programador de tareas). Después: `-Estado` para ver si
+funciona y sus reinicios automáticos, `-Detener` / `-Iniciar`, `-Quitar`. El estado también está en
+Configuración y acceso. Detalle: [docs/10](docs/10_funcionamiento_continuo.md).
 
 ## S/4HANA con Fiori y sistemas de desarrollo
 
@@ -100,7 +114,8 @@ Detalle: [docs/07](docs/07_s4hana_fiori_y_desarrollo.md).
 
 ### Extracción nocturna programada
 
-Las horas se configuran en la aplicación (**Administración › Extracciones programadas**). Para que corran aunque
+Las horas se configuran en la aplicación (**Administración › Extracciones programadas**). Con el *funcionamiento
+continuo* las ejecuta la propia aplicación, también después de reiniciar el servidor. Sin él, para que corran aunque
 la aplicación esté cerrada: `scripts\instalar_tarea_programada.ps1` (una vez, con el mismo usuario de Windows que
 guardó las contraseñas de SAP, ya que el Administrador de credenciales es por usuario).
 
@@ -187,6 +202,9 @@ validarse y aprobarse antes de usarse como criterio de auditoría.
 | `sapsec generate-key` | Clave para `SAPSEC_MASTER_KEY` (almacén cifrado) |
 | `sapsec serve` | Interfaz web solo para esta PC (`http://localhost:8000`) |
 | `sapsec serve --red` | Interfaz web para otras PC de la empresa / VPN (HTTPS, puerto 8443) |
+| `sapsec servicio --red` | La interfaz web vigilada: la reabre si se cae o deja de responder (lo usa `iniciar_con_windows.ps1`) |
+| `sapsec estado-servicio` | Si el servicio está funcionando, desde cuándo y sus reinicios automáticos |
+| `sapsec verificar-credenciales` | Qué conexiones SAP tienen la contraseña guardada para este usuario de Windows |
 | `sapsec reset-password USUARIO` | Contraseña nueva para un usuario de la aplicación (y lo desbloquea) |
 | `sapsec extract-all [--ambiente PRD]` | Extrae todos los sistemas activos, uno por vez |
 | `sapsec run-due` | Ejecuta las extracciones programadas vencidas |

@@ -9,7 +9,7 @@ para la red interna con HTTPS. Desde fuera de la oficina se entra **por la VPN c
 |---|---|---|
 | 1. Abrir el puerto 8443 solo a redes privadas | Servidor, PowerShell **como administrador** | `powershell -ExecutionPolicy Bypass -File scripts\habilitar_acceso_red.ps1` |
 | 2. Iniciar en modo red | Servidor | `powershell -ExecutionPolicy Bypass -File scripts\run.ps1 -Red` |
-| 3. Que quede siempre disponible (opcional) | Servidor, mismo usuario que guardó las contraseñas SAP | `powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1` |
+| 3. Que funcione siempre (recomendado): arranca con el servidor y se levanta sola si se cae | Servidor, PowerShell **como administrador**, mismo usuario que guardó las contraseñas SAP | `powershell -ExecutionPolicy Bypass -File scripts\iniciar_con_windows.ps1` (ver [docs/10](10_funcionamiento_continuo.md)) |
 | 4. Instalar el certificado (una vez por PC) | Cada PC, o por GPO | Pantalla de ingreso › «Instalar el certificado» |
 | 5. Crear un usuario por persona | Aplicación › Configuración y acceso | consultor (solo consulta), auditor, administrador |
 
