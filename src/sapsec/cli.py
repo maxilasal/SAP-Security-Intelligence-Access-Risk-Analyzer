@@ -38,8 +38,22 @@ from pathlib import Path
 from .config import PROJECT_ROOT, get_settings
 
 
+class _IgnoreClientResets(logging.Filter):
+    """En Windows, cuando un navegador corta una conexión, asyncio registra «WinError 10054» con toda su traza.
+    No es un error de la aplicación: se descarta para que el registro muestre solo lo que importa."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        exc = record.exc_info[1] if record.exc_info else None
+        if isinstance(exc, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError)):
+            return False
+        return not (isinstance(exc, OSError) and getattr(exc, "winerror", None) in (10053, 10054))
+
+
 def setup_logging() -> None:
     s = get_settings()
+    aio = logging.getLogger("asyncio")
+    if not any(isinstance(f, _IgnoreClientResets) for f in aio.filters):
+        aio.addFilter(_IgnoreClientResets())
     Path(s.log_dir).mkdir(parents=True, exist_ok=True)
     fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
     root = logging.getLogger()

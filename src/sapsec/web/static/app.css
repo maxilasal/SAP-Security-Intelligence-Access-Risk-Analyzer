@@ -239,4 +239,4 @@ a.chip:hover{text-decoration:none;background:#e2eaf4}
 .mode-toggle{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font-size:15px;line-height:1;padding:0}
 .mode-toggle:hover{border-color:var(--brand2)}
 .card>h3:first-of-type{margin-top:0}
-
+form.enviando button,form.enviando .btn{opacity:.6;cursor:progress}

@@ -540,3 +540,27 @@ def test_dark_mode_toggle_and_program_title(client):
     page = client.get("/mi-cuenta").text
     assert 'data-modo="auto"' in page and "Automático (como Windows) ✓" in page and "mode-toggle" not in page
     client.post("/mi-cuenta/modo", data={"csrf": tok, "modo": "claro"})
+
+
+def test_registering_the_same_connection_twice_is_not_an_error(client):
+    """Doble clic en «Registrar»: la segunda vez no falla (ya estaba registrada); con otros datos, aviso claro."""
+    from sapsec.storage.db import session_scope
+    from sapsec.storage.orm import SapConnection
+    login(client)
+    form = {"system_name": "DES Prueba", "sid": "DES", "client": "200", "name": "DES 100", "environment": "DEV",
+            "backend": "fixture", "rfc_user": "mlasalvia", "ashost": "sapdesa", "sysnr": "00",
+            "fixture_path": str(ROOT / "tests" / "fixtures" / "demo_system.json")}
+    tok = csrf(client, "/conexiones")
+    first = client.post("/conexiones", data={**form, "csrf": tok}, follow_redirects=False)
+    second = client.post("/conexiones", data={**form, "csrf": tok}, follow_redirects=False)
+    assert first.status_code == 303 and first.headers["location"] == "/conexiones"
+    assert second.status_code == 303 and "/conexiones?ya=" in second.headers["location"]
+    assert "ya estaba registrada" in client.get(second.headers["location"]).text
+    with session_scope() as db:
+        assert len(db.scalars(select(SapConnection).where(SapConnection.name == "DES 100")).all()) == 1
+    other = client.post("/conexiones", data={**form, "csrf": tok, "ashost": "otro-servidor"})
+    assert other.status_code == 400 and "Ya existe la conexión «DES 100»" in other.text and "use otro nombre" in other.text
+    with session_scope() as db:
+        cid = db.scalars(select(SapConnection).where(SapConnection.name == "DES 100")).one().id
+    tok = csrf(client, "/conexiones")
+    assert client.post(f"/conexiones/{cid}/eliminar", data={"csrf": tok}, follow_redirects=False).status_code == 303

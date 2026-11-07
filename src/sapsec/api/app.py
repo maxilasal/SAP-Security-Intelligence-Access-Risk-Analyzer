@@ -14,6 +14,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -116,6 +117,10 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(Exception)
     async def _unexpected(request: Request, exc: Exception):  # type: ignore[no-untyped-def]
+        if _client_went_away(exc):  # el navegador cortó el envío (doble clic o página cerrada): no es un error
+            log.info("El navegador cortó el envío de %s antes de terminar (doble clic o página cerrada)",
+                     request.url.path)
+            return Response(status_code=400)
         ref = secrets.token_hex(4).upper()
         log.exception("Error no controlado ref=%s en %s", ref, request.url.path)
         if request.url.path.startswith("/api/"):
@@ -159,6 +164,15 @@ def create_app() -> FastAPI:
     _warm_up_async()
     threading.Thread(target=_queue_worker, daemon=True, name="cola-extracciones").start()
     return app
+
+
+def _client_went_away(exc: BaseException) -> bool:
+    """¿Es solo que el navegador cerró la conexión mientras enviaba el formulario? (también dentro de un grupo)"""
+    from starlette.requests import ClientDisconnect
+    if isinstance(exc, ClientDisconnect):
+        return True
+    inner = getattr(exc, "exceptions", None)
+    return bool(inner) and all(_client_went_away(e) for e in inner)
 
 
 def _need_snap(request: Request, db: Session) -> Snapshot:
@@ -412,7 +426,7 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
         landscapes = sorted({(c.system.landscape or "") for c in conns} - {""})
         return render(request, "connections.html", user, db, active="conexiones", conns=conns, snaps_all=snaps,
                       snap_counts=counts, deleted=request.query_params.get("borrado", ""), landscapes=landscapes,
-                      updated=request.query_params.get("actualizado", ""))
+                      updated=request.query_params.get("actualizado", ""), ya=request.query_params.get("ya", ""))
 
     @app.post("/conexiones")
     async def connection_create(request: Request, user: CurrentUser = Depends(require("conexiones")),
@@ -437,8 +451,15 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
             db.add(system)
             db.flush()
         backend = str(f.get("backend", "nwrfc"))
+        client = str(f["client"]).strip()
+        conn_name = str(f.get("name") or "").strip() or f"{sid}/{client}"
+        same = db.scalars(select(SapConnection).where(SapConnection.system_id == system.id,
+                                                     SapConnection.client == client,
+                                                     SapConnection.name == conn_name)).first() if system.id else None
+        if same is not None:
+            return _duplicate_connection(db, same, f, user.username)
         conn = SapConnection(
-            system_id=system.id, client=str(f["client"]).strip(), name=str(f.get("name") or f"{sid}/{f['client']}"),
+            system_id=system.id, client=client, name=conn_name,
             backend=backend, ashost=str(f.get("ashost") or "") or None, sysnr=str(f.get("sysnr") or "") or None,
             mshost=str(f.get("mshost") or "") or None, msserv=str(f.get("msserv") or "") or None,
             logon_group=str(f.get("logon_group") or "") or None, saprouter=str(f.get("saprouter") or "") or None,
@@ -452,7 +473,16 @@ def _routes(app: FastAPI) -> None:  # noqa: C901 - registro de rutas
                     "max_calls_per_minute": int(f.get("max_calls_per_minute") or 120),
                     "batch_size_in_list": int(f.get("batch_size_in_list") or 150)})
         db.add(conn)
-        db.flush()
+        try:
+            db.flush()
+        except IntegrityError:  # otro envío del mismo formulario la registró recién (doble clic)
+            db.rollback()
+            same = db.scalars(select(SapConnection).join(SapSystem).where(
+                func.lower(SapSystem.name) == sys_name.lower(), SapConnection.client == client,
+                SapConnection.name == conn_name)).first()
+            if same is None:
+                raise
+            return _duplicate_connection(db, same, f, user.username)
         pw = str(f.get("password") or "")
         if pw and backend != "fixture":
             ref = f"{sid}-{conn.client}-{conn.rfc_user}-{conn.id}"
@@ -1616,6 +1646,19 @@ def _is_locked(u: AppUser, max_failed: int, lockout_minutes: int) -> bool:
         return True
     from datetime import timedelta
     return utcnow() - u.last_failed_at < timedelta(minutes=lockout_minutes)
+
+
+def _duplicate_connection(db: Session, same: SapConnection, form: Any, username: str):  # type: ignore[no-untyped-def]
+    """Alta de una conexión que ya existe (mismo sistema, mandante y nombre). Si es la misma que se acaba de
+    registrar (doble clic, o reenviar el formulario), se muestra como registrada; si no, se explica qué hacer."""
+    host = str(form.get("ashost") or form.get("mshost") or "").strip().lower()
+    user = str(form.get("rfc_user", "")).strip().upper()
+    if (same.ashost or same.mshost or "").lower() == host and same.rfc_user == user:
+        log.info("Alta repetida de la conexión %s (%s): ya estaba registrada", same.name, same.label)
+        return RedirectResponse(f"/conexiones?ya={same.id}#c{same.id}", status_code=303)
+    raise HTTPException(400, f"Ya existe la conexión «{same.name}» para {same.label}. Para registrar otra conexión al "
+                             "mismo sistema y mandante, use otro nombre; para cambiar esta, elimínela en «Conexiones "
+                             "SAP» y vuelva a registrarla.")
 
 
 def _404():  # type: ignore[no-untyped-def]

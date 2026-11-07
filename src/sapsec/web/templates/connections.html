@@ -4,6 +4,7 @@
 <h1>Conexiones SAP</h1>
 {% if deleted %}<div class="note">{% if deleted == 'todo' %}Se borraron todos los sistemas, snapshots, hallazgos y contraseñas guardadas. Los usuarios de la aplicación y la auditoría se conservan.{% else %}Eliminado: {{ deleted }} (incluye sus snapshots, hallazgos y la contraseña guardada).{% endif %}</div>{% endif %}
 <p class="subtitle">Sistemas y mandantes registrados. Las contraseñas se guardan en el almacén de credenciales del sistema operativo (o cifradas), nunca en la base de datos.</p>
+{% if ya %}<div class="note">✓ La conexión ya estaba registrada (el formulario se envió más de una vez): está abajo, no hace falta volver a cargarla.</div>{% endif %}
 {% if updated %}<div class="note">Datos del sistema actualizados. Si cambió el ambiente, vuelva a extraer el sistema para aplicar los controles de ese ambiente.</div>{% endif %}
 <datalist id="landscapes">{% for l in landscapes %}<option value="{{ l }}">{% endfor %}</datalist>
 

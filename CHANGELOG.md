@@ -6,6 +6,20 @@ la base o en las reglas; MENOR = funciones nuevas; PARCHE = correcciones).
 
 ## [Sin publicar]
 
+## [0.6.1] - 2026-11-07
+
+### Corregido
+- **Registrar un sistema daba «Ocurrió un error inesperado» (UNIQUE constraint failed: sap_connection…)** cuando el
+  formulario se enviaba más de una vez (doble clic o Enter + clic): la primera vez la conexión sí quedaba registrada y
+  los envíos siguientes chocaban con ella. Ahora la repetición muestra «La conexión ya estaba registrada»; y si
+  realmente existe otra con el mismo sistema, mandante y nombre, se explica qué hacer (otro nombre, o eliminarla y
+  volver a registrarla).
+- Todos los formularios se envían una sola vez aunque se haga doble clic.
+- Si el navegador corta un envío a mitad de camino (doble clic, página cerrada), ya no se registra como «Error no
+  controlado».
+- El registro (`data\logs\sapsec.log`) ya no se llena con trazas de «WinError 10054» de Windows, que aparecen cuando un
+  navegador cierra una conexión y no son errores.
+
 ## [0.6.0] - 2026-11-06
 
 ### Agregado
@@ -132,7 +146,8 @@ Primera versión publicada en el repositorio. Reúne todo lo construido hasta la
   Release con estas notas. La versión instalada se ve en la interfaz y en `scripts\actualizar.ps1`.
 - `scripts\actualizar.ps1` para actualizar cada instalación desde Git sin tocar sus datos.
 
-[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.6.0...HEAD
+[Sin publicar]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/maxilasal/sap-security-intelligence-access-risk-analyzer/compare/v0.3.0...v0.4.0

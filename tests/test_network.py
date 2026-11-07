@@ -128,3 +128,28 @@ def test_windows_console_without_color_codes():
     assert uvicorn_options(windows=True)["use_colors"] is False
     assert "use_colors" not in uvicorn_options(windows=False)
     assert uvicorn_options(windows=False)["server_header"] is False
+
+
+def test_windows_connection_resets_are_not_logged_as_errors():
+    """Un navegador que corta la conexión (WinError 10054) no es un error: no llena el registro de trazas."""
+    import logging
+
+    from sapsec.cli import _IgnoreClientResets
+    f = _IgnoreClientResets()
+
+    def rec(exc):  # type: ignore[no-untyped-def]
+        return logging.LogRecord("asyncio", logging.ERROR, __file__, 1, "Exception in callback", None,
+                                 (type(exc), exc, None) if exc else None)
+    assert not f.filter(rec(ConnectionResetError(10054, "forcibly closed")))
+    assert not f.filter(rec(ConnectionAbortedError()))
+    assert f.filter(rec(ValueError("otro error"))) and f.filter(rec(None))
+
+
+def test_client_disconnect_is_not_an_unexpected_error():
+    from starlette.requests import ClientDisconnect
+
+    from sapsec.api.app import _client_went_away
+    assert _client_went_away(ClientDisconnect())
+    assert _client_went_away(ExceptionGroup("grupo", [ClientDisconnect()]))
+    assert not _client_went_away(ExceptionGroup("grupo", [ClientDisconnect(), ValueError("x")]))
+    assert not _client_went_away(ValueError("x"))

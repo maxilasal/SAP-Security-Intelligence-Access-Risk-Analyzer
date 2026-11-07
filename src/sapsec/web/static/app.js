@@ -86,4 +86,18 @@
       if (!window.confirm(f.dataset.confirm)) ev.preventDefault();
     });
   });
+
+  // Un solo envío por formulario: un doble clic (o Enter + clic) no registra dos veces lo mismo. No se deshabilitan
+  // los botones (el botón pulsado debe viajar con el formulario); se ignoran los envíos siguientes por 10 segundos.
+  document.addEventListener("submit", function (ev) {
+    var f = ev.target;
+    if (ev.defaultPrevented || (f.getAttribute("method") || "").toLowerCase() !== "post") return;
+    if (f.dataset.enviando === "1") { ev.preventDefault(); return; }
+    f.dataset.enviando = "1";
+    f.classList.add("enviando");
+    window.setTimeout(function () { f.dataset.enviando = ""; f.classList.remove("enviando"); }, 10000);
+  });
+  window.addEventListener("pageshow", function () {  // al volver atrás con el navegador
+    document.querySelectorAll("form.enviando").forEach(function (f) { f.dataset.enviando = ""; f.classList.remove("enviando"); });
+  });
 })();
